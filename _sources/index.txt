@@ -2,6 +2,19 @@
 Discrete Exterior Calculus
 **************************
 
+Installation
+=============
+
+To install simply run:: 
+
+   easy_install dec 
+   
+or build from source:: 
+
+   git clone https://github.com/drufat/dec.git 
+   cd dec 
+   python setup.py install
+
 Figure 3
 ========
 
