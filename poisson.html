@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Poisson Operator &mdash; dec 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dec 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Periodic Hodge-Star" href="hodge-star.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="hodge-star.html" title="Periodic Hodge-Star"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dec 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="poisson-operator">
+<h1>Poisson Operator<a class="headerlink" href="#poisson-operator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="d">
+<h2>1D<a class="headerlink" href="#d" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dec.spectral.laplacian">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">laplacian</tt><big>(</big><em>g</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#laplacian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.laplacian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Laplacian Operator</p>
+</dd></dl>
+
+<div class="math">
+\[\mathbf{\nabla}^2 f = q\]</div>
+<div class="math">
+\[\star \mathbf{d} \star \mathbf{d} f=q\]</div>
+<p>Discrete form:</p>
+<p>Primal:</p>
+<div class="math">
+\[\mathbf{\widetilde{H}}^{1}
+(\mathbf{\widetilde{D}^{1}}
+\mathbf{H}^{1}
+\mathbf{D^{0}}
+\bar{f}^{0} + a)=\bar{q}^{0}\]</div>
+<p>where <cite>a</cite> is Neumann b.c.</p>
+<p>Dual</p>
+<div class="math">
+\[\mathbf{H}^{1}
+\mathbf{D^{0}}
+\mathbf{\widetilde{H}}^{1}
+(\mathbf{\widetilde{D}^{1}}
+\tilde{f}^{0} + b)=\tilde{q}^{0}\]</div>
+<p>where <cite>b</cite> is Dirichlet b.c.</p>
+</div>
+<div class="section" id="periodic-grid-1d">
+<h2>Periodic grid 1D<a class="headerlink" href="#periodic-grid-1d" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+f(x) &amp;=&amp; e^{\sin x} \\
+q(x) &amp;=&amp; e^{\sin x} (\cos^2 x - \sin x)
+\end{eqnarray}\end{split}\]</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_periodic.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson1d_periodic.png" src="_images/poisson1d_periodic.png" />
+</div>
+</div>
+<div class="section" id="chebyshev-grid-1d">
+<h2>Chebyshev grid 1D<a class="headerlink" href="#chebyshev-grid-1d" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+\[\begin{split}\begin{eqnarray}
+f(x) &amp;=&amp;  e^x \\
+q(x) &amp;=&amp;  e^x
+\end{eqnarray}\end{split}\]</div>
+<p>Boundary Conditions:</p>
+<p>Dirichlet boundary conditions:</p>
+<div class="math">
+\[f(-1) = e^{-1} \quad f(+1) = e\]</div>
+<p>Neumann boundary condition:</p>
+<div class="math">
+\[f^\prime(-1)= e^{-1} \quad f^\prime(+1)= e\]</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_cheb.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson1d_cheb.png" src="_images/poisson1d_cheb.png" />
+</div>
+</div>
+<div class="section" id="id1">
+<h2>2D<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+\[(\star \mathbf{d} \star \mathbf{d} + \mathbf{d} \star \mathbf{d} \star ) f=q\]</div>
+</div>
+<div class="section" id="periodic-grid-2d">
+<h2>Periodic grid 2D<a class="headerlink" href="#periodic-grid-2d" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+\[f = e^{\sin(x)} \mathbf{d}x + e^{\sin(y)} \mathbf{d}y\]</div>
+<p>Convergence for operator.</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson2d_periodic.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/poisson2d_periodic_00.png" src="_images/poisson2d_periodic_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_00.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/poisson2d_periodic_01.png" src="_images/poisson2d_periodic_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_01.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="chebyshev-grid-2d">
+<h2>Chebyshev grid 2D<a class="headerlink" href="#chebyshev-grid-2d" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+\[f = e^{x} \mathbf{d}x + e^{y} \mathbf{d}y\]</div>
+<div class="math">
+\[q = e^{x} \mathbf{d}x + e^{y} \mathbf{d}y\]</div>
+<p>Convergence for operator.</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson2d_cheb.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/poisson2d_cheb_00.png" src="_images/poisson2d_cheb_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_cheb_00.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/poisson2d_cheb_01.png" src="_images/poisson2d_cheb_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_cheb_01.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_01.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="vector-field">
+<h2>Vector field<a class="headerlink" href="#vector-field" title="Permalink to this headline">¶</a></h2>
+<p>(<a class="reference external" href="./plot/cheb/poisson_2d_example.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.png">png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson_2d_example.png" src="_images/poisson_2d_example.png" />
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Poisson Operator</a><ul>
+<li><a class="reference internal" href="#d">1D</a></li>
+<li><a class="reference internal" href="#periodic-grid-1d">Periodic grid 1D</a></li>
+<li><a class="reference internal" href="#chebyshev-grid-1d">Chebyshev grid 1D</a></li>
+<li><a class="reference internal" href="#id1">2D</a></li>
+<li><a class="reference internal" href="#periodic-grid-2d">Periodic grid 2D</a></li>
+<li><a class="reference internal" href="#chebyshev-grid-2d">Chebyshev grid 2D</a></li>
+<li><a class="reference internal" href="#vector-field">Vector field</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="hodge-star.html"
+                        title="previous chapter">Periodic Hodge-Star</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/poisson.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="hodge-star.html" title="Periodic Hodge-Star"
+             >previous</a> |</li>
+        <li><a href="index.html">dec 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Dzhelil Rufat.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
