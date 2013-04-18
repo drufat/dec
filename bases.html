@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mapping &mdash; dec 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dec 0.1 documentation" href="index.html" />
+    <link rel="next" title="Periodic Hodge-Star" href="hodge-star.html" />
+    <link rel="prev" title="Symbolic Computations" href="symbolic.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="hodge-star.html" title="Periodic Hodge-Star"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="symbolic.html" title="Symbolic Computations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dec 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mapping">
+<h1>Mapping<a class="headerlink" href="#mapping" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dec.spectral.varphi">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">varphi</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#varphi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.varphi" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\varphi:&amp;&amp; [-1,1]\to[0,\pi]\\
+        &amp;&amp; x\mapsto\arccos(-x)\end{split}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">varphi</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">varphi</span><span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">pi</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.varphi_inv">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">varphi_inv</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#varphi_inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.varphi_inv" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\varphi^{-1}:&amp;&amp; [0,\pi]\to[-1,1]\\
+        &amp;&amp; \theta\mapsto-\cos(\theta)\end{split}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">varphi_inv</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">varphi_inv</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span> <span class="o">==</span> <span class="o">+</span><span class="mi">1</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="helper-functions">
+<h1>Helper Functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dec.spectral.alpha0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">alpha0</tt><big>(</big><em>N</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#alpha0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.alpha0" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\alpha_{N}(x)=\frac{1}{N}
+\begin{cases}
+    \cot\frac{x}{2}\,\sin\frac{Nx}{2} &amp; \text{if N even,}\\
+    \csc\frac{x}{2}\,\sin\frac{Nx}{2} &amp; \text{if N odd.}
+\end{cases}\end{split}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.beta0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">beta0</tt><big>(</big><em>N</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#beta0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.beta0" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\beta_{N}(x)=
+\begin{cases}
+    \frac{1}{2\pi} -\frac{1}{4}\cos\frac{Nx}{2} + 
+        \frac{1}{N}\sum\limits_{n=1}^{N/2}
+            \frac{n\cos nx}{\sin\frac{n\pi}{N}} &amp; \text{if N even,}\\
+    \frac{1}{2\pi} + 
+        \frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
+            \frac{n\cos nx}{\sin\frac{n\pi}{N}} &amp; \text{if N odd.}
+\end{cases}\end{split}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.alpha">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">alpha</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#alpha"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.alpha" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\alpha_{N, n} (x) = \alpha_N(x-h n)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.beta">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">beta</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#beta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.beta" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\beta_{N, n} (x) = \beta_N(x-h n)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.rho">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">rho</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#rho"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.rho" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\rho_{N, n}(x) = 2 \gamma_{2N-2, n}\delta_N(x) + 2 \gamma_{2N-2, N-n-1} \delta_N(\pi-x)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.gamma">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">gamma</tt><big>(</big><em>N</em>, <em>k</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#gamma"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.gamma" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\gamma_{N, n} = \int_0^{\frac{h}{2}=\frac{\pi}{N}} \beta_{N,n}(x) \, dx =
+\begin{cases}
+\frac{1}{2N} - 
+\frac{(-1)^k}{2N} +
+\frac{1}{N}\sum\limits_{n=1}^{N/2}
+\frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}
+{\sin\frac{n\pi}{N}} &amp; \text{if N even,}\\
+\frac{1}{2N} + 
+\frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
+\frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}{\sin\frac{n\pi}{N}} &amp; \text{if N odd.}
+\end{cases}\end{split}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.delta">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">delta</tt><big>(</big><em>N</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis function for dual half-edge at the boundary.</p>
+<div class="math">
+\[\delta_{N}(x)=\left((N-1)^{2}\alpha_{2N-2,0}(x)+\frac{1}{2}\cos\left((N-1)x\right)\right)\sin(x)\]</div>
+</dd></dl>
+
+</div>
+<div class="section" id="periodic-basis-functions">
+<h1>Periodic Basis Functions<a class="headerlink" href="#periodic-basis-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dec.spectral.phi0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">phi0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#phi0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.phi0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for primal 0-forms.</p>
+<div class="math">
+\[\phi_{N,n}^{0}(x)=\alpha_{N,n}(x)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.phi1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">phi1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#phi1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.phi1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for primal 1-forms.</p>
+<div class="math">
+\[\phi_{N,n}^{1}(x)=\beta_{N,n+\frac{1}{2}}(x)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.phid0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">phid0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#phid0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.phid0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for dual 0-forms.</p>
+<div class="math">
+\[\widetilde{\phi}_{N,n}^{0}(x)=\alpha_{N,n+\frac{1}{2}}(x)\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.phid1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">phid1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#phid1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.phid1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for dual 1-forms.</p>
+<div class="math">
+\[\widetilde{\phi}_{N,n}^{1}(x)=\alpha_{N,n}(x)\]</div>
+</dd></dl>
+
+<p>(<a class="reference external" href=".//bases-1.py">Source code</a>, <a class="reference external" href=".//bases-1.png">png</a>, <a class="reference external" href=".//bases-1.hires.png">hires.png</a>, <a class="reference external" href=".//bases-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/bases-1.png" src="_images/bases-1.png" />
+</div>
+</div>
+<div class="section" id="regular-basis-functions">
+<h1>Regular Basis Functions<a class="headerlink" href="#regular-basis-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dec.spectral.kappa0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">kappa0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#kappa0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.kappa0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for primal 0-forms.</p>
+<div class="math">
+\[\begin{split}\kappa_{N,n}^{0}(x) =
+\begin{cases}
+    \alpha_{2N-2,n}(x), &amp; n\in\{0,N-1\}\\
+    \alpha_{2N-2,n}(x)+\alpha_{2N-2,2N-2-n}(x), &amp; n\in\{1,\dots,N-2\}
+\end{cases} \end{split}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.kappa1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">kappa1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#kappa1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.kappa1" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\kappa_{N,n}^{1}(x) = \left(
+\beta_{2N-2,n+\frac{1}{2}}(x)-
+\beta_{2N-2,2N-3-n+\frac{1}{2}}(x)\right)
+\mathbf{d}x,n\in\{0,\dots,N-2\}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.kappad0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">kappad0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#kappad0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.kappad0" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\widetilde{\kappa}_{N,n}^{0}(x)=
+\alpha_{2N-2,\, n+\frac{1}{2}}(x)+
+\alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}    \]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.kappad1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">kappad1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#kappad1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.kappad1" title="Permalink to this definition">¶</a></dt>
+<dd><div class="math">
+\[\begin{split}\widetilde{\kappa}_{N,n}^{1}(x)=
+\begin{cases}
+    \delta(x)\mathbf{d}x &amp; \qquad n=0\\
+    \left(\beta_{2N-2,n}(x)-\beta_{2N-2,2N-2-n}(x)-\rho_{N,n}(x)\right)\mathbf{d}x &amp; \qquad n\in\{1,\dots,N-2\}\\
+    \delta(\pi-x)\mathbf{d}x &amp; \qquad n=N-1
+\end{cases}\end{split}\]</div>
+</dd></dl>
+
+<p>Even 0-forms, Odd 1-forms</p>
+<p>(<a class="reference external" href=".//bases-2.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/bases-2_00.png" src="_images/bases-2_00.png" />
+<p class="caption">(<a class="reference external" href=".//bases-2_00.png">png</a>, <a class="reference external" href=".//bases-2_00.hires.png">hires.png</a>, <a class="reference external" href=".//bases-2_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/bases-2_01.png" src="_images/bases-2_01.png" />
+<p class="caption">(<a class="reference external" href=".//bases-2_01.png">png</a>, <a class="reference external" href=".//bases-2_01.hires.png">hires.png</a>, <a class="reference external" href=".//bases-2_01.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/bases-2_02.png" src="_images/bases-2_02.png" />
+<p class="caption">(<a class="reference external" href=".//bases-2_02.png">png</a>, <a class="reference external" href=".//bases-2_02.hires.png">hires.png</a>, <a class="reference external" href=".//bases-2_02.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/bases-2_03.png" src="_images/bases-2_03.png" />
+<p class="caption">(<a class="reference external" href=".//bases-2_03.png">png</a>, <a class="reference external" href=".//bases-2_03.hires.png">hires.png</a>, <a class="reference external" href=".//bases-2_03.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="chebyshev-basis-functions">
+<h1>Chebyshev Basis Functions<a class="headerlink" href="#chebyshev-basis-functions" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="dec.spectral.psi0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">psi0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#psi0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.psi0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for primal 0-forms.</p>
+<div class="math">
+\[\psi_{N,n}^{0}(x)=\kappa_{N,n}^{0}(\arccos(-x))\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.psi1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">psi1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#psi1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.psi1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for primal 1-forms.</p>
+<div class="math">
+\[\psi_{N,n}^{1}(x)\mathbf{d}x=
+    \kappa_{N,n}^{1}(\arccos(-x))\frac{\mathbf{d}x}{\sqrt{1-x^{2}}}\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.psid0">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">psid0</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#psid0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.psid0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for dual 0-forms.</p>
+<div class="math">
+\[\tilde{\psi}_{N,n}^{0}(x)=\tilde{\kappa}_{N,n}^{0}(\arccos(-x))\]</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.spectral.psid1">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">psid1</tt><big>(</big><em>N</em>, <em>n</em>, <em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#psid1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.psid1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basis functions for dual 1-forms.</p>
+<div class="math">
+\[\tilde{\psi}_{N,n}^{1}(x)\mathbf{d}x=\tilde{\kappa}_{N,n}^{1}(\arccos(-x))\frac{\mathbf{d}x}{\sqrt{1-x^{2}}}\]</div>
+</dd></dl>
+
+<p>(<a class="reference external" href=".//bases-3.py">Source code</a>, <a class="reference external" href=".//bases-3.png">png</a>, <a class="reference external" href=".//bases-3.hires.png">hires.png</a>, <a class="reference external" href=".//bases-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/bases-3.png" src="_images/bases-3.png" />
+</div>
+<p><span class="math">\(\psi^0\)</span> and <span class="math">\(\widetilde{\psi}^0\)</span> match the Lagrange polynomials</p>
+<dl class="function">
+<dt id="dec.spectral.lagrange_polynomials">
+<tt class="descclassname">dec.spectral.</tt><tt class="descname">lagrange_polynomials</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#lagrange_polynomials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.lagrange_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lagrange Polynomials for the set of points defined by <span class="math">\(x_m\)</span></p>
+<div class="math">
+\[\psi_{n}^{0}(x)=\prod_{m=0,m\neq n}^{N-1}\frac{x-x_{m}}{x_{n}-x_{m}}\]</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">L</span> <span class="o">=</span> <span class="n">lagrange_polynomials</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="go">[1.0, 0.0, -0.0]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="go">[-0.0, 1.0, 0.0]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="go">[0.0, -0.0, 1.0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="d-periodic-basis-function">
+<h1>2D Periodic Basis Function<a class="headerlink" href="#d-periodic-basis-function" title="Permalink to this headline">¶</a></h1>
+<p>(<a class="reference external" href="./plot/cheb/basis_forms_2d.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/basis_forms_2d_00.png" src="_images/basis_forms_2d_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/basis_forms_2d_00.png">png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/basis_forms_2d_01.png" src="_images/basis_forms_2d_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/basis_forms_2d_01.png">png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_01.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/basis_forms_2d_02.png" src="_images/basis_forms_2d_02.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/basis_forms_2d_02.png">png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_02.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_02.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/basis_forms_2d_03.png" src="_images/basis_forms_2d_03.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/basis_forms_2d_03.png">png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_03.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/basis_forms_2d_03.pdf">pdf</a>)</p>
+</div>
+<p>(<a class="reference external" href="./plot/cheb/vector_field_plot.py">Source code</a>, <a class="reference external" href="./plot/cheb/vector_field_plot.png">png</a>, <a class="reference external" href="./plot/cheb/vector_field_plot.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/vector_field_plot.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/vector_field_plot.png" src="_images/vector_field_plot.png" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Mapping</a></li>
+<li><a class="reference internal" href="#helper-functions">Helper Functions</a></li>
+<li><a class="reference internal" href="#periodic-basis-functions">Periodic Basis Functions</a></li>
+<li><a class="reference internal" href="#regular-basis-functions">Regular Basis Functions</a></li>
+<li><a class="reference internal" href="#chebyshev-basis-functions">Chebyshev Basis Functions</a></li>
+<li><a class="reference internal" href="#d-periodic-basis-function">2D Periodic Basis Function</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="symbolic.html"
+                        title="previous chapter">Symbolic Computations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hodge-star.html"
+                        title="next chapter">Periodic Hodge-Star</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/bases.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="hodge-star.html" title="Periodic Hodge-Star"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="symbolic.html" title="Symbolic Computations"
+             >previous</a> |</li>
+        <li><a href="index.html">dec 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Dzhelil Rufat.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
