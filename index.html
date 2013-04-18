@@ -48,6 +48,179 @@
             
   <div class="section" id="discrete-exterior-calculus">
 <h1>Discrete Exterior Calculus<a class="headerlink" href="#discrete-exterior-calculus" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="figure-3">
+<h2>Figure 3<a class="headerlink" href="#figure-3" title="Permalink to this headline">¶</a></h2>
+<p>Examples of periodic interpolators for <span class="math">\(N=6\)</span> (a) and <span class="math">\(7\)</span> (b), and
+corresponding periodic histopolators (c) and (d), scaled by <span class="math">\(h=2\pi/N\)</span>
+for clarity. While the interpolator <span class="math">\(\alpha_N\)</span> satisfies
+<span class="math">\(\alpha_N(nh \mod 2\pi) = \delta_{0n} \; \forall n\)</span>, the histopolator
+<span class="math">\(\beta_N\)</span> integrates to <span class="math">\(1\)</span> over the dual cell straddling
+<span class="math">\(x=0\)</span>, and to <span class="math">\(0\)</span> over other dual cells in the range
+<span class="math">\([0,2\pi]\)</span>. Note that the alternating red and green colors are used to
+mark out dual cells, and to illustrate that the integral of <span class="math">\(\beta_N\)</span>
+over each of these dual cells sums to zero or one.</p>
+<p>(<a class="reference external" href="./plot/cheb/plot_basis_fn.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/plot_basis_fn_00.png" src="_images/plot_basis_fn_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_00.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_01.png" src="_images/plot_basis_fn_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_01.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_01.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_02.png" src="_images/plot_basis_fn_02.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_02.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_02.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_02.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_03.png" src="_images/plot_basis_fn_03.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_03.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_03.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_03.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="figure-5">
+<h2>Figure 5<a class="headerlink" href="#figure-5" title="Permalink to this headline">¶</a></h2>
+<p>Chebyshev primal basis functions for a grid with <span class="math">\(N=7\)</span>. We normalize the
+one-form basis functions by <span class="math">\(x_n\!-\!x_{n-1}\)</span> to have approximately the
+same scale in our visualizations.</p>
+<p>(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_00.png" src="_images/plot_basis_fn_chebyshev_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_00.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_01.png" src="_images/plot_basis_fn_chebyshev_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_01.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_01.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_02.png" src="_images/plot_basis_fn_chebyshev_02.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_02.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_02.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_02.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_03.png" src="_images/plot_basis_fn_chebyshev_03.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_03.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_03.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_03.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_04.png" src="_images/plot_basis_fn_chebyshev_04.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_04.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_04.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_04.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_05.png" src="_images/plot_basis_fn_chebyshev_05.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_05.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_05.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_05.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_06.png" src="_images/plot_basis_fn_chebyshev_06.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_06.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_06.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_06.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_07.png" src="_images/plot_basis_fn_chebyshev_07.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_07.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_07.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_07.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="figure-6">
+<h2>Figure 6<a class="headerlink" href="#figure-6" title="Permalink to this headline">¶</a></h2>
+<p>Chebyshev dual basis functions for a grid with <span class="math">\(N=7\)</span>.</p>
+<p>(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_00.png" src="_images/plot_basis_fn_chebyshev_dual_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_00.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_01.png" src="_images/plot_basis_fn_chebyshev_dual_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_01.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_01.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_02.png" src="_images/plot_basis_fn_chebyshev_dual_02.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_02.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_02.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_02.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_03.png" src="_images/plot_basis_fn_chebyshev_dual_03.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_03.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_03.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_03.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_04.png" src="_images/plot_basis_fn_chebyshev_dual_04.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_04.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_04.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_04.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_05.png" src="_images/plot_basis_fn_chebyshev_dual_05.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_05.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_05.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_05.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_06.png" src="_images/plot_basis_fn_chebyshev_dual_06.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_06.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_06.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_06.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/plot_basis_fn_chebyshev_dual_07.png" src="_images/plot_basis_fn_chebyshev_dual_07.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_07.png">png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_07.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/plot_basis_fn_chebyshev_dual_07.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="figure-7">
+<h2>Figure 7<a class="headerlink" href="#figure-7" title="Permalink to this headline">¶</a></h2>
+<p>Convergence graphs for a 1D Poisson equation: (a) we solve
+<span class="math">\(\Delta f = e^{\sin x} (\cos^2 x - \sin x)\)</span> on a periodic domain for
+either a primal, or dual <span class="math">\(0\)</span>-form <span class="math">\(f\)</span>; (b) we solve
+math:<cite>Delta f = e^{x}</cite> on a Chebyshev grid, for either a primal <span class="math">\(0\)</span>-form
+with Dirichlet boundary conditions <span class="math">\(f(-1)=e^{-1}\)</span> and <span class="math">\(f(1)=e\)</span>, or
+for a dual <span class="math">\(0\)</span>-form with Neumann boundary conditions
+math:<cite>f^prime(-1)= e^{-1}</cite> and <span class="math">\(f^\prime(+1)= e\)</span>. All of our results
+exhibit spectral convergence (measured through the <span class="math">\(L^\infty\)</span> error
+<span class="math">\(\|f - \Delta^{-1}q \|_\infty\)</span>), with the conventional plateau when we
+reach the limit of accuracy of the representation of floating point numbers.</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_periodic.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson1d_periodic.png" src="_images/poisson1d_periodic.png" />
+</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_cheb.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson1d_cheb.png" src="_images/poisson1d_cheb.png" />
+</div>
+</div>
+<div class="section" id="figure-8">
+<h2>Figure 8<a class="headerlink" href="#figure-8" title="Permalink to this headline">¶</a></h2>
+<p>Convergence graphs for a 2D Poisson equation; (a) we solve
+<span class="math">\(\Delta f = e^{\sin x} (\cos^2 x - \sin x)+e^{\sin y} (\cos^2 y - \sin y)\)</span>
+on a periodic domain for either a primal, or dual <span class="math">\(0\)</span>-form <span class="math">\(f\)</span>; (b)
+Now for
+<span class="math">\(\Delta f = e^{\sin x} (\cos^2 x - \sin x) \mathbf{d}x +e^{\sin y} (\cos^2 y - \sin y) \mathbf{d}y\)</span>;
+(c) we solve <span class="math">\(\Delta f = e^{x}+e^{y}\)</span> on a Chebyshev grid, for either a
+primal <span class="math">\(0\)</span>-form with Dirichlet boundary conditions
+<span class="math">\(f(x,y)=e^{x}+e^{y}\)</span>, or for a dual <span class="math">\(0\)</span>-form with Neumann boundary
+conditions <span class="math">\(\nabla f(x) \cdot \mathbf{n} = (e^x\;e^y)^t \;\mathbf{n}\)</span>;
+(d) Now for <span class="math">\(\Delta f = e^{x} \mathbf{d}x+e^{y}\mathbf{d}y\)</span>. All of our
+results exhibit spectral convergence (measured through the <span class="math">\(L^\infty\)</span>
+error <span class="math">\(\|\Delta f - q \|_\infty\)</span>), with the conventional plateau in
+accuracy for fine meshes.</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson2d_periodic.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/poisson2d_periodic_00.png" src="_images/poisson2d_periodic_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_00.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/poisson2d_periodic_01.png" src="_images/poisson2d_periodic_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_01.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.pdf">pdf</a>)</p>
+</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson2d_cheb.py">Source code</a>)</p>
+<div class="figure">
+<img alt="_images/poisson2d_cheb_00.png" src="_images/poisson2d_cheb_00.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_cheb_00.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_00.pdf">pdf</a>)</p>
+</div>
+<div class="figure">
+<img alt="_images/poisson2d_cheb_01.png" src="_images/poisson2d_cheb_01.png" />
+<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_cheb_01.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_cheb_01.pdf">pdf</a>)</p>
+</div>
+</div>
+<div class="section" id="figure-9">
+<h2>Figure 9<a class="headerlink" href="#figure-9" title="Permalink to this headline">¶</a></h2>
+<p>Plot for the solution of
+<span class="math">\((\star\mathbf{d}\star\mathbf{d}+\mathbf{d}\star\mathbf{d}\star)f\!=\!0\)</span>
+with the boundary conditions of <span class="math">\(\star f |_{\mathcal{B}} = 0\)</span> (vector
+field is tangent to the boundary) and
+<span class="math">\(\star\mathbf{d}\star f |_{\mathcal{B}}\!=\!1\)</span> (the curl at the boundary
+is equal to <span class="math">\(1\)</span>). The domain is <span class="math">\([-1,1]^2\)</span>, discretized by a
+<span class="math">\(10\!\times\!10\)</span> Chebyshev grid.</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson_2d_example.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.png">png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/poisson_2d_example.png" src="_images/poisson_2d_example.png" />
+</div>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -73,6 +246,7 @@
 </li>
 </ul>
 </div>
+</div>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -92,6 +266,14 @@
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Discrete Exterior Calculus</a><ul>
+<li><a class="reference internal" href="#figure-3">Figure 3</a></li>
+<li><a class="reference internal" href="#figure-5">Figure 5</a></li>
+<li><a class="reference internal" href="#figure-6">Figure 6</a></li>
+<li><a class="reference internal" href="#figure-7">Figure 7</a></li>
+<li><a class="reference internal" href="#figure-8">Figure 8</a></li>
+<li><a class="reference internal" href="#figure-9">Figure 9</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
