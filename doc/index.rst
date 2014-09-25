@@ -2,6 +2,19 @@
 Discrete Exterior Calculus
 **************************
 
+Installation
+=============
+
+To install simply run:: 
+
+   pip install dec 
+   
+or build from source:: 
+
+   git clone https://github.com/drufat/dec.git 
+   cd dec 
+   python setup.py install
+
 Figure 3
 ========
 
@@ -32,7 +45,6 @@ Figure 6
 Chebyshev dual basis functions for a grid with :math:`N=7`.
 
 .. plot:: plot/cheb/plot_basis_fn_chebyshev_dual.py
-
 
 
 Figure 7
@@ -71,7 +83,6 @@ accuracy for fine meshes.
 
 .. plot:: plot/cheb/poisson2d_periodic.py 
 .. plot:: plot/cheb/poisson2d_cheb.py
-
 
 Figure 9  
 =========
