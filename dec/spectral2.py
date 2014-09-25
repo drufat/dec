@@ -2,11 +2,10 @@
 Spectral DEC in 2D
 =============================
 """
-from __future__ import division
 from numpy import *
 from dec.helper import *
 from dec.spectral import *
-import scipy.integrate
+from functools import reduce
 
 def cartesian_product(X, Y):
     """
@@ -15,11 +14,11 @@ def cartesian_product(X, Y):
     """
     X = asarray(X)
     Y = asarray(Y)
-    X, Y = map(lambda x: x.flatten(), meshgrid(X, Y))
+    X, Y = [x.flatten() for x in meshgrid(X, Y)]
     return X, Y
 
 Grid_2D_Interface = """
-    pnts, 
+    pnts,
     verts, verts_dual,
     edges, edges_dual,
     faces, faces_dual,
@@ -28,7 +27,7 @@ Grid_2D_Interface = """
     projection,
     P0, P1, P2, P0d, P1d, P2d,
     reconstruction,
-    R0, R1, R2, R0d, R1d, R2d, 
+    R0, R1, R2, R0d, R1d, R2d,
     derivative,
     D0, D1, D0d, D1d,
     hodge_star,
@@ -37,12 +36,12 @@ Grid_2D_Interface = """
     """
 
 def Grid_2D_Cartesian(gx, gy):
-    
+
     dimension = gx.dimension + gy.dimension
-    
-    # For all meshgrids hence forth, first argument should have an x, second should have a y    
+
+    # For all meshgrids hence forth, first argument should have an x, second should have a y
     verts = meshgrid(gx.verts, gy.verts)
-    verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)    
+    verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
     edges = ((meshgrid(gx.edges[0], gy.verts),
               meshgrid(gx.edges[1], gy.verts)),
              (meshgrid(gx.verts, gy.edges[0]),
@@ -70,7 +69,7 @@ def Grid_2D_Cartesian(gx, gy):
                      integrate_1form(edges_dual[1], f)[0])
     def projection():
         return P0, P1, P2, P0d, P1d, P2d
-    
+
     def basis_fn():
         vec = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y))))
         mg = lambda x, y: meshgrid(x, y, copy=False, sparse=False)
@@ -87,9 +86,9 @@ def Grid_2D_Cartesian(gx, gy):
                fy(*mg(gx.B0d, gy.B1d)))
         return B0, B1, B2, B0d, B1d, B2d
     B0, B1, B2, B0d, B1d, B2d = basis_fn()
-    
+
     R0, R1, R2, R0d, R1d, R2d = reconstruction(basis_fn())
-    
+
     def derivative():
 
         def deriv(g, axis):
@@ -100,15 +99,15 @@ def Grid_2D_Cartesian(gx, gy):
 
         Dx, Ddx = deriv(gx, axis=1)
         Dy, Ddy = deriv(gy, axis=0)
-        
+
         D0 = lambda f: (Dx(f), Dy(f))
         D0d = lambda f: (Ddx(f), Ddy(f))
-        D1 = lambda f: -Dy(f[0]) + Dx(f[1]) 
+        D1 = lambda f: -Dy(f[0]) + Dx(f[1])
         D1d = lambda f: -Ddy(f[0]) + Ddx(f[1])
 
         return D0, D1, D0d, D1d
     D0, D1, D0d, D1d = derivative()
-    
+
     def boundary_condition():
 
         def BC0(f):
@@ -118,8 +117,8 @@ def Grid_2D_Cartesian(gx, gy):
             bc0[ma] -= f(x0[ma], y0[ma])
             ma = (x1==gx.xmax)
             bc0[ma] += f(x1[ma], y1[ma])
-    
-            ((x0, y0), (x1,y1)) = edges_dual[1]        
+
+            ((x0, y0), (x1,y1)) = edges_dual[1]
             bc1 = zeros(x1.shape)
             ma = (y0==gy.xmin)
             bc1[ma] -= f(x0[ma], y0[ma])
@@ -142,7 +141,7 @@ def Grid_2D_Cartesian(gx, gy):
 
         return BC0, BC1
     BC0, BC1 = boundary_condition()
-    
+
     def hodge_star():
 
         def hodge(g, axis):
@@ -152,21 +151,21 @@ def Grid_2D_Cartesian(gx, gy):
             H0d = lambda arr: apply_along_axis(h0d, axis, arr)
             H1d = lambda arr: apply_along_axis(h1d, axis, arr)
             return H0, H1, H0d, H1d
-    
+
         H0x, H1x, H0dx, H1dx = hodge(gx, axis=1)
         H0y, H1y, H0dy, H1dy = hodge(gy, axis=0)
-        
+
         H0 = lambda f: H0x(H0y(f))
         H2 = lambda f: H1x(H1y(f))
         H0d = lambda f: H0dx(H0dy(f))
         H2d = lambda f: H1dx(H1dy(f))
-        
-        H1 = lambda (fx, fy): (-H0x(H1y(fy)), H0y(H1x(fx)))
-        H1d = lambda (fx, fy): (-H0dx(H1dy(fy)), H0dy(H1dx(fx)))
-        
+
+        H1 = lambda f: (-H0x(H1y(f[1])), H0y(H1x(f[0])))
+        H1d = lambda f: (-H0dx(H1dy(f[1])), H0dy(H1dx(f[0])))
+
         return H0, H1, H2, H0d, H1d, H2d
     H0, H1, H2, H0d, H1d, H2d = hodge_star()
-    
+
     return bunch(**locals())
 
 def Grid_2D_Periodic(N, M):
@@ -179,35 +178,35 @@ def Grid_2D_Regular(N, M):
     return Grid_2D_Cartesian(Grid_1D_Regular(N), Grid_1D_Regular(M))
 
 def laplacian2(g):
-    """ 
+    """
     2D Laplacian Operator
     """
     D0, D1, D0d, D1d = g.derivative()
     H0, H1, H2, H0d, H1d, H2d = g.hodge_star()
     add = lambda x, y: (x[0]+y[0], x[1]+y[1])
-    
+
     L0 = lambda f: H2d(D1d(H1(D0(f))))
     L0d = lambda f: H2(D1(H1d(D0d(f))))
-    L1 = lambda f: add(H1d(D0d(H2(D1(f)))), 
+    L1 = lambda f: add(H1d(D0d(H2(D1(f)))),
                        D0(H2d(D1d(H1(f)))))
-    L1d = lambda f: add(H1(D0(H2d(D1d(f)))), 
+    L1d = lambda f: add(H1(D0(H2d(D1d(f)))),
                         D0d(H2(D1(H1d(f)))))
-    
+
     return L0, L1, L0d, L1d
 
 def _draw(plt, pnts, xytext=(10,10), color='k', fc='blue'):
-    
+
     def average(pnts):
-        Sx, Sy = map(lambda x: reduce(operator.add, x), zip(*pnts))
-        Lx, Ly = map(len, zip(*pnts))
+        Sx, Sy = [reduce(operator.add, x) for x in zip(*pnts)]
+        Lx, Ly = list(map(len, list(zip(*pnts))))
         return Sx/Lx, Sy/Ly
-    
+
     X, Y = average(pnts)
     plt.scatter(X, Y,color=color)
-                    
+
     for i, (x, y) in enumerate(zip(X.flat, Y.flat)):
         plt.annotate(
-            '{0}'.format(i), 
+            '{0}'.format(i),
             xy = (x, y), xytext = xytext,
             textcoords = 'offset points', ha = 'right', va = 'bottom',
             bbox = dict(boxstyle = 'round,pad=0.5', fc = fc, alpha = 0.5),
