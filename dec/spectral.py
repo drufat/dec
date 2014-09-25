@@ -43,10 +43,10 @@ def beta0(N, x):
     .. math::
         \beta_{N}(x)=
         \begin{cases}
-            \frac{1}{2\pi} -\frac{1}{4}\cos\frac{Nx}{2} + 
+            \frac{1}{2\pi} -\frac{1}{4}\cos\frac{Nx}{2} +
                 \frac{1}{N}\sum\limits_{n=1}^{N/2}
                     \frac{n\cos nx}{\sin\frac{n\pi}{N}} & \text{if N even,}\\
-            \frac{1}{2\pi} + 
+            \frac{1}{2\pi} +
                 \frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
                     \frac{n\cos nx}{\sin\frac{n\pi}{N}} & \text{if N odd.}
         \end{cases}
@@ -63,7 +63,7 @@ def beta0(N, x):
 
 def alpha(N, n, x):
     r"""
-    
+
     .. math::
         \alpha_{N, n} (x) = \alpha_N(x-h n)
     """
@@ -71,7 +71,7 @@ def alpha(N, n, x):
 
 def beta(N, n, x):
     r"""
-    
+
     .. math::
         \beta_{N, n} (x) = \beta_N(x-h n)
     """
@@ -79,16 +79,16 @@ def beta(N, n, x):
 
 def gamma(N, k):
     r"""
-    
+
     .. math::
         \gamma_{N, n} = \int_0^{\frac{h}{2}=\frac{\pi}{N}} \beta_{N,n}(x) \, dx =
         \begin{cases}
-        \frac{1}{2N} - 
+        \frac{1}{2N} -
         \frac{(-1)^k}{2N} +
         \frac{1}{N}\sum\limits_{n=1}^{N/2}
         \frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}
         {\sin\frac{n\pi}{N}} & \text{if N even,}\\
-        \frac{1}{2N} + 
+        \frac{1}{2N} +
         \frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
         \frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}{\sin\frac{n\pi}{N}} & \text{if N odd.}
         \end{cases}
@@ -97,7 +97,7 @@ def gamma(N, k):
     if N % 2 == 0:
         y = 1/(2*N) - (-1)**k/(2*N)
         for n in range(1, N//2 + 1):
-            y += (sin(2*n*k*pi/N) - sin((2*k-1)*n*pi/N)) / sin(n*pi/N) / N    
+            y += (sin(2*n*k*pi/N) - sin((2*k-1)*n*pi/N)) / sin(n*pi/N) / N
     else:
         y = 1/(2*N)
         for n in range(1, (N-1)//2 + 1):
@@ -111,7 +111,7 @@ def gamma(N, k):
 def phi0(N, n, x):
     r"""
     Basis functions for primal 0-forms.
-    
+
     .. math::
         \phi_{N,n}^{0}(x)=\alpha_{N,n}(x)
     """
@@ -120,7 +120,7 @@ def phi0(N, n, x):
 def phi1(N, n, x):
     r"""
     Basis functions for primal 1-forms.
-    
+
     .. math::
         \phi_{N,n}^{1}(x)=\beta_{N,n+\frac{1}{2}}(x)
     """
@@ -129,7 +129,7 @@ def phi1(N, n, x):
 def phid0(N, n, x):
     r"""
     Basis functions for dual 0-forms.
-    
+
     .. math::
         \widetilde{\phi}_{N,n}^{0}(x)=\alpha_{N,n+\frac{1}{2}}(x)
     """
@@ -138,7 +138,7 @@ def phid0(N, n, x):
 def phid1(N, n, x):
     r"""
     Basis functions for dual 1-forms.
-    
+
     .. math::
         \widetilde{\phi}_{N,n}^{1}(x)=\alpha_{N,n}(x)
     """
@@ -153,7 +153,7 @@ def varphi(x):
     .. math::
         \varphi:&& [-1,1]\to[0,\pi]\\
                 && x\mapsto\arccos(-x)
-    
+
     >>> varphi(-1) == 0
     True
     >>> varphi(+1) == pi
@@ -166,7 +166,7 @@ def varphi_inv(x):
     .. math::
         \varphi^{-1}:&& [0,\pi]\to[-1,1]\\
                 && \theta\mapsto-\cos(\theta)
-    
+
     >>> varphi_inv(0) == -1
     True
     >>> varphi_inv(pi) == +1
@@ -185,7 +185,7 @@ def delta(N, x):
     .. math::
         \delta_{N}(x)=\left((N-1)^{2}\alpha_{2N-2,0}(x)+\frac{1}{2}\cos\left((N-1)x\right)\right)\sin(x)
     """
-    
+
     return ((N-1)**2 * alpha(2*N-2, 0, x) + 0.5*cos((N-1)*x))*sin(x)
 
 def rho(N, n, x):
@@ -206,7 +206,7 @@ def kappa0(N, n, x):
         \begin{cases}
             \alpha_{2N-2,n}(x), & n\in\{0,N-1\}\\
             \alpha_{2N-2,n}(x)+\alpha_{2N-2,2N-2-n}(x), & n\in\{1,\dots,N-2\}
-        \end{cases} 
+        \end{cases}
    """
     if n in (0, N-1):
         return  alpha(2*N-2, n, x)
@@ -216,30 +216,30 @@ def kappa0(N, n, x):
 
 def kappa1(N, n, x):
     r"""
-    
+
     .. math::
         \kappa_{N,n}^{1}(x) = \left(
         \beta_{2N-2,n+\frac{1}{2}}(x)-
         \beta_{2N-2,2N-3-n+\frac{1}{2}}(x)\right)
         \mathbf{d}x,n\in\{0,\dots,N-2\}
     """
-    return (beta(2*N-2, n+0.5, x) - 
+    return (beta(2*N-2, n+0.5, x) -
             beta(2*N-2, 2*N-3-n+0.5, x))
-        
+
 def kappad0(N, n, x):
     r"""
 
     .. math::
         \widetilde{\kappa}_{N,n}^{0}(x)=
         \alpha_{2N-2,\, n+\frac{1}{2}}(x)+
-        \alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}    
+        \alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}
     """
-    return (alpha(2*N-2, n+0.5, x) + 
+    return (alpha(2*N-2, n+0.5, x) +
             alpha(2*N-2, 2*N-3-n+0.5, x))
 
-def kappad1(N, n, x):    
+def kappad1(N, n, x):
     r"""
-    
+
     .. math::
         \widetilde{\kappa}_{N,n}^{1}(x)=
         \begin{cases}
@@ -253,7 +253,7 @@ def kappad1(N, n, x):
     if n == N-1:
         return delta(N, pi - x)
 
-    y = (beta(2*N-2, n, x) - 
+    y = (beta(2*N-2, n, x) -
          beta(2*N-2, 2*N-2-n, x)
          - rho(N, n, x) )
     return y
@@ -286,11 +286,11 @@ def psi0(N, n, x):
         \psi_{N,n}^{0}(x)=\kappa_{N,n}^{0}(\arccos(-x))
     """
     return kappa0(N, n, arccos(-x))
-    
+
 def psi1(N, n, x):
     r"""
     Basis functions for primal 1-forms.
-    
+
     .. math::
         \psi_{N,n}^{1}(x)\mathbf{d}x=
             \kappa_{N,n}^{1}(\arccos(-x))\frac{\mathbf{d}x}{\sqrt{1-x^{2}}}
@@ -301,7 +301,7 @@ def psi1(N, n, x):
 def psid0(N, n, x):
     r"""
     Basis functions for dual 0-forms.
-    
+
     .. math::
         \tilde{\psi}_{N,n}^{0}(x)=\tilde{\kappa}_{N,n}^{0}(\arccos(-x))
     """
@@ -324,10 +324,10 @@ def psid1(N, n, x):
 def lagrange_polynomials(x):
     r"""
     Lagrange Polynomials for the set of points defined by :math:`x_m`
-    
-    .. math:: 
+
+    .. math::
         \psi_{n}^{0}(x)=\prod_{m=0,m\neq n}^{N-1}\frac{x-x_{m}}{x_{n}-x_{m}}
-    
+
     >>> L = lagrange_polynomials([0, 1, 2])
     >>> map(lambda l: l(0), L)
     [1.0, 0.0, -0.0]
@@ -364,11 +364,11 @@ def method_in_fourier_space(g):
     f.__doc__ = g.__doc__ # make sure doctests are run
     return f
 
-def H(a):    
+def H(a):
     r"""
-    
+
     .. math::
-        \mathbf{H}^0 = \widetilde{\mathbf{H}}^0 = 
+        \mathbf{H}^0 = \widetilde{\mathbf{H}}^0 =
         \mathcal{F}^{-1} \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}} \mathcal{F}
     """
     N = len(a)
@@ -379,7 +379,7 @@ def Hinv(a):
     r"""
 
     .. math::
-        \mathbf{H}^1 = \widetilde{\mathbf{H}}^1 = 
+        \mathbf{H}^1 = \widetilde{\mathbf{H}}^1 =
         \mathcal{F}^{-1}{\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}\mathcal{F}
     """
     N = len(a)
@@ -399,21 +399,21 @@ def S(a):
     h = 2*pi/N
     return Finv( F(a) * S_diag(N, h/2) )
 
-def Sinv(a): 
+def Sinv(a):
     N = len(a)
     h = 2*pi/N
     return Finv( F(a) * S_diag(N, -h/2) )
 
 def I_diag(N, a, b):
     r"""
-    
-    A diagonal matrix that corresponds to integration in Fourier space.     
+
+    A diagonal matrix that corresponds to integration in Fourier space.
     Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) d\xi`
-        
+
     .. math::
         \mathbf{I}_{\phantom{a,b}nn}^{a,b}
             =\frac{e^{inb}-e^{ina}}{in}
-        
+
     .. math::
         \mathbf{I}_{\phantom{a,b}00}^{a,b}=b-a
     """
@@ -424,7 +424,7 @@ def I_diag(N, a, b):
 
 def S_diag(N, a):
     r"""
-    
+
     A diagonal matrix that corresponds to shifting in Fourier Space
     Corresponds to :math:`f(x) \mapsto f(x-h)`
 
@@ -464,12 +464,12 @@ def fourier_J(x, a, b, c):
     Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) \sin(\xi+c) d\xi`
     """
     c = fourier_I(x, a, b)
-    b = (roll(c[2:]*x,+1)*exp(1j*c) - roll(c[:-2]*x,-1)*exp(-1j*c))/2j    
+    b = (roll(c[2:]*x,+1)*exp(1j*c) - roll(c[:-2]*x,-1)*exp(-1j*c))/2j
     return b
 
 def refine(x):
     """
-    Resample x at a twice refined grid. 
+    Resample x at a twice refined grid.
     >>> N = 4
     >>> x = linspace(0, 2*pi, N+1)[:-1]
     >>> y = linspace(0, 2*pi, 2*N+1)[:-1]
@@ -503,11 +503,11 @@ def integrate_spectral_coarse(x, f):
 
 def integrate_spectral(x, f):
     assert is_equidistant(x)
-    
+
     r = subdivide
     f1 = integrate_spectral_coarse(r(r(r(x))), f)
 
-    return (f1[0::8] + f1[1::8] + f1[2::8] + f1[3::8] + 
+    return (f1[0::8] + f1[1::8] + f1[2::8] + f1[3::8] +
             f1[4::8] + f1[5::8] + f1[6::8] + f1[7::8])
 
 def integrate_chebyshev(xi, f):
@@ -546,10 +546,10 @@ def split_args(I):
         return I(concatenate((x0, [x1[-1]])), f)
     return J
 
-def hodge_star_matrix(P, B): 
+def hodge_star_matrix(P, B):
     """
     Compute Hodge-Star matrix from basis functions.
-    """       
+    """
     P0, P1, P0d, P1d = P
     B0, B1, B0d, B1d = B
     H0 = vstack(P1d(b) for b in B0).T
@@ -564,7 +564,7 @@ def reconstruction(basis_fn):
     """
     def summation(a, B):
         return lambda *x: sum(a[i]*f(*x) for i, f in enumerate(B))
-    return map(lambda B: (lambda a: summation(a, B)),  basis_fn)
+    return [(lambda a: summation(a, B)) for B in basis_fn]
 
 class Form(ndarray):
 
@@ -595,7 +595,7 @@ def DEC(grid):
             f, _, _ = by_codomain[codomain]
             return Form(getattr(grid, f)(arg[0]), grid, *codomain)
         return O
-    
+
     def typed2(op):
         by_domain = {}
         for tup in ops_1D[op]:
@@ -605,7 +605,7 @@ def DEC(grid):
             " Select appropriate operator for form"
             assert grid == form.grid
             f, _, codomain = by_domain[(form.degree, form.primal)]
-            return Form(getattr(grid, f)(form), grid, *codomain)    
+            return Form(getattr(grid, f)(form), grid, *codomain)
         return O
 
     def typed3(op):
@@ -619,15 +619,15 @@ def DEC(grid):
             f, _, _ = by_domain[(form.degree, form.primal)]
             return getattr(grid, f)(form)
         return O
-    
-    return (typed1('P'), 
+
+    return (typed1('P'),
             typed3('R'),
             typed2('D'),
             typed2('H'))
 
 def operators(n):
     """
-    Return all the operators for dimension n together with their domains and codomains. 
+    Return all the operators for dimension n together with their domains and codomains.
     >>> import pprint
     >>> pprint.PrettyPrinter().pprint(operators(1))
     {'D': [('D0', (0, True), (1, True)), ('D0d', (0, False), (1, False))],
@@ -653,12 +653,12 @@ def operators(n):
     # Add more operators here - Wedge, Contraction/Flat ?
     forms = tuple(itertools.product(range(n+1), (True, False)))
     return dict(P=map(P, forms),
-                R=map(R, forms), 
+                R=map(R, forms),
                 D=map(D, filter(lambda (k,_): k<n, forms)),
                 H=map(H, forms))
 
 Grid_1D_Interface = """
-        pnts, 
+        pnts,
         xmin, xmax, lenx,
         verts, verts_dual,
         edges, edges_dual,
@@ -669,13 +669,13 @@ Grid_1D_Interface = """
         reconstruction,
         R0, R1, R0d, R1d,
         derivative,
-        D0, D0d, 
+        D0, D0d,
         hodge_star,
         H0, H1, H0d, H1d,
     """
 
 def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
-    
+
     assert xmax > xmin
 
     dimension = 1
@@ -683,7 +683,7 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
     pnts = linspace(xmin, xmax, num=(n+1))
     lenx = abs(xmax - xmin)
     delta = diff(pnts)
-        
+
     verts = pnts[:-1]
     edges = (pnts[:-1], pnts[1:])
 
@@ -691,15 +691,15 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
     edges_dual = (roll(verts_dual,shift=1), verts_dual)
     edges_dual[0][0] -= lenx
     delta_dual = delta
-    
+
     V = verts
     S0 = arange(len(V))
     S1 = (S0[:-1], S0[1:])
-    
+
     Vd = verts_dual
     S0d = arange(len(Vd))
     S1d = (S0d[:-1], S0d[1:])
-    
+
     P0 = lambda f: f(verts)
     P1 = lambda f: split_args(integrate_spectral)(
                     edges[0], edges[1], f)
@@ -729,7 +729,7 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
     H1d = H1
     def hodge_star():
         return H0, H1, H0d, H1d
-    
+
     def derivative_matrix():
         rng = arange(n)
         ons = ones(n)
@@ -755,15 +755,15 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
         row = concatenate(( column[:1], column[1:][::-1] ))
         D = toeplitz(column, row)
         return D
-    
+
     def hodge_star_toeplitz():
         """
-        The Hodge-Star using a Toeplitz matrix. 
+        The Hodge-Star using a Toeplitz matrix.
         """
         column = P1d(lambda x: alpha0(n, x))
         row = concatenate((column[:1], column[1:][::-1]))
         return toeplitz(column, row)
-        
+
     def wedge():
         """
         Return \alpha ^ \beta. Keep only for primal forms for now.
@@ -788,7 +788,7 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
         def C1(alpha):
             return Hinv(Sinv(V)) * Hinv(Sinv(alpha))
         return C1
-    
+
     return bunch(**locals())
 
 def _slow_integration(a, b, f):
@@ -797,34 +797,34 @@ def _slow_integration(a, b, f):
 
 def A_diag(N):
     r"""
-    
-    .. math:: 
+
+    .. math::
         \mathbf{A}=\text{diag}\left(\begin{array}{ccccccc}\frac{1}{2} & 1 & 1 & \dots & 1 & 1 & \frac{1}{2}\end{array}\right)
-    
+
     """
     d = concatenate(([0.5], ones(N-2), [0.5]))
     return d
 
 def H0_regular(f):
     r"""
-    
+
     .. math::
         \mathbf{H}^{0}=
             \mathbf{A}
             \mathbf{M}_{0}^{\dagger}
             \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-            \mathbf{M}_{0}^{+}        
+            \mathbf{M}_{0}^{+}
     """
-    f = mirror0(f, +1)    
+    f = mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
     f = I_space(-h/2, h/2)(f)
     f = unmirror0(f)
-    f = f*A_diag(f.shape[0])     
+    f = f*A_diag(f.shape[0])
     return  real(f)
 
 def H1_regular(f):
     r"""
-    
+
     .. math::
         \mathbf{H}^{1}=
             \mathbf{M}_{1}^{\dagger}
@@ -834,7 +834,7 @@ def H1_regular(f):
     f = mirror1(f, -1)
     N = f.shape[0]; h = 2*pi/N
     f = I_space_inv(-h/2, h/2)(f)
-    f = unmirror1(f) 
+    f = unmirror1(f)
     return f
 
 def H0d_regular(f):
@@ -854,7 +854,7 @@ def H0d_regular(f):
 
 def H1d_regular(f):
     r"""
-    
+
     .. math::
         \widetilde{\mathbf{H}}^{1}=
             \mathbf{M}_{1}^{\dagger}
@@ -866,11 +866,11 @@ def H1d_regular(f):
     f = mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
     f = I_space_inv(-h/2, +h/2)(f)
-    f = unmirror0(f) 
+    f = unmirror0(f)
     return f
 
 def Grid_1D_Regular(n, xmin=0, xmax=pi):
-    
+
     assert xmax > xmin
 
     dimension = 1
@@ -879,7 +879,7 @@ def Grid_1D_Regular(n, xmin=0, xmax=pi):
     pnts = linspace(xmin, xmax, num=n)
     lenx = abs(xmax - xmin)
     delta = diff(pnts)
-        
+
     verts = pnts
     verts_dual = verts[:-1] + 0.5*delta
 
@@ -887,7 +887,7 @@ def Grid_1D_Regular(n, xmin=0, xmax=pi):
     tmp = concatenate(([xmin], verts_dual, [xmax]))
     delta_dual = diff(tmp)
     edges_dual = (tmp[:-1], tmp[1:])
-    
+
     P0 = lambda f: f(verts)
     P1 = lambda f: _slow_integration(edges[0], edges[1], f)
     P0d = lambda f: f(verts_dual)
@@ -914,13 +914,13 @@ def Grid_1D_Regular(n, xmin=0, xmax=pi):
     H0d = H0d_regular
     H1d = H1d_regular
     def hodge_star():
-        return H0, H1, H0d, H1d    
+        return H0, H1, H0d, H1d
 
     return bunch(**locals())
 
 def extend(f, n):
     r"""
-    
+
     .. math::
         \mathbf{E}^{n}:\quad
         \begin{bmatrix}x_{0}\\
@@ -944,15 +944,15 @@ def extend(f, n):
         \vdots\\
         0
         \end{array}\right\} n
-        \end{bmatrix} 
-    
+        \end{bmatrix}
+
     """
     N = f.shape[0]
     return (N+2.0*n)/N*_extend(f, n)
 
 def unextend(f, n):
     r"""
-    
+
     .. math::
         \mathbf{E}^{-n}:\quad\begin{bmatrix}\left.\begin{array}{c}
         x_{-n}\\
@@ -994,8 +994,8 @@ def _extend(f, n):
     >>> _extend([1, 2, 3, 4], 2)
     array([ 0.,  0.,  1.,  2.,  3.,  4.,  0.,  0.])
     """
-    return concatenate(( zeros(n), 
-                         f, 
+    return concatenate(( zeros(n),
+                         f,
                          zeros(n) ))
 
 def _unextend(f, n):
@@ -1015,7 +1015,7 @@ def _unextend(f, n):
 
 def mirror0(f, sign=+1):
     r"""
-    
+
     .. math::
         \mathbf{M}_{0}^{\pm}:\quad\begin{bmatrix}x_{0}\\
                 x_{1}\\
@@ -1032,7 +1032,7 @@ def mirror0(f, sign=+1):
                 \vdots\\
                 \pm x_{1}
             \end{bmatrix}
-    
+
     >>> mirror0(array([1, 2, 3]))
     array([1, 2, 3, 2])
     >>> mirror0(array([1, 2, 3]), -1)
@@ -1042,7 +1042,7 @@ def mirror0(f, sign=+1):
            [ 0.,  1.,  0.],
            [ 0.,  0.,  1.],
            [ 0.,  1.,  0.]])
-    >>> to_matrix(lambda x: mirror0(x, -1), 3) 
+    >>> to_matrix(lambda x: mirror0(x, -1), 3)
     array([[ 1.,  0.,  0.],
            [ 0.,  1.,  0.],
            [ 0.,  0.,  1.],
@@ -1052,7 +1052,7 @@ def mirror0(f, sign=+1):
 
 def mirror1(f, sign=+1):
     r"""
-    
+
     .. math::
         \mathbf{M}_{1}^{\pm}:\quad
         \begin{bmatrix}x_{0}\\
@@ -1092,7 +1092,7 @@ def mirror1(f, sign=+1):
 
 def unmirror0(f):
     r"""
-    
+
     .. math::
         \mathbf{M}_{0}^{\dagger}:\quad\begin{bmatrix}x_{0}\\
         x_{1}\\
@@ -1108,7 +1108,7 @@ def unmirror0(f):
         x_{N}\\
         x_{N+1}
         \end{bmatrix}
-    
+
     >>> unmirror0(array([1, 2, 3, 2]))
     array([1, 2, 3])
     """
@@ -1116,7 +1116,7 @@ def unmirror0(f):
 
 def unmirror1(f):
     r"""
-    
+
     .. math::
         \mathbf{M}_{1}^{\dagger}:\quad\begin{bmatrix}x_{0}\\
         x_{1}\\
@@ -1130,7 +1130,7 @@ def unmirror1(f):
         \vdots\\
         x_{N-1}
         \end{bmatrix}
-    
+
     >>> unmirror1(array([1, 2, 3, -3, -2, -1]))
     array([1, 2, 3])
     """
@@ -1142,42 +1142,42 @@ def unmirror1(f):
 
 def H_exp(a):
     r"""
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \exp(i \xi) d\xi`   
-    
+    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \exp(i \xi) d\xi`
+
     This transformation is singular non-invertible.
     """
 
     N = len(a)
     h = 2*pi/N
     c = I_diag(N+2, -h/2, h/2)
-    
+
     a = F(a)
     b = roll(c[2:]*a,+1)
     return Finv(b)
 
 def H_sin(a):
     r"""
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi) d\xi`   
-    
+    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi) d\xi`
+
     This transformation is singular non-invertible.
 
     >>> x = linspace(0, 2*pi, 6)[:-1]
     >>> round_(real( H_sin(sin(2*x)) ), 3)
     array([ 0.271,  0.438, -0.573, -0.573,  0.438])
     """
-    
+
     N = len(a)
     h = 2*pi/N
-    
+
     a = F(a)
     c = I_diag(N+2, -h/2, h/2)
     b = (roll(c[2:]*a,+1) - roll(c[:-2]*a,-1))/2j
-    
+
     return Finv(b)
 
 def H_sin_dual(a):
     r"""
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi+\frac{h}{2}) d\xi`   
+    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi+\frac{h}{2}) d\xi`
 
     This transformation is singular non-invertible.
 
@@ -1189,7 +1189,7 @@ def H_sin_dual(a):
     N = len(a)
     h = 2*pi/N
 
-    a = F(a)    
+    a = F(a)
     c = I_diag(N+2, -h/2, h/2)
     s = exp(1j*h/2)
     b = (roll(c[2:]*a,+1)*s - roll(c[:-2]*a,-1)/s)/2j
@@ -1198,10 +1198,10 @@ def H_sin_dual(a):
 
 def Omega(N):
     r"""
-    
+
     .. math::
         \mathbf{\Omega}_{nn}=\sin\left(nh\right)
-    
+
     """
 
     h = 2*pi/N
@@ -1210,13 +1210,13 @@ def Omega(N):
 
 def Omega_d(N):
     r"""
-    
+
     .. math::
-        \mathbf{\widetilde{\Omega}}_{nn} 
+        \mathbf{\widetilde{\Omega}}_{nn}
             =\sin\left(\left(n+\frac{1}{2}\right)h\right)
-    
-    If :math:`\widetilde{\omega}` is the length of each dual edge, then 
-    
+
+    If :math:`\widetilde{\omega}` is the length of each dual edge, then
+
     .. math::
         \mathbf{\widetilde{\Omega}}
             =\text{diag}(\mathbf{M}_{1}^{\dagger}
@@ -1232,7 +1232,7 @@ def half_edge_base(N):
     r"""
     This is the discrete version of :math:`\delta(x)` - the basis functions
     for the half edge at -1
-    
+
     .. math::
         \mathbf{B}=
             \text{diag}\left(\underset{N}{\underbrace{
@@ -1245,7 +1245,7 @@ def half_edge_base(N):
             \cdots,-\frac{1}{2},\frac{1}{2},-\frac{1}{2},(N-1)^{2}}
             }\right)
 
-    
+
     >>> half_edge_base(3)
     array([ 4.5, -0.5,  0.5])
     """
@@ -1253,7 +1253,7 @@ def half_edge_base(N):
     a[1::2] += -1
     a[0] += (N-1)**2
     return a
-    
+
 def half_edge_integrals(f):
     """
     >>> approx( half_edge_integrals([1,0,0]), gamma(3, 0))
@@ -1262,16 +1262,16 @@ def half_edge_integrals(f):
     True
     """
     N = len(f)
-    h = 2*pi/N    
-    f = Hinv(f)    
+    h = 2*pi/N
+    f = Hinv(f)
     p = I(f, 0, h/2)
     return p[0]
 
 def pick(f, n):
     r"""
-    
+
     Pick the nth element in the array f.
-    
+
     .. math::
         \mathcal{\mathbf{P}}^{n}:\quad\begin{bmatrix}x_{0}\\
         \vdots\\
@@ -1288,7 +1288,7 @@ def pick(f, n):
         \vdots\\
         x_{n}
         \end{bmatrix}
-        
+
     .. math::
        \mathcal{\mathbf{P}}^{0}=\begin{pmatrix}1 & 0 & 0 & 0 & 0\\
         1\\
@@ -1300,19 +1300,19 @@ def pick(f, n):
          & 1\\
          & 1\\
          & 1
-        \end{pmatrix},\dots 
-            
+        \end{pmatrix},\dots
+
     """
-    
+
     return f[n]*ones(f.shape[0])
 
 
 def reverse(f):
     r"""
-    
-    Reverse array. 
-    
-    .. math:: 
+
+    Reverse array.
+
+    .. math::
         \mathbf{R}:\quad\begin{bmatrix}x_{0}\\
         \vdots\\
         x_{n-1}\\
@@ -1328,8 +1328,8 @@ def reverse(f):
         \vdots\\
         x_{0}
         \end{bmatrix}
-        
-    .. math::        
+
+    .. math::
         \mathbf{R} = \begin{pmatrix} &  &  &  & 1\\
          &  &  & 1\\
          &  & 1\\
@@ -1377,7 +1377,7 @@ def H0d_cheb(f):
 
     .. math::
         \widetilde{\mathbf{H}}^0 = {\mathbf{M}_1}^{\dagger}
-                \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}} 
+                \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}
                 \widetilde{\mathbf{\Omega}} \mathbf{M}_1^+
     """
 
@@ -1386,16 +1386,16 @@ def H0d_cheb(f):
     f = f*Omega_d(N)
     f = I_space(-h/2, h/2)(f)
     f = unmirror1(f)
-        
+
     return f
 
 def H1_cheb(f):
     r"""
-    
+
     .. math::
-        \mathbf{H}^1 = {\mathbf{M}_1}^{\dagger} 
-                \widetilde{\mathbf{\Omega}}^{-1} 
-                {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1} 
+        \mathbf{H}^1 = {\mathbf{M}_1}^{\dagger}
+                \widetilde{\mathbf{\Omega}}^{-1}
+                {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1}
                 \mathbf{M}_1^-
     """
 
@@ -1415,22 +1415,22 @@ def H0_cheb(f):
     f = mirror0(f, +1)
     f = E_space(N-1)(f)
     f = I_space(0, h/2)(f*Omega(f.shape[0]))
-    f = unmirror1(f)    
+    f = unmirror1(f)
     f = matA(f)
     return real(f)
 
 def H0_cheb_alternate(f):
     r"""
-    
+
     .. math::
         \mathbf{H}^0 = \mathbf{M}_0^{\dagger}
-            (\mathcal{A}^{0} \mathbf{E}^{-1} \mathbf{I}^{-\frac{h}{2}, 0} + 
+            (\mathcal{A}^{0} \mathbf{E}^{-1} \mathbf{I}^{-\frac{h}{2}, 0} +
              \mathcal{A}^{N-1} \mathbf{E}^{-1} \mathbf{I}^{0, +\frac{h}{2}})
              \mathbf{\Omega} \mathbf{E}^{1}
-             \mathbf{M}_0^{+}        
+             \mathbf{M}_0^{+}
     """
     N = f.shape[0]
-    f = mirror0(f, +1)    
+    f = mirror0(f, +1)
     h = 2*pi/f.shape[0]
     f = E_space(1)(f)
     f = f*Omega(f.shape[0])
@@ -1439,15 +1439,15 @@ def H0_cheb_alternate(f):
     l[0], r[N-1] = 0, 0
     f = l+r
     f = unmirror0(f)
-    #TODO: Is it possible to avoid discarding the imaginary part?    
+    #TODO: Is it possible to avoid discarding the imaginary part?
     f = real(f)
     return  f
 
 def H1d_cheb(f):
     r"""
-    
+
     .. math::
-        
+
         \widetilde{\mathbf{H}}^{1} = \mathbf{M}_{0}^{\dagger}\left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-\mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-\mathbf{B}^{\dagger}\mathbf{I}^{-\frac{h}{2},0}\right)\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+\mathbf{B}+\mathbf{B}^{\dagger}
 
     """
@@ -1475,26 +1475,26 @@ def laplacian(g):
     """
     D, DD = g.derivative()
     H0, H1, H0d, H1d = g.hodge_star()
-    
+
     L = lambda x: H1d(DD(H1(D(x))))
     Ld = lambda x: H1(D(H1d(DD(x))))
-    
+
     return L, Ld
-         
+
 def Grid_1D_Chebyshev(n, xmin=-1, xmax=+1):
 
     N = n
     dimension = 1
-    
-    # 2n-1 points: n primal, n-1 dual 
+
+    # 2n-1 points: n primal, n-1 dual
     x = sin(linspace(-pi/2, pi/2, 2*n-1))
     p = 0.5*(xmin*(1-x) + xmax*(1+x))
 
     verts = p[::2]
     delta = diff(verts)
     edges = (verts[:-1], verts[1:])
-    
-    verts_dual = p[1::2]    
+
+    verts_dual = p[1::2]
     tmp = concatenate(([p[0]], verts_dual, [p[-1]]))
     delta_dual = diff(tmp)
     edges_dual = (tmp[:-1], tmp[1:])
@@ -1502,11 +1502,11 @@ def Grid_1D_Chebyshev(n, xmin=-1, xmax=+1):
     V = verts
     S0 = arange(len(V))
     S1 = (S0[:-1], S0[1:])
-    
+
     Vd = verts_dual
     S0d = arange(len(Vd))
     S1d = (S0d[:-1], S0d[1:])
-    
+
     P0 = lambda f: f(verts)
     P1 = lambda f: integrate_chebyshev(verts, f)
     P0d = lambda f: f(verts_dual)
@@ -1514,33 +1514,33 @@ def Grid_1D_Chebyshev(n, xmin=-1, xmax=+1):
             concatenate(([-1], verts_dual, [+1])), f)
     def projection():
         return P0, P1, P0d, P1d
-    
+
     B0  = [lambda x, i=i:  psi0(n, i, x) for i in range(n)]
     B1  = [lambda x, i=i:  psi1(n, i, x) for i in range(n-1)]
     B0d = [lambda x, i=i: psid0(n, i, x) for i in range(n-1)]
-    B1d = [lambda x, i=i: psid1(n, i, x) for i in range(n)]        
+    B1d = [lambda x, i=i: psid1(n, i, x) for i in range(n)]
     def basis_fn():
         return B0, B1, B0d, B1d
-    
+
     R0, R1, R0d, R1d = reconstruction(basis_fn())
-    
+
     def boundary_condition(f):
         bc = zeros(array(B1d).shape)
         bc[ 0] = -f(xmin)
         bc[-1] = +f(xmax)
         return bc
-    
+
     D0 = lambda f: diff(f)
     D0d = lambda f: diff(concatenate(([0], f, [0])))
     def derivative():
         return D0, D0d
 
     H0 = H0_cheb
-    H1 = H1_cheb        
+    H1 = H1_cheb
     H0d = H0d_cheb
     H1d = H1d_cheb
     def hodge_star():
         return H0, H1, H0d, H1d
     H0, H1, H0d, H1d = hodge_star()
- 
+
     return bunch(**locals())
