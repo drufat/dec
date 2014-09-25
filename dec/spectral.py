@@ -646,10 +646,10 @@ def operators(n):
     """
     name = lambda n, k, t: '{0}{1}{2}'.format(n, k, 'd' if not t else '')
     # enumerate all the possible discrete forms
-    P = lambda (k, t): ( name('P', k, t), None, (k, t) )
-    R = lambda (k, t): ( name('R', k, t), (k, t), None )
-    D = lambda (k, t): ( name('D', k, t), (k, t), (k+1, t) )
-    H = lambda (k, t): ( name('H', k, t), (k, t), (n-k, not t) )
+    def P(tup): (k, t) = tup; return ( name('P', k, t), None, (k, t) )
+    def R(tup): (k, t) = tup; return ( name('R', k, t), (k, t), None )
+    def D(tup): (k, t) = tup; return ( name('D', k, t), (k, t), (k+1, t) )
+    def H(tup): (k, t) = tup; return ( name('H', k, t), (k, t), (n-k, not t) )
     # Add more operators here - Wedge, Contraction/Flat ?
     forms = tuple(itertools.product(range(n+1), (True, False)))
     return dict(P=map(P, forms),
