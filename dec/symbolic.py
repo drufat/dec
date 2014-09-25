@@ -9,6 +9,7 @@ from itertools import permutations, product, combinations_with_replacement
 import numpy as np
 import fractions
 import operator
+from functools import reduce
 
 
 def coords_symbolic(coords, order=2):
@@ -30,41 +31,41 @@ def coords_symbolic(coords, order=2):
 
 def moments_symbolic(C, verts):
     """
-    Compute the moments symbolically. 
+    Compute the moments symbolically.
 
     Edge moments:
 
     >>> C = coords_symbolic("xy", order=2)
     >>> M = moments_symbolic(C, verts=(0,1))
-    >>> C[1], len(M[1]), M[1] 
+    >>> C[1], len(M[1]), M[1]
     (('x',), 2, {(('x', 0),): 1, (('x', 1),): 1})
-    >>> C[3], len(M[3]), M[3] 
+    >>> C[3], len(M[3]), M[3]
     (('x', 'x'), 3, {(('x', 0), ('x', 1)): 1, (('x', 1), ('x', 1)): 1, (('x', 0), ('x', 0)): 1})
     >>> C[4], len(M[4]), M[4]
     (('x', 'y'), 4, {(('x', 0), ('y', 1)): 1, (('x', 0), ('y', 0)): 2, (('x', 1), ('y', 1)): 2, (('x', 1), ('y', 0)): 1})
-    
+
     Triangle moments:
-    
+
     >>> C = coords_symbolic("xy", order=2)
     >>> M = moments_symbolic(C, verts=(0,1,2))
-    >>> C[1], len(M[1]), M[1] 
+    >>> C[1], len(M[1]), M[1]
     (('x',), 3, {(('x', 0),): 1, (('x', 1),): 1, (('x', 2),): 1})
-    >>> C[3], len(M[3]), M[3] 
+    >>> C[3], len(M[3]), M[3]
     (('x', 'x'), 6, {(('x', 1), ('x', 1)): 1, (('x', 0), ('x', 2)): 1, (('x', 2), ('x', 2)): 1, (('x', 0), ('x', 0)): 1, (('x', 0), ('x', 1)): 1, (('x', 1), ('x', 2)): 1})
 
-    
+
     """
     M = []
     for c in C:
         P = permutations(c)
         V = combinations_with_replacement(verts, len(c))
         X = product(P, V)
-        X = map(lambda x: tuple(sorted(zip(*x))), X)
+        X = [tuple(sorted(zip(*x))) for x in X]
         D = {}
-        for x in X: 
+        for x in X:
             if x in D: D[x] += 1
             else: D[x] = 1
-        gcd = reduce(fractions.gcd, D.values())
+        gcd = reduce(fractions.gcd, list(D.values()))
         for k in D: D[k] /= gcd
         M.append(D)
     return M
@@ -77,9 +78,9 @@ def moments_eval(M, coord):
     X = [np.zeros(coord.shape[0]) for i in range(len(M))]
     for i, m in enumerate(M):
         S = sum(m.values())
-        for k in m: 
+        for k in m:
             x = np.ones(coord.shape[0])
-            if k: 
+            if k:
                 for d, v in k:
                     x *= coord[:, v, d]
             X[i] += m[k] * x / S
@@ -90,12 +91,12 @@ def measure_eval(coord):
     Evaluate the area.
     coord[simplices,vertices,dimensions]
     """
-    def cross(u, v): 
+    def cross(u, v):
         return u[:, 0] * v[:, 1] - u[:, 1] * v[:, 0]
     A = np.zeros(coord.shape[0])
     n = coord.shape[1]
     for i in range(n):
-        A += 0.5 * cross(coord[:, i, :], coord[:, (i + 1) % n, :])       
+        A += 0.5 * cross(coord[:, i, :], coord[:, (i + 1) % n, :])
     return A
 
 def coord_eval(C, coord):
@@ -109,13 +110,13 @@ def coord_eval(C, coord):
     return R
 
 class Product(object):
-    
+
     def __init__(self, C):
         index = {}
         for i, c in enumerate(C):
             index[c] = i
         coeff = []
-        for l, r in product(C, C): 
+        for l, r in product(C, C):
             p = tuple(sorted(l + r))
             if p in index:
                 coeff.append((index[p], index[l], index[r]))
@@ -124,26 +125,27 @@ class Product(object):
         for p, l, r in coeff:
             cauchi[p].append((l, r))
         self.coeff = cauchi
-    
+
     def __call__(self, A, B):
         """
-        Product between 
+        Product between
         (A0 + A1 x + A2 x x) (B0 + B1 x + B2 x x)
         """
-        def prod((l, r)):
+        def prod(tup):
+            l, r = tup
             return A[l] * B[r]
         P = []
         for c in self.coeff:
-            P.append(reduce(operator.add, map(prod, c)))
+            P.append(reduce(operator.add, list(map(prod, c))))
         return P
-    
+
 class Derivative(object):
-    
+
     def __init__(self, C, x):
         index = {}
         for i, c in enumerate(C):
             index[c] = i
-            
+
         self.derivative = []
         for c in C:
             if x not in c:
@@ -155,8 +157,8 @@ class Derivative(object):
             self.derivative += [(i, j, k)]
 
     def __call__(self, A):
-        
-        D = map(lambda x: 0 * x, A)
+
+        D = [0 * x for x in A]
         for (i, j, k) in self.derivative:
             D[i] = k * A[j]
         return D

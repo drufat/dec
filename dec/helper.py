@@ -133,7 +133,7 @@ def apply_map(faces, identify):
     faces = np.asanyarray(faces)
     data = faces.ravel()
     mp = np.arange(0,max(data)+1)
-    mp[identify.keys()] = identify.values()
+    mp[list(identify.keys())] = list(identify.values())
     data = mp[data]
     return data.reshape(faces.shape)
 
@@ -252,7 +252,7 @@ def integrate_boole2(x1, x5, f):
 
 def flat(f):
     if isinstance(f, tuple):
-        return np.concatenate(map(lambda x: x.ravel(), f))
+        return np.concatenate([x.ravel() for x in f])
     else:
         return f.ravel()
 
