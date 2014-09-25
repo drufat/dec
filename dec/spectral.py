@@ -8,6 +8,7 @@ from numpy import *
 from numpy.testing import assert_almost_equal
 import itertools
 import operator
+from functools import reduce
 try:
     from scipy.linalg.special_matrices import toeplitz
 except ImportError:
@@ -329,11 +330,11 @@ def lagrange_polynomials(x):
         \psi_{n}^{0}(x)=\prod_{m=0,m\neq n}^{N-1}\frac{x-x_{m}}{x_{n}-x_{m}}
 
     >>> L = lagrange_polynomials([0, 1, 2])
-    >>> map(lambda l: l(0), L)
+    >>> [l(0) for l in L]
     [1.0, 0.0, -0.0]
-    >>> map(lambda l: l(1), L)
+    >>> [l(1) for l in L]
     [-0.0, 1.0, 0.0]
-    >>> map(lambda l: l(2), L)
+    >>> [l(2) for l in L]
     [0.0, -0.0, 1.0]
 
     """
@@ -652,10 +653,10 @@ def operators(n):
     def H(tup): (k, t) = tup; return ( name('H', k, t), (k, t), (n-k, not t) )
     # Add more operators here - Wedge, Contraction/Flat ?
     forms = tuple(itertools.product(range(n+1), (True, False)))
-    return dict(P=map(P, forms),
-                R=map(R, forms),
-                D=map(D, filter(lambda (k,_): k<n, forms)),
-                H=map(H, forms))
+    return dict(P=[P(f) for f in forms],
+                R=[R(f) for f in forms],
+                D=[D(f) for f in forms if f[0]<n],
+                H=[H(f) for f in forms])
 
 Grid_1D_Interface = """
         pnts,

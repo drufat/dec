@@ -3,7 +3,7 @@ from collections import namedtuple
 from scipy.sparse import csr_matrix
 import scipy.integrate
 
-def approx(a, b):    
+def approx(a, b):
     c = np.round_(a, 10) == np.round_(b, 10)
     if type(c)==np.ndarray:
         return c.all()
@@ -11,12 +11,16 @@ def approx(a, b):
 
 def to_matrix(f, N):
     """
-    >>> to_matrix(lambda x: x, 2)
-    array([[ 1.,  0.],
-           [ 0.,  1.]])
-    >>> to_matrix(lambda x: np.roll(x,+1), 2)
-    array([[ 0.,  1.],
-           [ 1.,  0.]])
+    >>> np.array_equal(
+    ... to_matrix(lambda x: x, 2),
+    ... [[ 1.,  0.],
+    ...  [ 0.,  1.]])
+    True
+    >>> np.array_equal(
+    ... to_matrix(lambda x: np.roll(x,+1), 2),
+    ... [[ 0.,  1.],
+    ...  [ 1.,  0.]])
+    True
     """
     M = np.vstack(f(b) for b in np.eye(N)).T
     if approx(np.real(M), M).all():
@@ -25,9 +29,11 @@ def to_matrix(f, N):
 
 def to_matrix_by_index(f, N):
     """
-    >>> to_matrix_by_index(lambda i, j: 10*i + j, 2)
-    array([[  0.,   1.],
-           [ 10.,  11.]])
+    >>> np.array_equal(
+    ... to_matrix_by_index(lambda i, j: 10*i + j, 2),
+    ... [[  0.,   1.],
+    ...  [ 10.,  11.]])
+    True
     """
     M = np.zeros((N, N))
     for i in range(N):
@@ -37,10 +43,12 @@ def to_matrix_by_index(f, N):
 
 def sparse_diag(x):
     """
-    >>> sparse_diag([1,2,3]).todense()
-    matrix([[1, 0, 0],
-            [0, 2, 0],
-            [0, 0, 3]])
+    >>> np.array_equal(
+    ... sparse_diag([1,2,3]).todense(),
+    ... np.matrix([[1, 0, 0],
+    ...            [0, 2, 0],
+    ...            [0, 0, 3]]))
+    True
     """
     x = np.asanyarray(x)
     N = len(x)
@@ -49,9 +57,11 @@ def sparse_diag(x):
 
 def sparse_matrix(ijk, N, M):
     """
-    >>> sparse_matrix([[0,1,1], [1,0,2]], 2, 2).todense()
-    matrix([[0, 1],
-            [2, 0]])
+    >>> np.array_equal(
+    ... sparse_matrix([[0,1,1], [1,0,2]], 2, 2).todense(),
+    ... np.matrix([[0, 1],
+    ...            [2, 0]]))
+    True
     """
     ijk = np.asanyarray(ijk)
     ij = ijk[:,:2].T
@@ -66,8 +76,8 @@ def nametuple(name, fields, dictionary):
     """
     >>> nametuple('Point', 'x,y', dict(x=1,y=2,z=3))
     Point(x=1, y=2)
-    """    
-    d = {x:dictionary[x] for x in fields.split(',')}    
+    """
+    d = {x:dictionary[x] for x in fields.split(',')}
     return namedtuple(name, fields)(**d)
 
 def NamedTuple(attribs):
@@ -118,13 +128,13 @@ def this_function_name():
 def make_namedtuple(metaclass, dictionary):
     """
     Create a named tuple from a dictionary which is a superset of the fields
-    
+
     >>> Point = namedtuple('Point', 'x,y')
     >>> make_namedtuple(Point, {'x':1, 'y':2, 'z':3})
     Point(x=1, y=2)
     """
     return metaclass._make((dictionary[f] for f in metaclass._fields))
-    
+
 def apply_map(faces, identify):
     """
     >>> apply_map([0,1,2], {0:3, 1:4, 2:5})
@@ -158,7 +168,7 @@ def bndry_with_zeros(a, axis=-1):
     return np.apply_along_axis(f1d, axis, a)
 
 def interweave(a, b, axis=-1):
-    """ Interweave two arrays. 
+    """ Interweave two arrays.
     >>> interweave([0, 1, 2], [3, 4, 5])
     array([0, 3, 1, 4, 2, 5])
     >>> interweave([[0,1],[2,3]],[[4,5],[6,7]])
@@ -203,12 +213,12 @@ def integrate_simpson(a, b, f):
     """
     Simpson's 3-point rule O(h**4)
     http://en.wikipedia.org/wiki/Simpson%27s_rule
-    
+
     >>> integrate_simpson(0, 1, lambda x: x)
     0.5
     >>> integrate_simpson(-1, -0.5, lambda x: x)
     -0.375
-    """    
+    """
     I = ((b-a)/6.0)*(f(a) + 4*f((a+b)/2.0) + f(b))
     return I
 
@@ -216,7 +226,7 @@ def integrate_boole(x1, x5, f):
     """
     Boole's 5-point rule O(h**7)
     http://en.wikipedia.org/wiki/Boole%27s_rule
-    
+
     >>> integrate_boole(0, 1, lambda x: x)
     0.5
     >>> integrate_boole(0, 1, lambda x: x**4)
@@ -227,8 +237,8 @@ def integrate_boole(x1, x5, f):
     x3 = x1 + 2*h
     x4 = x1 + 3*h
     #assert(x5 == x1 + 4*h)
-    I = (2*h/45.0)*(7*f(x1) + 32*f(x2) + 12*f(x3) + 32*f(x4) + 7*f(x5)) 
-    return I 
+    I = (2*h/45.0)*(7*f(x1) + 32*f(x2) + 12*f(x3) + 32*f(x4) + 7*f(x5))
+    return I
 
 def integrate_boole1(x, f):
     """
@@ -237,7 +247,7 @@ def integrate_boole1(x, f):
     """
     x = np.asanyarray(x)
     return integrate_boole(x[:-1], x[1:], f)
-    
+
 def integrate_boole2(x1, x5, f):
     """
     Boole's 5-point rule O(h**7) in 2D
@@ -247,8 +257,8 @@ def integrate_boole2(x1, x5, f):
     x3 = x1 + 2*h
     x4 = x1 + 3*h
     I = (2*np.sqrt(h[0]**2 + h[1]**2)/45.0)*\
-        (7*f(*x1) + 32*f(*x2) + 12*f(*x3) + 32*f(*x4) + 7*f(*x5)) 
-    return I 
+        (7*f(*x1) + 32*f(*x2) + 12*f(*x3) + 32*f(*x4) + 7*f(*x5))
+    return I
 
 def flat(f):
     if isinstance(f, tuple):
@@ -263,30 +273,30 @@ def integrate_1form(edge, f):
     array(1.0)
     >>> integrate_1form( ((0,0), (1,0)), lambda x, y: (0, 1) )[0]
     array(0.0)
-    """    
+    """
     def tmp(x0, y0, x1, y1):
         dx = x1 - x0
         dy = y1 - y0
         def _f(t):
             x = x0 + t*dx
-            y = y0 + t*dy   
+            y = y0 + t*dy
             fx, fy = f(x, y)
             return fx*dx + fy*dy
         return scipy.integrate.quad(_f, 0, 1)
 
-    ((x0, y0), (x1, y1)) = edge  
+    ((x0, y0), (x1, y1)) = edge
     return np.vectorize(tmp)(x0, y0, x1, y1)
 
 def _integrate_2form(face, f):
     g = lambda x: 0
     h = lambda x: 1-x
 
-    def tmp(x0, y0, x1, y1, x2, y2):    
+    def tmp(x0, y0, x1, y1, x2, y2):
         dx1 = x1 - x0
         dy1 = y1 - y0
         dx2 = x2 - x0
         dy2 = y2 - y0
-        _f = lambda u, v: f(x0 + u*dx1 + v*dx2, 
+        _f = lambda u, v: f(x0 + u*dx1 + v*dx2,
                             y0 + u*dy1 + v*dy2)*(dx1*dy2 - dy1*dx2)
         return scipy.integrate.dblquad(_f, 0, 1, g, h)
 
@@ -303,11 +313,11 @@ def integrate_2form(face, f):
     """
     integral = 0.0
     error = 0.0
-    
+
     a = face[0]
     for b, c in zip(face[1:-1], face[2:]):
         i, e = _integrate_2form((a,b,c), f)
         integral += i
         error += e
-    
+
     return integral, error

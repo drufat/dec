@@ -59,13 +59,14 @@ def test_d_equivalence():
     g = Grid_1D_Periodic(10)
     F = lambda x: exp(sin(13*x))
 
-    for ((d, dd), (D, DD)) in itertools.combinations(
-        (map(lambda M: (lambda f: M*f),  g.derivative_matrix()),
-         g.derivative()), 2):
-        f = g.P0(F)
-        eq(D(f), d(f))
-        f = g.P0d(F)
-        eq(DD(f), dd(f))
+    M = g.derivative_matrix()
+    d, dd = [(lambda f: M[0]*f), (lambda f: M[1]*f)]
+    D, DD = g.derivative()
+
+    f = g.P0(F)
+    eq(D(f), d(f))
+    f = g.P0d(F)
+    eq(DD(f), dd(f))
 
 def test_one_form():
 
