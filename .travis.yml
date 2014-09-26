@@ -9,7 +9,7 @@ os:
     - osx
 
 before_install:
-    - pip install -q --use-mirrors nose numpy scipy
+    - pip install nose numpy scipy
 
 install:
     - python setup.py install
