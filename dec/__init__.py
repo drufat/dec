@@ -3,7 +3,7 @@ Discrete Exterior Calculus Module
 ==================================
 """
 
-import os, pickle
+import os, json, numpy
 
 def get_data_dir():
     root = os.path.abspath(os.path.dirname(__file__))
@@ -11,16 +11,23 @@ def get_data_dir():
 
 def get_data(name):
     """
-    Load data samples provided by file `name` in dec/data 
+    Load data samples provided by file `name` in dec/data
     """
     filename = os.path.join(get_data_dir(), name)
-    with open(filename, 'r') as f: 
-        return pickle.load(f)
+    with open(filename, 'r') as f:
+        return json.load(f)
+
+class NumpyAwareJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 def store_data(name, obj):
     """
-    Store `obj` in a file `name` in dec/data
+    Store `obj` in a file `name` in dec/data.
+    Obj must be json serializable.
     """
     filename = os.path.join(get_data_dir(), name)
     with open(filename, 'w') as f:
-        pickle.dump(obj, f)
+        json.dump(obj, f, cls=NumpyAwareJSONEncoder)
