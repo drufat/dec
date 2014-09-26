@@ -9,7 +9,7 @@ os:
     - osx
 
 before_install:
-    - pip install numpy
+    - pip install numpy scipy matplotlib
 
 install:
     - pip install .

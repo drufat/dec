@@ -10,5 +10,5 @@ setup(name='dec',
     author_email='drufat@caltech.edu',
     license='GNU GPLv3',
     url='http://dzhelil.info/dec',
-    requires = ['numpy (>= 1.7.0)', 'scipy'],
+    requires = ['numpy (>= 1.7.0)'],
 )
