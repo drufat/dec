@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 repo=`mktemp -d`
-git clone drufat-github:drufat/dec.git ${repo}
+git clone git@github:drufat/dec.git ${repo}
 
 (
     cd ${repo}
