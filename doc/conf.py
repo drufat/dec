@@ -60,8 +60,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'dec'
-copyright = u'2012, Dzhelil Rufat'
+project = 'dec'
+copyright = '2012, Dzhelil Rufat'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -203,8 +203,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'dec.tex', u'Discrete Exterior Calculus Library Documentation',
-   u'Dzhelil Rufat', 'manual'),
+  ('index', 'dec.tex', 'Discrete Exterior Calculus Library Documentation',
+   'Dzhelil Rufat', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -233,8 +233,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dec', u'dec Documentation',
-     [u'Dzhelil Rufat'], 1)
+    ('index', 'dec', 'dec Documentation',
+     ['Dzhelil Rufat'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -247,8 +247,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'dec', u'dec Documentation',
-   u'Dzhelil Rufat', 'dec', 'One line description of project.',
+  ('index', 'dec', 'dec Documentation',
+   'Dzhelil Rufat', 'dec', 'One line description of project.',
    'Miscellaneous'),
 ]
 
