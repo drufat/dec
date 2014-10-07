@@ -324,7 +324,9 @@ def psid1(N, n, x):
 
 def lagrange_polynomials(x):
     r"""
-    Lagrange Polynomials for the set of points defined by :math:`x_m`
+    Lagrange Polynomials for the set of points defined by :math:`x_m`.
+    The Lagrange Polynomials are such that they are 1 at the point, and 0
+    everywhere else.
 
     .. math::
         \psi_{n}^{0}(x)=\prod_{m=0,m\neq n}^{N-1}\frac{x-x_{m}}{x_{n}-x_{m}}
