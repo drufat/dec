@@ -51,12 +51,14 @@
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>To install simply run:</p>
-<div class="highlight-python"><pre>easy_install dec</pre>
+<div class="highlight-python"><div class="highlight"><pre>pip install dec
+</pre></div>
 </div>
 <p>or build from source:</p>
-<div class="highlight-python"><pre>git clone https://github.com/drufat/dec.git
+<div class="highlight-python"><div class="highlight"><pre>git clone https://github.com/drufat/dec.git
 cd dec
-python setup.py install</pre>
+python setup.py install
+</pre></div>
 </div>
 </div>
 <div class="section" id="figure-3">
@@ -176,14 +178,8 @@ math:<cite>f^prime(-1)= e^{-1}</cite> and <span class="math">\(f^\prime(+1)= e\)
 exhibit spectral convergence (measured through the <span class="math">\(L^\infty\)</span> error
 <span class="math">\(\|f - \Delta^{-1}q \|_\infty\)</span>), with the conventional plateau when we
 reach the limit of accuracy of the representation of floating point numbers.</p>
-<p>(<a class="reference external" href="./plot/cheb/poisson1d_periodic.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_periodic.pdf">pdf</a>)</p>
-<div class="figure">
-<img alt="_images/poisson1d_periodic.png" src="_images/poisson1d_periodic.png" />
-</div>
-<p>(<a class="reference external" href="./plot/cheb/poisson1d_cheb.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.png">png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson1d_cheb.pdf">pdf</a>)</p>
-<div class="figure">
-<img alt="_images/poisson1d_cheb.png" src="_images/poisson1d_cheb.png" />
-</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_periodic.py">Source code</a>)</p>
+<p>(<a class="reference external" href="./plot/cheb/poisson1d_cheb.py">Source code</a>)</p>
 </div>
 <div class="section" id="figure-8">
 <h2>Figure 8<a class="headerlink" href="#figure-8" title="Permalink to this headline">¶</a></h2>
@@ -201,14 +197,6 @@ results exhibit spectral convergence (measured through the <span class="math">\(
 error <span class="math">\(\|\Delta f - q \|_\infty\)</span>), with the conventional plateau in
 accuracy for fine meshes.</p>
 <p>(<a class="reference external" href="./plot/cheb/poisson2d_periodic.py">Source code</a>)</p>
-<div class="figure">
-<img alt="_images/poisson2d_periodic_00.png" src="_images/poisson2d_periodic_00.png" />
-<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_00.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_00.pdf">pdf</a>)</p>
-</div>
-<div class="figure">
-<img alt="_images/poisson2d_periodic_01.png" src="_images/poisson2d_periodic_01.png" />
-<p class="caption">(<a class="reference external" href="./plot/cheb/poisson2d_periodic_01.png">png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson2d_periodic_01.pdf">pdf</a>)</p>
-</div>
 <p>(<a class="reference external" href="./plot/cheb/poisson2d_cheb.py">Source code</a>)</p>
 <div class="figure">
 <img alt="_images/poisson2d_cheb_00.png" src="_images/poisson2d_cheb_00.png" />
@@ -228,10 +216,7 @@ field is tangent to the boundary) and
 <span class="math">\(\star\mathbf{d}\star f |_{\mathcal{B}}\!=\!1\)</span> (the curl at the boundary
 is equal to <span class="math">\(1\)</span>). The domain is <span class="math">\([-1,1]^2\)</span>, discretized by a
 <span class="math">\(10\!\times\!10\)</span> Chebyshev grid.</p>
-<p>(<a class="reference external" href="./plot/cheb/poisson_2d_example.py">Source code</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.png">png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/poisson_2d_example.pdf">pdf</a>)</p>
-<div class="figure">
-<img alt="_images/poisson_2d_example.png" src="_images/poisson_2d_example.png" />
-</div>
+<p>(<a class="reference external" href="./plot/cheb/poisson_2d_example.py">Source code</a>)</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -283,9 +268,7 @@ is equal to <span class="math">\(1\)</span>). The domain is <span class="math">\
 <li><a class="reference internal" href="#figure-6">Figure 6</a></li>
 <li><a class="reference internal" href="#figure-7">Figure 7</a></li>
 <li><a class="reference internal" href="#figure-8">Figure 8</a></li>
-<li><a class="reference internal" href="#figure-9">Figure 9</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#figure-9">Figure 9</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
@@ -330,7 +313,7 @@ is equal to <span class="math">\(1\)</span>). The domain is <span class="math">\
     </div>
     <div class="footer">
         &copy; Copyright 2012, Dzhelil Rufat.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

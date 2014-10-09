@@ -56,7 +56,7 @@
 <dt id="dec.spectral.H">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">H</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.H" title="Permalink to this definition">¶</a></dt>
 <dd><div class="math">
-\[\mathbf{H}^0 = \widetilde{\mathbf{H}}^0 = 
+\[\mathbf{H}^0 = \widetilde{\mathbf{H}}^0 =
 \mathcal{F}^{-1} \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}} \mathcal{F}\]</div>
 </dd></dl>
 
@@ -64,7 +64,7 @@
 <dt id="dec.spectral.Hinv">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">Hinv</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#Hinv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.Hinv" title="Permalink to this definition">¶</a></dt>
 <dd><div class="math">
-\[\mathbf{H}^1 = \widetilde{\mathbf{H}}^1 = 
+\[\mathbf{H}^1 = \widetilde{\mathbf{H}}^1 =
 \mathcal{F}^{-1}{\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}\mathcal{F}\]</div>
 </dd></dl>
 
@@ -72,7 +72,7 @@
 <dl class="function">
 <dt id="dec.spectral.I_diag">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">I_diag</tt><big>(</big><em>N</em>, <em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#I_diag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.I_diag" title="Permalink to this definition">¶</a></dt>
-<dd><p>A diagonal matrix that corresponds to integration in Fourier space.     
+<dd><p>A diagonal matrix that corresponds to integration in Fourier space.
 Corresponds to <span class="math">\(f(x) \mapsto \int_{x+a}^{x+b} f(\xi) d\xi\)</span></p>
 <div class="math">
 \[\mathbf{I}_{\phantom{a,b}nn}^{a,b}
@@ -101,7 +101,7 @@ Corresponds to <span class="math">\(f(x) \mapsto f(x-h)\)</span></p>
     \mathbf{A}
     \mathbf{M}_{0}^{\dagger}
     \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-    \mathbf{M}_{0}^{+}        \]</div>
+    \mathbf{M}_{0}^{+}\]</div>
 </dd></dl>
 
 <dl class="function">
@@ -157,7 +157,7 @@ Corresponds to <span class="math">\(f(x) \mapsto f(x-h)\)</span></p>
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">H0d_cheb</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#H0d_cheb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.H0d_cheb" title="Permalink to this definition">¶</a></dt>
 <dd><div class="math">
 \[\widetilde{\mathbf{H}}^0 = {\mathbf{M}_1}^{\dagger}
-        \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}} 
+        \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}
         \widetilde{\mathbf{\Omega}} \mathbf{M}_1^+\]</div>
 </dd></dl>
 
@@ -165,9 +165,9 @@ Corresponds to <span class="math">\(f(x) \mapsto f(x-h)\)</span></p>
 <dt id="dec.spectral.H1_cheb">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">H1_cheb</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#H1_cheb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.H1_cheb" title="Permalink to this definition">¶</a></dt>
 <dd><div class="math">
-\[\mathbf{H}^1 = {\mathbf{M}_1}^{\dagger} 
-        \widetilde{\mathbf{\Omega}}^{-1} 
-        {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1} 
+\[\mathbf{H}^1 = {\mathbf{M}_1}^{\dagger}
+        \widetilde{\mathbf{\Omega}}^{-1}
+        {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1}
         \mathbf{M}_1^-\]</div>
 </dd></dl>
 
@@ -190,7 +190,7 @@ Corresponds to <span class="math">\(f(x) \mapsto f(x-h)\)</span></p>
 <dt id="dec.spectral.Omega_d">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">Omega_d</tt><big>(</big><em>N</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#Omega_d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.Omega_d" title="Permalink to this definition">¶</a></dt>
 <dd><div class="math">
-\[\mathbf{\widetilde{\Omega}}_{nn} 
+\[\mathbf{\widetilde{\Omega}}_{nn}
     =\sin\left(\left(n+\frac{1}{2}\right)h\right)\]</div>
 <p>If <span class="math">\(\widetilde{\omega}\)</span> is the length of each dual edge, then</p>
 <div class="math">
@@ -226,7 +226,7 @@ x_{N-1}
 \vdots\\
 0
 \end{array}\right\} n
-\end{bmatrix} \end{split}\]</div>
+\end{bmatrix}\end{split}\]</div>
 </dd></dl>
 
 <p>(<a class="reference external" href="./plot/cheb/resample.py">Source code</a>, <a class="reference external" href="./plot/cheb/resample.png">png</a>, <a class="reference external" href="./plot/cheb/resample.hires.png">hires.png</a>, <a class="reference external" href="./plot/cheb/resample.pdf">pdf</a>)</p>
@@ -298,7 +298,7 @@ x_{N-1}+x_{-1}
 <span class="go">       [ 0.,  1.,  0.],</span>
 <span class="go">       [ 0.,  0.,  1.],</span>
 <span class="go">       [ 0.,  1.,  0.]])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">to_matrix</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mirror0</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_matrix</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">mirror0</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
 <span class="go">array([[ 1.,  0.,  0.],</span>
 <span class="go">       [ 0.,  1.,  0.],</span>
 <span class="go">       [ 0.,  0.,  1.],</span>
@@ -445,7 +445,7 @@ x_{n}
   &amp; 1\\
   &amp; 1\\
   &amp; 1
- \end{pmatrix},\dots \end{split}\]</div>
+ \end{pmatrix},\dots\end{split}\]</div>
 </dd></dl>
 
 </div>
@@ -508,7 +508,7 @@ x_{n}
     </div>
     <div class="footer">
         &copy; Copyright 2012, Dzhelil Rufat.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

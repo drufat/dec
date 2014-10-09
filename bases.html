@@ -100,10 +100,10 @@
 <dd><div class="math">
 \[\begin{split}\beta_{N}(x)=
 \begin{cases}
-    \frac{1}{2\pi} -\frac{1}{4}\cos\frac{Nx}{2} + 
+    \frac{1}{2\pi} -\frac{1}{4}\cos\frac{Nx}{2} +
         \frac{1}{N}\sum\limits_{n=1}^{N/2}
             \frac{n\cos nx}{\sin\frac{n\pi}{N}} &amp; \text{if N even,}\\
-    \frac{1}{2\pi} + 
+    \frac{1}{2\pi} +
         \frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
             \frac{n\cos nx}{\sin\frac{n\pi}{N}} &amp; \text{if N odd.}
 \end{cases}\end{split}\]</div>
@@ -136,12 +136,12 @@
 <dd><div class="math">
 \[\begin{split}\gamma_{N, n} = \int_0^{\frac{h}{2}=\frac{\pi}{N}} \beta_{N,n}(x) \, dx =
 \begin{cases}
-\frac{1}{2N} - 
+\frac{1}{2N} -
 \frac{(-1)^k}{2N} +
 \frac{1}{N}\sum\limits_{n=1}^{N/2}
 \frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}
 {\sin\frac{n\pi}{N}} &amp; \text{if N even,}\\
-\frac{1}{2N} + 
+\frac{1}{2N} +
 \frac{1}{N}\sum\limits_{n=1}^{(N-1)/2}
 \frac{\sin(2 k n \pi/N) - \sin((2 k-1) n \pi/N)}{\sin\frac{n\pi}{N}} &amp; \text{if N odd.}
 \end{cases}\end{split}\]</div>
@@ -206,7 +206,7 @@
 \begin{cases}
     \alpha_{2N-2,n}(x), &amp; n\in\{0,N-1\}\\
     \alpha_{2N-2,n}(x)+\alpha_{2N-2,2N-2-n}(x), &amp; n\in\{1,\dots,N-2\}
-\end{cases} \end{split}\]</div>
+\end{cases}\end{split}\]</div>
 </dd></dl>
 
 <dl class="function">
@@ -225,7 +225,7 @@
 <dd><div class="math">
 \[\widetilde{\kappa}_{N,n}^{0}(x)=
 \alpha_{2N-2,\, n+\frac{1}{2}}(x)+
-\alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}    \]</div>
+\alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}\]</div>
 </dd></dl>
 
 <dl class="function">
@@ -302,15 +302,17 @@
 <dl class="function">
 <dt id="dec.spectral.lagrange_polynomials">
 <tt class="descclassname">dec.spectral.</tt><tt class="descname">lagrange_polynomials</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/dec/spectral.html#lagrange_polynomials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.spectral.lagrange_polynomials" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lagrange Polynomials for the set of points defined by <span class="math">\(x_m\)</span></p>
+<dd><p>Lagrange Polynomials for the set of points defined by <span class="math">\(x_m\)</span>.
+The Lagrange Polynomials are such that they are 1 at the point, and 0
+everywhere else.</p>
 <div class="math">
 \[\psi_{n}^{0}(x)=\prod_{m=0,m\neq n}^{N-1}\frac{x-x_{m}}{x_{n}-x_{m}}\]</div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">L</span> <span class="o">=</span> <span class="n">lagrange_polynomials</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">l</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">L</span><span class="p">]</span>
 <span class="go">[1.0, 0.0, -0.0]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">l</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">L</span><span class="p">]</span>
 <span class="go">[-0.0, 1.0, 0.0]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">L</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">l</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">L</span><span class="p">]</span>
 <span class="go">[0.0, -0.0, 1.0]</span>
 </pre></div>
 </div>
@@ -403,7 +405,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2012, Dzhelil Rufat.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

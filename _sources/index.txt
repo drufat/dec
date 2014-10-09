@@ -7,7 +7,7 @@ Installation
 
 To install simply run:: 
 
-   easy_install dec 
+   pip install dec 
    
 or build from source:: 
 
@@ -47,7 +47,6 @@ Chebyshev dual basis functions for a grid with :math:`N=7`.
 .. plot:: plot/cheb/plot_basis_fn_chebyshev_dual.py
 
 
-
 Figure 7
 =========
 
@@ -84,7 +83,6 @@ accuracy for fine meshes.
 
 .. plot:: plot/cheb/poisson2d_periodic.py 
 .. plot:: plot/cheb/poisson2d_cheb.py
-
 
 Figure 9  
 =========
