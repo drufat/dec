@@ -631,6 +631,7 @@ def DEC(grid):
 def operators(n):
     """
     Return all the operators for dimension n together with their domains and codomains.
+
     >>> import pprint
     >>> pprint.PrettyPrinter().pprint(operators(1))
     {'D': [('D0', (0, True), (1, True)), ('D0d', (0, False), (1, False))],
@@ -1473,7 +1474,7 @@ def H1d_cheb(f):
     return midpoints(f) + endpoints(f)
 
 def laplacian(g):
-    r"""
+    """
         Laplacian Operator
     """
     D, DD = g.derivative()

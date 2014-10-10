@@ -15,11 +15,11 @@ before_install:
     - sudo ln -s /run/shm /dev/shm
 
 install:
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy matplotlib pytest
     - python setup.py install    
 
 script:
-    - nosetests --with-doctest
+    - py.test --doctest-modules dec
 
 notifications:
     email: false

@@ -1,6 +1,6 @@
-from numpy.testing import *
 from dec.spectral import *
 import itertools
+from numpy.testing import assert_array_almost_equal
 
 eq = assert_array_almost_equal
 
