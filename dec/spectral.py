@@ -585,6 +585,12 @@ class Form(ndarray):
         self.primal = getattr(obj, 'primal', None)
 
 def DEC(grid):
+    '''
+    P, R, D, H = DEC(g)
+    this function returns the usual dec operators which then select the appropriate
+    specialization of the operator for the given form based on its order and whether
+    it is primal or dual
+    '''
 
     ops_1D = operators(1)
 

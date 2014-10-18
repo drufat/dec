@@ -35,7 +35,7 @@ def run():
         L[1].append( err )
 
     return size, L
-dataname = "poisson1d_periodic.json"
+dataname = "converge/poisson1d_periodic.json"
 #dec.store_data(dataname, run())
 
 import matplotlib

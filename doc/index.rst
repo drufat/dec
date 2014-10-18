@@ -12,7 +12,6 @@ Contents
    bases
    hodge-star
    poisson
-   symbolic
 
 
 Operators
