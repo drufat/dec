@@ -41,7 +41,7 @@ def run():
     #    print N, err0, err1, err2, err3
     return size, L
 
-dataname = "poisson2d_periodic.json"
+dataname = "converge/poisson2d_periodic.json"
 #dec.store_data(dataname, run())
 
 import matplotlib

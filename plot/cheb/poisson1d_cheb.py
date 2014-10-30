@@ -22,7 +22,7 @@ def run():
         laplace, laplace_d = laplacian(g)
 
         # Dirichlet boundary conditions
-        # Solve: g.H1(g.D(g.H1d(g.DD(f) + bc))) == q
+        # Solve: H1(D(H1d(DD(f) + bc))) == q
 
         bc = zeros(N); bc[0] = -f(-1); bc[-1] = f(+1)
 
@@ -32,7 +32,7 @@ def run():
         err = linalg.norm(g.P0d(f) - z, inf)
         L[0].append( err )
 
-        # Neumann boundary condition
+        # Neumann boundary conditions
         # Solve: H1d(DD(  H1(D(x))) + bc) == q
 
         bc = zeros(N); bc[0] = -f_prime(-1); bc[-1] = f_prime(+1)
@@ -52,7 +52,7 @@ def run():
 
     return size, L
 
-dataname = "poisson1d_cheb.json"
+dataname = "converge/poisson1d_cheb.json"
 #dec.store_data(dataname, run())
 
 import matplotlib

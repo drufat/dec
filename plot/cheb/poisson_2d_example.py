@@ -43,7 +43,7 @@ def run():
     U, V = vec(X, Y)
     return g.verts, X, Y, U, V
 
-dataname = "poisson_2d_example.json"
+dataname = "converge/poisson_2d_example.json"
 #dec.store_data(dataname, run())
 
 import matplotlib
