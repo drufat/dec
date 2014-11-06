@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
-repo=`mktemp -d`
-git clone git@github:drufat/dec.git ${repo}
+repo=`mktemp -d /tmp/doc.XXXXXXXXX`
 
+git clone git@github:drufat/dec.git ${repo}
 (
     cd ${repo}
     git checkout gh-pages
     git rm -rf .
 )
 
-#echo "My GitHub Page" > ${repo}/index.html
 sphinx-build -b html doc ${repo}
-
 (
     cd ${repo}
     touch .nojekyll

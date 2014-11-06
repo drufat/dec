@@ -53,7 +53,7 @@ def run():
     return size, L
 
 dataname = "converge/poisson1d_cheb.json"
-dec.store_data(dataname, run())
+#dec.store_data(dataname, run())
 
 import matplotlib
 matplotlib.rcParams['legend.fancybox'] = True

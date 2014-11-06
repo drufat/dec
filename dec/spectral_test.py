@@ -1,6 +1,7 @@
 from dec.spectral import *
 import itertools
 from numpy.testing import assert_array_almost_equal
+import dec.forms
 
 eq = assert_array_almost_equal
 
@@ -31,7 +32,7 @@ def test_transforms():
 def test_type_system():
     g = Grid_1D_Periodic(11)
 
-    P, R, D, H = DEC(g)
+    P, R, D, H = dec.forms.DEC(g)
     f = lambda x: sin(sin(x))
 
     eq( P(f, 0, True ), g.P0(f)  )
