@@ -92,6 +92,13 @@
     \cot\frac{x}{2}\,\sin\frac{Nx}{2} &amp; \text{if N even,}\\
     \csc\frac{x}{2}\,\sin\frac{Nx}{2} &amp; \text{if N odd.}
 \end{cases}\end{split}\]</div>
+<div class="highlight-python"><div class="highlight"><pre>&gt;&gt;&gt; def α0(N, i): return round(alpha0(N, i*2*pi/N), 15)
+&gt;&gt;&gt; (α0(5, 0), α0(5, 1), α0(5, 2)) == (1.0, 0.0, 0.0) 
+True
+&gt;&gt;&gt; (α0(6, 0), α0(6, 1), α0(6, 2)) == (1.0, 0.0, 0.0)
+True
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">

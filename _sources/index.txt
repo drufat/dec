@@ -17,7 +17,7 @@ Contents
 Operators
 ==========
 
-.. autofunction:: dec.spectral.operators
+.. autofunction:: dec.forms.operators
 
 Grids
 ======
