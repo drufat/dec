@@ -48,7 +48,7 @@
             
   <div class="section" id="sample-advection">
 <h1>Sample Advection<a class="headerlink" href="#sample-advection" title="Permalink to this headline">¶</a></h1>
-<p>We will obtain explicit analytical solutions of the Navier-Stokes equation in the two dimensional periodic domain <span class="math">\([-\pi, \pi] \times [-\pi, \pi]\)</span>.</p>
+<p>We will obtain explicit analytical solutions for the Navier-Stokes equation in the two dimensional periodic domain <span class="math">\([-\pi, \pi] \times [-\pi, \pi]\)</span>.</p>
 <div class="math">
 \[\begin{split}\dot{\mathbf{v}}+\left(\mathbf{v}\cdot\nabla\right)\mathbf{v}       &amp; = &amp;   -\nabla p \\
 \nabla\cdot\mathbf{v}       &amp; = &amp;   0\end{split}\]</div>
@@ -72,6 +72,8 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <p>Let us compute the vorticity <span class="math">\(\omega\)</span>, pressure <span class="math">\(p\)</span>, and the time derivative of the velocity
 <span class="math">\(\mathbf{\dot{v}}\)</span> for a prescribed initial velocity field <span class="math">\(\mathbf{v}(x,y)\)</span>.</p>
+<div class="section" id="example-1">
+<h3>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h3>
 <div class="math">
 \[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- 2 \sin{\left (y \right )} \cos^{2}{\left (\frac{x}{2} \right )}, &amp; 2 \sin{\left (x \right )} \cos^{2}{\left (\frac{y}{2} \right )}\end{pmatrix}  \\
 \omega (x,y) &amp; = &amp; 2 \cos{\left (x \right )} \cos{\left (y \right )} + \cos{\left (x \right )} + \cos{\left (y \right )} \\\end{split}\]</div>
@@ -79,14 +81,32 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <div class="figure">
 <img alt="_images/sample_advection-1.png" src="_images/sample_advection-1.png" />
 </div>
+</div>
+<div class="section" id="example-2">
+<h3>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h3>
+<div class="math">
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- \sin{\left (y \right )}, &amp; \sin{\left (x \right )}\end{pmatrix} \\
+\omega (x,y) &amp; = &amp; \cos{\left (x \right )} + \cos{\left (y \right )}\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-2.py">Source code</a>, <a class="reference external" href=".//sample_advection-2.png">png</a>, <a class="reference external" href=".//sample_advection-2.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-2.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-2.png" src="_images/sample_advection-2.png" />
 </div>
+</div>
+<div class="section" id="example-3">
+<h3>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h3>
+<div class="math">
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- \sin{\left (2 y \right )}, &amp; \sin{\left (x \right )}\end{pmatrix} \\
+\omega (x,y) &amp; = &amp; \cos{\left (x \right )} + 2 \cos{\left (2 y \right )}\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-3.py">Source code</a>, <a class="reference external" href=".//sample_advection-3.png">png</a>, <a class="reference external" href=".//sample_advection-3.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-3.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-3.png" src="_images/sample_advection-3.png" />
 </div>
+</div>
+<div class="section" id="example-4">
+<h3>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h3>
+<div class="math">
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}1, &amp; 0\end{pmatrix} \\
+ \omega (x,y) &amp; = &amp; 0\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-4.py">Source code</a>, <a class="reference external" href=".//sample_advection-4.png">png</a>, <a class="reference external" href=".//sample_advection-4.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-4.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-4.png" src="_images/sample_advection-4.png" />
@@ -111,6 +131,7 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 
 </div>
 </div>
+</div>
 
 
           </div>
@@ -121,7 +142,13 @@ domain this can be done by applying the Fourier transform on both sides.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Sample Advection</a><ul>
-<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#example-1">Example 1</a></li>
+<li><a class="reference internal" href="#example-2">Example 2</a></li>
+<li><a class="reference internal" href="#example-3">Example 3</a></li>
+<li><a class="reference internal" href="#example-4">Example 4</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

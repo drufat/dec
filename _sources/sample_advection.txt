@@ -1,7 +1,7 @@
 Sample Advection
 ================
 
-We will obtain explicit analytical solutions of the Navier-Stokes equation in the two dimensional periodic domain :math:`[-\pi, \pi] \times [-\pi, \pi]`.
+We will obtain explicit analytical solutions for the Navier-Stokes equation in the two dimensional periodic domain :math:`[-\pi, \pi] \times [-\pi, \pi]`.
 
 .. math::
 
@@ -43,6 +43,9 @@ Examples
 Let us compute the vorticity :math:`\omega`, pressure :math:`p`, and the time derivative of the velocity
 :math:`\mathbf{\dot{v}}` for a prescribed initial velocity field :math:`\mathbf{v}(x,y)`.
 
+Example 1
+..........
+
 .. math::
 
     \mathbf{v}(x, y) & = & \begin{pmatrix}- 2 \sin{\left (y \right )} \cos^{2}{\left (\frac{x}{2} \right )}, & 2 \sin{\left (x \right )} \cos^{2}{\left (\frac{y}{2} \right )}\end{pmatrix}  \\
@@ -55,6 +58,14 @@ Let us compute the vorticity :math:`\omega`, pressure :math:`p`, and the time de
     plot(plt, V1, p1)
     plt.show()
 
+Example 2
+..........
+
+.. math::
+
+    \mathbf{v}(x, y) & = & \begin{pmatrix}- \sin{\left (y \right )}, & \sin{\left (x \right )}\end{pmatrix} \\
+    \omega (x,y) & = & \cos{\left (x \right )} + \cos{\left (y \right )}
+
 .. plot::
 
     from dec.symbolic import *
@@ -62,12 +73,27 @@ Let us compute the vorticity :math:`\omega`, pressure :math:`p`, and the time de
     plot(plt, V2, p2)
     plt.show()
 
+Example 3
+..........
+
+.. math::
+
+    \mathbf{v}(x, y) & = & \begin{pmatrix}- \sin{\left (2 y \right )}, & \sin{\left (x \right )}\end{pmatrix} \\
+    \omega (x,y) & = & \cos{\left (x \right )} + 2 \cos{\left (2 y \right )}
+
 .. plot::
 
     from dec.symbolic import *
     import matplotlib.pyplot as plt
     plot(plt, V3, p3)
     plt.show()
+
+Example 4
+..........
+
+.. math::
+    \mathbf{v}(x, y) & = & \begin{pmatrix}1, & 0\end{pmatrix} \\
+     \omega (x,y) & = & 0
 
 .. plot::
 
