@@ -12,6 +12,7 @@ Contents
    bases
    hodge-star
    poisson
+   sample_advection
 
 
 Operators
