@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sample Advection &mdash; dec  documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="dec  documentation" href="index.html" />
+    <link rel="prev" title="Poisson Operator" href="poisson.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="poisson.html" title="Poisson Operator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">dec  documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sample-advection">
+<h1>Sample Advection<a class="headerlink" href="#sample-advection" title="Permalink to this headline">¶</a></h1>
+<p>We will obtain explicit analytical solutions of the Navier-Stokes equation in the two dimensional periodic domain <span class="math">\([-\pi, \pi] \times [-\pi, \pi]\)</span>.</p>
+<div class="math">
+\[\begin{split}\dot{\mathbf{v}}+\left(\mathbf{v}\cdot\nabla\right)\mathbf{v}       &amp; = &amp;   -\nabla p \\
+\nabla\cdot\mathbf{v}       &amp; = &amp;   0\end{split}\]</div>
+<p>Applying the divergence operator on both sides of the first equation,</p>
+<div class="math">
+\[\begin{split}\nabla^2 p  &amp; = &amp; - \nabla \cdot \left(\left(\mathbf{v}\cdot\nabla\right)\mathbf{v}\right) \\\end{split}\]</div>
+<p>or in different notation</p>
+<div class="math">
+\[\begin{split}\Delta p &amp; = &amp; - \operatorname{div}(\operatorname{adv}(\mathbf{v}))\end{split}\]</div>
+<p>which can be solved for the pressure by inverting the Laplacian operator. On a periodic
+domain this can be done by applying the Fourier transform on both sides.</p>
+<div class="math">
+\[\begin{split}-(u^2 + v^2) \mathcal{F}(p)  = - \mathcal{F} \left( \operatorname{div}(\operatorname{adv}(\mathbf{v})) \right)\\\end{split}\]</div>
+<p>And the solution for the pressure is</p>
+<div class="math">
+\[p =  \mathcal{F}^{-1} \left( \frac{-1}{u^2+v^2} \mathcal{F} (\operatorname{div}(\operatorname{adv}(\mathbf{v}))) \right)\]</div>
+<p>from which it follows that the evolution in time is given by</p>
+<div class="math">
+\[\mathbf{\dot{v}} = -\nabla p - \left(\mathbf{v}\cdot\nabla\right)\mathbf{v}\]</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Let us compute the vorticity <span class="math">\(\omega\)</span>, pressure <span class="math">\(p\)</span>, and the time derivative of the velocity
+<span class="math">\(\mathbf{\dot{v}}\)</span> for a prescribed initial velocity field <span class="math">\(\mathbf{v}(x,y)\)</span>.</p>
+<div class="math">
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- 2 \sin{\left (y \right )} \cos^{2}{\left (\frac{x}{2} \right )}, &amp; 2 \sin{\left (x \right )} \cos^{2}{\left (\frac{y}{2} \right )}\end{pmatrix}  \\
+\omega (x,y) &amp; = &amp; 2 \cos{\left (x \right )} \cos{\left (y \right )} + \cos{\left (x \right )} + \cos{\left (y \right )} \\\end{split}\]</div>
+<p>(<a class="reference external" href=".//sample_advection-1.py">Source code</a>, <a class="reference external" href=".//sample_advection-1.png">png</a>, <a class="reference external" href=".//sample_advection-1.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/sample_advection-1.png" src="_images/sample_advection-1.png" />
+</div>
+<p>(<a class="reference external" href=".//sample_advection-2.py">Source code</a>, <a class="reference external" href=".//sample_advection-2.png">png</a>, <a class="reference external" href=".//sample_advection-2.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/sample_advection-2.png" src="_images/sample_advection-2.png" />
+</div>
+<p>(<a class="reference external" href=".//sample_advection-3.py">Source code</a>, <a class="reference external" href=".//sample_advection-3.png">png</a>, <a class="reference external" href=".//sample_advection-3.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/sample_advection-3.png" src="_images/sample_advection-3.png" />
+</div>
+<p>(<a class="reference external" href=".//sample_advection-4.py">Source code</a>, <a class="reference external" href=".//sample_advection-4.png">png</a>, <a class="reference external" href=".//sample_advection-4.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-4.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/sample_advection-4.png" src="_images/sample_advection-4.png" />
+</div>
+<dl class="function">
+<dt id="dec.symbolic.div">
+<tt class="descclassname">dec.symbolic.</tt><tt class="descname">div</tt><big>(</big><em>V</em><big>)</big><a class="reference internal" href="_modules/dec/symbolic.html#div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.symbolic.div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the divergence of a vector field <span class="math">\(V(x,y)\)</span>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.symbolic.vort">
+<tt class="descclassname">dec.symbolic.</tt><tt class="descname">vort</tt><big>(</big><em>V</em><big>)</big><a class="reference internal" href="_modules/dec/symbolic.html#vort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.symbolic.vort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the vorticity of a vector field <span class="math">\(V(x,y)\)</span>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dec.symbolic.grad">
+<tt class="descclassname">dec.symbolic.</tt><tt class="descname">grad</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/dec/symbolic.html#grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.symbolic.grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the gradient of a scalar field <span class="math">\(f(x,y)\)</span>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sample Advection</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="poisson.html"
+                        title="previous chapter">Poisson Operator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sample_advection.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="poisson.html" title="Poisson Operator"
+             >previous</a> |</li>
+        <li><a href="index.html">dec  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Dzhelil Rufat.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
