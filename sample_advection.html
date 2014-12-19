@@ -75,8 +75,10 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <div class="section" id="example-1">
 <h3>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h3>
 <div class="math">
-\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- 2 \sin{\left (y \right )} \cos^{2}{\left (\frac{x}{2} \right )}, &amp; 2 \sin{\left (x \right )} \cos^{2}{\left (\frac{y}{2} \right )}\end{pmatrix}  \\
-\omega (x,y) &amp; = &amp; 2 \cos{\left (x \right )} \cos{\left (y \right )} + \cos{\left (x \right )} + \cos{\left (y \right )} \\\end{split}\]</div>
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \left\{-2 \cos ^2\left(\frac{x}{2}\right) \sin (y),2 \sin (x) \cos ^2\left(\frac{y}{2}\right)\right\}  \\
+\omega (x,y) &amp; = &amp; 2 \cos (x) \cos (y)+\cos (x)+\cos (y) \\
+p(x,y) &amp; = &amp; \frac{1}{20} (\cos (2 x) (4 \cos (y)+5)+4 \cos (x) (5 \cos (y)+\cos (2 y)+5)+5 (4 \cos (y)+\cos (2 y))) \\
+\dot{\mathbf{v}}(x,y) &amp; = &amp; \left\{\frac{1}{5} \sin (x) (\cos (x) \cos (y)-\cos (2 y)),-\frac{1}{5} \sin (y) (\cos (2 x)-\cos (x) \cos (y))\right\}\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-1.py">Source code</a>, <a class="reference external" href=".//sample_advection-1.png">png</a>, <a class="reference external" href=".//sample_advection-1.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-1.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-1.png" src="_images/sample_advection-1.png" />
@@ -85,8 +87,10 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <div class="section" id="example-2">
 <h3>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h3>
 <div class="math">
-\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- \sin{\left (y \right )}, &amp; \sin{\left (x \right )}\end{pmatrix} \\
-\omega (x,y) &amp; = &amp; \cos{\left (x \right )} + \cos{\left (y \right )}\end{split}\]</div>
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \{-\sin (y),\sin (x)\} \\
+\omega (x,y) &amp; = &amp; \cos (x)+\cos (y) \\
+p(x,y) &amp; = &amp; \cos (x) \cos (y) \\
+\dot{\mathbf{v}}(x,y) &amp; = &amp; \{0,0\}\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-2.py">Source code</a>, <a class="reference external" href=".//sample_advection-2.png">png</a>, <a class="reference external" href=".//sample_advection-2.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-2.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-2.png" src="_images/sample_advection-2.png" />
@@ -95,8 +99,10 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <div class="section" id="example-3">
 <h3>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h3>
 <div class="math">
-\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}- \sin{\left (2 y \right )}, &amp; \sin{\left (x \right )}\end{pmatrix} \\
-\omega (x,y) &amp; = &amp; \cos{\left (x \right )} + 2 \cos{\left (2 y \right )}\end{split}\]</div>
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; {-Sin[2 y], Sin[x]} \\
+\omega (x,y) &amp; = &amp; \cos (x)+2 \cos (2 y)\\
+p(x,y) &amp; = &amp; \frac{4}{5} \cos (x) \cos (2 y) \\
+\dot{\mathbf{v}}(x,y) &amp; = &amp; \left\{\frac{6}{5} \sin (x) \cos (2 y),\frac{1}{5} (-3) \cos (x) \sin (2 y)\right\}\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-3.py">Source code</a>, <a class="reference external" href=".//sample_advection-3.png">png</a>, <a class="reference external" href=".//sample_advection-3.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-3.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-3.png" src="_images/sample_advection-3.png" />
@@ -105,8 +111,10 @@ domain this can be done by applying the Fourier transform on both sides.</p>
 <div class="section" id="example-4">
 <h3>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h3>
 <div class="math">
-\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \begin{pmatrix}1, &amp; 0\end{pmatrix} \\
- \omega (x,y) &amp; = &amp; 0\end{split}\]</div>
+\[\begin{split}\mathbf{v}(x, y) &amp; = &amp; \{1,0\} \\
+\omega (x,y) &amp; = &amp; 0\\
+p(x,y) &amp; = &amp; 0\\
+\dot{\mathbf{v}}(x,y) &amp; = \{0,0\}&amp;\end{split}\]</div>
 <p>(<a class="reference external" href=".//sample_advection-4.py">Source code</a>, <a class="reference external" href=".//sample_advection-4.png">png</a>, <a class="reference external" href=".//sample_advection-4.hires.png">hires.png</a>, <a class="reference external" href=".//sample_advection-4.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/sample_advection-4.png" src="_images/sample_advection-4.png" />

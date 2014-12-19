@@ -48,8 +48,10 @@ Example 1
 
 .. math::
 
-    \mathbf{v}(x, y) & = & \begin{pmatrix}- 2 \sin{\left (y \right )} \cos^{2}{\left (\frac{x}{2} \right )}, & 2 \sin{\left (x \right )} \cos^{2}{\left (\frac{y}{2} \right )}\end{pmatrix}  \\
-    \omega (x,y) & = & 2 \cos{\left (x \right )} \cos{\left (y \right )} + \cos{\left (x \right )} + \cos{\left (y \right )} \\
+    \mathbf{v}(x, y) & = & \left\{-2 \cos ^2\left(\frac{x}{2}\right) \sin (y),2 \sin (x) \cos ^2\left(\frac{y}{2}\right)\right\}  \\
+    \omega (x,y) & = & 2 \cos (x) \cos (y)+\cos (x)+\cos (y) \\
+    p(x,y) & = & \frac{1}{20} (\cos (2 x) (4 \cos (y)+5)+4 \cos (x) (5 \cos (y)+\cos (2 y)+5)+5 (4 \cos (y)+\cos (2 y))) \\
+    \dot{\mathbf{v}}(x,y) & = & \left\{\frac{1}{5} \sin (x) (\cos (x) \cos (y)-\cos (2 y)),-\frac{1}{5} \sin (y) (\cos (2 x)-\cos (x) \cos (y))\right\}
 
 .. plot::
 
@@ -63,8 +65,10 @@ Example 2
 
 .. math::
 
-    \mathbf{v}(x, y) & = & \begin{pmatrix}- \sin{\left (y \right )}, & \sin{\left (x \right )}\end{pmatrix} \\
-    \omega (x,y) & = & \cos{\left (x \right )} + \cos{\left (y \right )}
+    \mathbf{v}(x, y) & = & \{-\sin (y),\sin (x)\} \\
+    \omega (x,y) & = & \cos (x)+\cos (y) \\
+    p(x,y) & = & \cos (x) \cos (y) \\
+    \dot{\mathbf{v}}(x,y) & = & \{0,0\}
 
 .. plot::
 
@@ -78,8 +82,10 @@ Example 3
 
 .. math::
 
-    \mathbf{v}(x, y) & = & \begin{pmatrix}- \sin{\left (2 y \right )}, & \sin{\left (x \right )}\end{pmatrix} \\
-    \omega (x,y) & = & \cos{\left (x \right )} + 2 \cos{\left (2 y \right )}
+    \mathbf{v}(x, y) & = & {-Sin[2 y], Sin[x]} \\
+    \omega (x,y) & = & \cos (x)+2 \cos (2 y)\\
+    p(x,y) & = & \frac{4}{5} \cos (x) \cos (2 y) \\
+    \dot{\mathbf{v}}(x,y) & = & \left\{\frac{6}{5} \sin (x) \cos (2 y),\frac{1}{5} (-3) \cos (x) \sin (2 y)\right\}
 
 .. plot::
 
@@ -92,8 +98,10 @@ Example 4
 ..........
 
 .. math::
-    \mathbf{v}(x, y) & = & \begin{pmatrix}1, & 0\end{pmatrix} \\
-     \omega (x,y) & = & 0
+    \mathbf{v}(x, y) & = & \{1,0\} \\
+    \omega (x,y) & = & 0\\
+    p(x,y) & = & 0\\
+    \dot{\mathbf{v}}(x,y) & = \{0,0\}&
 
 .. plot::
 
