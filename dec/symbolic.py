@@ -81,14 +81,14 @@ def plot(plt, V, p):
                np.linspace(scale[0], scale[1], n))
     u, v = lambdify((x,y), V, 'numpy')(X, Y)
     axes[0].quiver(X, Y, u, v)
-    axes[0].set_title(r'$\mathbf{V}(x,y)$')
+    axes[0].set_title(r'$\mathbf{v}(x,y)$')
 
     vdot = [simplify(-adv(V)[0] + grad(p)[0]),
             simplify(-adv(V)[1] + grad(p)[1])]
     udot, vdot = lambdify((x,y), vdot, 'numpy')(X, Y)
     udot = udot + 0*X; vdot = vdot + 0*X;
     axes[2].quiver(X, Y, udot, vdot)
-    axes[2].set_title(r'$\mathbf{\dot{V}}(x,y)$')
+    axes[2].set_title(r'$\mathbf{\dot{v}}(x,y)$')
 
     omega = simplify(vort(V))
 
