@@ -2,7 +2,6 @@
 Spectral DEC
 =============
 """
-from __future__ import division
 from dec.helper import *
 from numpy import *
 from numpy.testing import assert_almost_equal
