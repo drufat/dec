@@ -82,7 +82,7 @@ Example 3
 
 .. math::
 
-    \mathbf{v}(x, y) & = & {-Sin[2 y], Sin[x]} \\
+    \mathbf{v}(x, y) & = & \{-\sin (2y),\sin (x)\} \\
     \omega (x,y) & = & \cos (x)+2 \cos (2 y)\\
     p(x,y) & = & \frac{4}{5} \cos (x) \cos (2 y) \\
     \dot{\mathbf{v}}(x,y) & = & \left\{\frac{6}{5} \sin (x) \cos (2 y),\frac{1}{5} (-3) \cos (x) \sin (2 y)\right\}
