@@ -23,7 +23,7 @@ def DEC(grid):
 
     this function returns the usual dec operators which then select the appropriate
     specialization of the operator for the given form based on its order and whether
-    it is primal or dual
+    it is primal or dual.
     '''
 
     ops_1D = operators(1)
@@ -72,21 +72,23 @@ def operators(n):
     """
     Return all the operators for dimension n together with their domains and codomains.
 
-    >>> import pprint
-    >>> pprint.PrettyPrinter().pprint(operators(1))
-    {'D': [('D0', (0, True), (1, True)), ('D0d', (0, False), (1, False))],
-     'H': [('H0', (0, True), (1, False)),
-           ('H0d', (0, False), (1, True)),
-           ('H1', (1, True), (0, False)),
-           ('H1d', (1, False), (0, True))],
-     'P': [('P0', None, (0, True)),
-           ('P0d', None, (0, False)),
-           ('P1', None, (1, True)),
-           ('P1d', None, (1, False))],
-     'R': [('R0', (0, True), None),
-           ('R0d', (0, False), None),
-           ('R1', (1, True), None),
-           ('R1d', (1, False), None)]}
+    >>> (operators(1) == 
+    ... {'D': [('D0', (0, True), (1, True)), 
+    ...        ('D0d', (0, False), (1, False))],
+    ...  'H': [('H0', (0, True), (1, False)),
+    ...        ('H0d', (0, False), (1, True)),
+    ...        ('H1', (1, True), (0, False)),
+    ...        ('H1d', (1, False), (0, True))],
+    ...  'P': [('P0', None, (0, True)),
+    ...        ('P0d', None, (0, False)),
+    ...        ('P1', None, (1, True)),
+    ...        ('P1d', None, (1, False))],
+    ...  'R': [('R0', (0, True), None),
+    ...        ('R0d', (0, False), None),
+    ...        ('R1', (1, True), None),
+    ...        ('R1d', (1, False), None)]})
+    True
+    
     """
     name = lambda n, k, t: '{0}{1}{2}'.format(n, k, 'd' if not t else '')
     # enumerate all the possible discrete forms
