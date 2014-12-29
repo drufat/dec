@@ -1,4 +1,4 @@
-from matplotlib.pyplot import *
+import matplotlib.pyplot as plt
 from numpy import *
 from dec.spectral2 import Grid_2D_Periodic
 
@@ -8,10 +8,10 @@ X, Y = meshgrid(X, Y)
 
 g = Grid_2D_Periodic(5, 5)
 
-scatter(*g.verts)
+plt.scatter(*g.verts)
 
 U, V = g.B1[0][2, 2](X, Y)
 
-quiver(X, Y, U, V)
+plt.quiver(X, Y, U, V)
 
-show()
+plt.show()

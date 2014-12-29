@@ -99,21 +99,22 @@
 <dt id="dec.forms.operators">
 <tt class="descclassname">dec.forms.</tt><tt class="descname">operators</tt><big>(</big><em>n</em><big>)</big><a class="reference internal" href="_modules/dec/forms.html#operators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dec.forms.operators" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return all the operators for dimension n together with their domains and codomains.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pprint</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pprint</span><span class="o">.</span><span class="n">PrettyPrinter</span><span class="p">()</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">operators</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="go">{&#39;D&#39;: [(&#39;D0&#39;, (0, True), (1, True)), (&#39;D0d&#39;, (0, False), (1, False))],</span>
-<span class="go"> &#39;H&#39;: [(&#39;H0&#39;, (0, True), (1, False)),</span>
-<span class="go">       (&#39;H0d&#39;, (0, False), (1, True)),</span>
-<span class="go">       (&#39;H1&#39;, (1, True), (0, False)),</span>
-<span class="go">       (&#39;H1d&#39;, (1, False), (0, True))],</span>
-<span class="go"> &#39;P&#39;: [(&#39;P0&#39;, None, (0, True)),</span>
-<span class="go">       (&#39;P0d&#39;, None, (0, False)),</span>
-<span class="go">       (&#39;P1&#39;, None, (1, True)),</span>
-<span class="go">       (&#39;P1d&#39;, None, (1, False))],</span>
-<span class="go"> &#39;R&#39;: [(&#39;R0&#39;, (0, True), None),</span>
-<span class="go">       (&#39;R0d&#39;, (0, False), None),</span>
-<span class="go">       (&#39;R1&#39;, (1, True), None),</span>
-<span class="go">       (&#39;R1d&#39;, (1, False), None)]}</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">operators</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> 
+<span class="gp">... </span><span class="p">{</span><span class="s">&#39;D&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s">&#39;D0&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span> 
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;D0d&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">False</span><span class="p">))],</span>
+<span class="gp">... </span> <span class="s">&#39;H&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s">&#39;H0&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">False</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;H0d&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;H1&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;H1d&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">True</span><span class="p">))],</span>
+<span class="gp">... </span> <span class="s">&#39;P&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s">&#39;P0&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;P0d&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;P1&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">)),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;P1d&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">False</span><span class="p">))],</span>
+<span class="gp">... </span> <span class="s">&#39;R&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s">&#39;R0&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="bp">None</span><span class="p">),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;R0d&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span> <span class="bp">None</span><span class="p">),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;R1&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="bp">None</span><span class="p">),</span>
+<span class="gp">... </span>       <span class="p">(</span><span class="s">&#39;R1d&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span> <span class="bp">None</span><span class="p">)]})</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>

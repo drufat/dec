@@ -70,7 +70,7 @@
 
 <span class="sd">    this function returns the usual dec operators which then select the appropriate</span>
 <span class="sd">    specialization of the operator for the given form based on its order and whether</span>
-<span class="sd">    it is primal or dual</span>
+<span class="sd">    it is primal or dual.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">ops_1D</span> <span class="o">=</span> <span class="n">operators</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -119,21 +119,23 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return all the operators for dimension n together with their domains and codomains.</span>
 
-<span class="sd">    &gt;&gt;&gt; import pprint</span>
-<span class="sd">    &gt;&gt;&gt; pprint.PrettyPrinter().pprint(operators(1))</span>
-<span class="sd">    {&#39;D&#39;: [(&#39;D0&#39;, (0, True), (1, True)), (&#39;D0d&#39;, (0, False), (1, False))],</span>
-<span class="sd">     &#39;H&#39;: [(&#39;H0&#39;, (0, True), (1, False)),</span>
-<span class="sd">           (&#39;H0d&#39;, (0, False), (1, True)),</span>
-<span class="sd">           (&#39;H1&#39;, (1, True), (0, False)),</span>
-<span class="sd">           (&#39;H1d&#39;, (1, False), (0, True))],</span>
-<span class="sd">     &#39;P&#39;: [(&#39;P0&#39;, None, (0, True)),</span>
-<span class="sd">           (&#39;P0d&#39;, None, (0, False)),</span>
-<span class="sd">           (&#39;P1&#39;, None, (1, True)),</span>
-<span class="sd">           (&#39;P1d&#39;, None, (1, False))],</span>
-<span class="sd">     &#39;R&#39;: [(&#39;R0&#39;, (0, True), None),</span>
-<span class="sd">           (&#39;R0d&#39;, (0, False), None),</span>
-<span class="sd">           (&#39;R1&#39;, (1, True), None),</span>
-<span class="sd">           (&#39;R1d&#39;, (1, False), None)]}</span>
+<span class="sd">    &gt;&gt;&gt; (operators(1) == </span>
+<span class="sd">    ... {&#39;D&#39;: [(&#39;D0&#39;, (0, True), (1, True)), </span>
+<span class="sd">    ...        (&#39;D0d&#39;, (0, False), (1, False))],</span>
+<span class="sd">    ...  &#39;H&#39;: [(&#39;H0&#39;, (0, True), (1, False)),</span>
+<span class="sd">    ...        (&#39;H0d&#39;, (0, False), (1, True)),</span>
+<span class="sd">    ...        (&#39;H1&#39;, (1, True), (0, False)),</span>
+<span class="sd">    ...        (&#39;H1d&#39;, (1, False), (0, True))],</span>
+<span class="sd">    ...  &#39;P&#39;: [(&#39;P0&#39;, None, (0, True)),</span>
+<span class="sd">    ...        (&#39;P0d&#39;, None, (0, False)),</span>
+<span class="sd">    ...        (&#39;P1&#39;, None, (1, True)),</span>
+<span class="sd">    ...        (&#39;P1d&#39;, None, (1, False))],</span>
+<span class="sd">    ...  &#39;R&#39;: [(&#39;R0&#39;, (0, True), None),</span>
+<span class="sd">    ...        (&#39;R0d&#39;, (0, False), None),</span>
+<span class="sd">    ...        (&#39;R1&#39;, (1, True), None),</span>
+<span class="sd">    ...        (&#39;R1d&#39;, (1, False), None)]})</span>
+<span class="sd">    True</span>
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="s">&#39;{0}{1}{2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="s">&#39;d&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
     <span class="c"># enumerate all the possible discrete forms</span>
