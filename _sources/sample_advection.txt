@@ -101,7 +101,7 @@ Example 4
     \mathbf{v}(x, y) & = & \{1,0\} \\
     \omega (x,y) & = & 0\\
     p(x,y) & = & 0\\
-    \dot{\mathbf{v}}(x,y) & = \{0,0\}&
+    \dot{\mathbf{v}}(x,y) & = & \{0,0\}
 
 .. plot::
 
