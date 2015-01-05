@@ -1,23 +1,23 @@
-"""
+'''
 Spectral DEC in 2D
 =============================
-"""
+'''
 from numpy import *
 from dec.helper import *
 from dec.spectral import *
 from functools import reduce
 
 def cartesian_product(X, Y):
-    """
+    '''
     >>> cartesian_product([0,1],[2,3])
     (array([0, 1, 0, 1]), array([2, 2, 3, 3]))
-    """
+    '''
     X = asarray(X)
     Y = asarray(Y)
     X, Y = [x.flatten() for x in meshgrid(X, Y)]
     return X, Y
 
-Grid_2D_Interface = """
+Grid_2D_Interface = '''
     verts verts_dual
     edges edges_dual
     faces faces_dual
@@ -31,7 +31,7 @@ Grid_2D_Interface = """
     hodge_star
     H0 H1 H2 H0d H1d H2d
     gx gy
-""".split()
+'''.split()
 
 def Grid_2D_Cartesian(gx, gy):
 
@@ -176,9 +176,9 @@ def Grid_2D_Regular(N, M):
     return Grid_2D_Cartesian(Grid_1D_Regular(N), Grid_1D_Regular(M))
 
 def laplacian2(g):
-    """
+    '''
     2D Laplacian Operator
-    """
+    '''
     D0, D1, D0d, D1d = g.derivative()
     H0, H1, H2, H0d, H1d, H2d = g.hodge_star()
     add = lambda x, y: (x[0]+y[0], x[1]+y[1])

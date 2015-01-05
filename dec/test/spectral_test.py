@@ -177,10 +177,10 @@ def test_hodge_star_basis_fn():
         eq(H1d, to_matrix(g.H1d, n))
 
 def test_compare_chebyshev_and_lagrange_polynomials():
-    """
+    '''
     The Chebyshev basis functions are equivalent to the
     Lagrange basis functions.
-    """
+    '''
 
     for n in (10, 11, 12, 13):
 
@@ -271,7 +271,7 @@ def test_leibniz():
     eq(lhs, rhs)
 
 #def test_associativity_exact():
-#    """ Associativity satisfied by exact forms. """
+#    ''' Associativity satisfied by exact forms. '''
 #
 #    N = 5
 #    g = Grid_1D_Periodic(N)
@@ -290,7 +290,7 @@ def test_leibniz():
 #    eq(eq2, eq3)
 
 def test_associativity_old():
-    """ Associativity satisfied only by wedge with no refinement."""
+    ''' Associativity satisfied only by wedge with no refinement.'''
 
     N = 13
     g = Grid_1D_Periodic(N)

@@ -69,7 +69,7 @@ def DEC(grid):
             typed2('H'))
     
 def operators(n):
-    """
+    '''
     Return all the operators for dimension n together with their domains and codomains.
 
     >>> (operators(1) == 
@@ -89,7 +89,7 @@ def operators(n):
     ...        ('R1d', (1, False), None)]})
     True
     
-    """
+    '''
     name = lambda n, k, t: '{0}{1}{2}'.format(n, k, 'd' if not t else '')
     # enumerate all the possible discrete forms
     def P(tup): (k, t) = tup; return ( name('P', k, t), None, (k, t) )
