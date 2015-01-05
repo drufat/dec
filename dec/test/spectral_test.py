@@ -29,32 +29,38 @@ def test_transforms():
     eq( S(    f(x)), f(x+h/2) )
     eq( Sinv( f(x)), f(x-h/2) )
 
-def test_type_system():
+def test_DEC():
     g = Grid_1D_Periodic(11)
 
     P, R, D, H = dec.forms.DEC(g)
+
+    P0, P1, P0d, P1d = g.projection()
+    R0, R1, R0d, R1d = reconstruction(g.basis_fn())
+    H0, H1, H0d, H1d = g.hodge_star()
+    D0, D0d = g.derivative()
+    
     f = lambda x: sin(sin(x))
 
-    eq( P(f, 0, True ), g.P0(f)  )
-    eq( P(f, 1, True ), g.P1(f)  )
-    eq( P(f, 0, False), g.P0d(f) )
-    eq( P(f, 1, False), g.P1d(f) )
+    eq( P(f, 0, True ), P0(f)  )
+    eq( P(f, 1, True ), P1(f)  )
+    eq( P(f, 0, False), P0d(f) )
+    eq( P(f, 1, False), P1d(f) )
 
     x = linspace(0, 2*pi, 100)
-    eq( R(P(f, 0, True ))(x), g.R0(g.P0(f))(x) )
-    eq( R(P(f, 1, True ))(x), g.R1(g.P1(f))(x)  )
-    eq( R(P(f, 0, False))(x), g.R0d(g.P0d(f))(x) )
-    eq( R(P(f, 1, False))(x), g.R1d(g.P1d(f))(x) )
+    eq( R(P(f, 0, True ))(x), R0(P0(f))(x) )
+    eq( R(P(f, 1, True ))(x), R1(P1(f))(x)  )
+    eq( R(P(f, 0, False))(x), R0d(P0d(f))(x) )
+    eq( R(P(f, 1, False))(x), R1d(P1d(f))(x) )
 
     x = P(f, 0, True)
-    eq( D(x), g.D0(x) )
+    eq( D(x), D0(x) )
     x = P(f, 0, False)
-    eq( D(x), g.D0d(x) )
+    eq( D(x), D0d(x) )
 
     x = P(f, 0, True)
-    eq( H(x), g.H0(x) )
+    eq( H(x), H0(x) )
     x = P(f, 1, True)
-    eq( H(x), g.H1(x) )
+    eq( H(x), H1(x) )
 
 def test_d_equivalence():
     g = Grid_1D_Periodic(10)

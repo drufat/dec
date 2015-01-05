@@ -103,4 +103,3 @@ def operators(n):
                 D=[D(f) for f in forms if f[0]<n],
                 H=[H(f) for f in forms])
 
-

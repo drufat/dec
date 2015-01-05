@@ -24,14 +24,14 @@ def alpha0(N, x):
             \cot\frac{x}{2}\,\sin\frac{Nx}{2} & \text{if N even,}\\
             \csc\frac{x}{2}\,\sin\frac{Nx}{2} & \text{if N odd.}
         \end{cases}
-        
-        
+
+
     >>> def α0(N, i): return round(alpha0(N, i*2*pi/N), 15)
-    >>> (α0(5, 0), α0(5, 1), α0(5, 2)) == (1.0, 0.0, 0.0) 
+    >>> (α0(5, 0), α0(5, 1), α0(5, 2)) == (1.0, 0.0, 0.0)
     True
     >>> (α0(6, 0), α0(6, 1), α0(6, 2)) == (1.0, 0.0, 0.0)
     True
-    
+
     """
     if N % 2 == 0:
         y = (sin(N*x/2) / tan(x/2)) / N
@@ -584,22 +584,22 @@ def reconstruction(basis_fn):
         return lambda *x: sum(a[i]*f(*x) for i, f in enumerate(B))
     return [(lambda a: summation(a, B)) for B in basis_fn]
 
-Grid_1D_Interface = """
-        pnts,
-        xmin, xmax, lenx,
-        verts, verts_dual,
-        edges, edges_dual,
-        basis_fn,
-        B0, B1, B0d, B1d,
-        projection,
-        P0, P1, P0d, P1d,
-        reconstruction,
-        R0, R1, R0d, R1d,
-        derivative,
-        D0, D0d,
-        hodge_star,
-        H0, H1, H0d, H1d,
-    """
+# Grid_1D_Interface = """
+#         pnts,
+#         xmin, xmax, lenx,
+#         verts, verts_dual,
+#         edges, edges_dual,
+#         basis_fn,
+#         B0, B1, B0d, B1d,
+#         projection,
+#         P0, P1, P0d, P1d,
+#         reconstruction,
+#         R0, R1, R0d, R1d,
+#         derivative,
+#         D0, D0d,
+#         hodge_star,
+#         H0, H1, H0d, H1d,
+#     """
 
 def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
 
