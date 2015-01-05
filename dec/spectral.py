@@ -4,8 +4,8 @@ Spectral DEC
 """
 from dec.helper import *
 from numpy import *
+from dec.forms import *
 from numpy.testing import assert_almost_equal
-import itertools
 import operator
 from functools import reduce
 try:
@@ -584,22 +584,37 @@ def reconstruction(basis_fn):
         return lambda *x: sum(a[i]*f(*x) for i, f in enumerate(B))
     return [(lambda a: summation(a, B)) for B in basis_fn]
 
-# Grid_1D_Interface = """
-#         pnts,
-#         xmin, xmax, lenx,
-#         verts, verts_dual,
-#         edges, edges_dual,
-#         basis_fn,
-#         B0, B1, B0d, B1d,
-#         projection,
-#         P0, P1, P0d, P1d,
-#         reconstruction,
-#         R0, R1, R0d, R1d,
-#         derivative,
-#         D0, D0d,
-#         hodge_star,
-#         H0, H1, H0d, H1d,
-#     """
+Grid_1D_Interface = """
+    xmin xmax
+    verts verts_dual
+    edges edges_dual
+    basis_fn
+    B0 B1 B0d B1d
+    projection
+    P0 P1 P0d P1d
+    R0 R1 R0d R1d
+    derivative
+    D0 D0d
+    hodge_star
+    H0 H1 H0d H1d
+""".split()
+
+def check(g, interface):
+    '''
+    Check whether an object satisfies an interface. 
+
+    >>> check(Grid_1D_Periodic(4), Grid_1D_Interface)
+    True
+    >>> check(Grid_1D_Chebyshev(4), Grid_1D_Interface)
+    True
+    >>> check(Grid_1D_Regular(4), Grid_1D_Interface)
+    True
+
+    '''
+    rslt = True
+    for i in interface:
+        rslt = (rslt and hasattr(g, i))
+    return rslt
 
 def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
 

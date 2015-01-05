@@ -18,22 +18,20 @@ def cartesian_product(X, Y):
     return X, Y
 
 Grid_2D_Interface = """
-    pnts,
-    verts, verts_dual,
-    edges, edges_dual,
-    faces, faces_dual,
-    basis_fn,
-    B0, B1, B2, B0d, B1d, B2d,
-    projection,
-    P0, P1, P2, P0d, P1d, P2d,
-    reconstruction,
-    R0, R1, R2, R0d, R1d, R2d,
-    derivative,
-    D0, D1, D0d, D1d,
-    hodge_star,
-    H0, H1, H2, H0d, H1d, H2d,
-    gx, gy
-    """
+    verts verts_dual
+    edges edges_dual
+    faces faces_dual
+    basis_fn
+    B0 B1 B2 B0d B1d B2d
+    projection
+    P0 P1 P2 P0d P1d P2d
+    R0 R1 R2 R0d R1d R2d
+    derivative
+    D0 D1 D0d D1d
+    hodge_star
+    H0 H1 H2 H0d H1d H2d
+    gx gy
+""".split()
 
 def Grid_2D_Cartesian(gx, gy):
 
