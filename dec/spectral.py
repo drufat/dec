@@ -26,10 +26,10 @@ def alpha0(N, x):
         \end{cases}
 
 
-    >>> def α0(N, i): return round(alpha0(N, i*2*pi/N), 15)
-    >>> (α0(5, 0), α0(5, 1), α0(5, 2)) == (1.0, 0.0, 0.0)
+    >>> def a0(N, i): return round(alpha0(N, i*2*pi/N), 15)
+    >>> (a0(5, 0), a0(5, 1), a0(5, 2)) == (1.0, 0.0, 0.0)
     True
-    >>> (α0(6, 0), α0(6, 1), α0(6, 2)) == (1.0, 0.0, 0.0)
+    >>> (a0(6, 0), a0(6, 1), a0(6, 2)) == (1.0, 0.0, 0.0)
     True
 
     '''
@@ -585,23 +585,26 @@ def reconstruction(basis_fn):
     return [(lambda a: summation(a, B)) for B in basis_fn]
 
 Grid_1D_Interface = '''
+    dimension
     xmin xmax
     verts verts_dual
     edges edges_dual
     basis_fn
-    B0 B1 B0d B1d
     projection
+    derivative
+    hodge_star
+'''.split()
+'''
+    B0 B1 B0d B1d
     P0 P1 P0d P1d
     R0 R1 R0d R1d
-    derivative
     D0 D0d
-    hodge_star
     H0 H1 H0d H1d
-'''.split()
+'''
 
 def check(g, interface):
     '''
-    Check whether an object satisfies an interface. 
+    Check whether an object satisfies an interface.
 
     >>> check(Grid_1D_Periodic(4), Grid_1D_Interface)
     True
@@ -616,63 +619,71 @@ def check(g, interface):
         rslt = (rslt and hasattr(g, i))
     return rslt
 
-def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
+class  Grid_1D_Periodic(object):
 
-    assert xmax > xmin
+    def __init__(self, n, xmin=0, xmax=2*pi):
+        assert xmax > xmin
 
-    dimension = 1
+        self.n = n
+        self.xmin = xmin
+        self.xmax = xmax
 
-    pnts = linspace(xmin, xmax, num=(n+1))
-    lenx = abs(xmax - xmin)
-    delta = diff(pnts)
+        self.dimension = 1
 
-    verts = pnts[:-1]
-    edges = (pnts[:-1], pnts[1:])
+        self.pnts = linspace(xmin, xmax, num=(n+1))
+        self.lenx = abs(xmax - xmin)
+        delta = diff(self.pnts)
 
-    verts_dual = verts + 0.5*delta
-    edges_dual = (roll(verts_dual,shift=1), verts_dual)
-    edges_dual[0][0] -= lenx
-    delta_dual = delta
+        self.verts = self.pnts[:-1]
+        self.edges = (self.pnts[:-1], self.pnts[1:])
 
-    V = verts
-    S0 = arange(len(V))
-    S1 = (S0[:-1], S0[1:])
+        self.verts_dual = self.verts + 0.5*delta
+        self.edges_dual = (roll(self.verts_dual,shift=1), self.verts_dual)
+        self.edges_dual[0][0] -= self.lenx
+        delta_dual = delta
 
-    Vd = verts_dual
-    S0d = arange(len(Vd))
-    S1d = (S0d[:-1], S0d[1:])
+        V = self.verts
+        S0 = arange(len(V))
+        S1 = (S0[:-1], S0[1:])
 
-    P0 = lambda f: f(verts)
-    P1 = lambda f: split_args(integrate_spectral)(
-                    edges[0], edges[1], f)
-    P0d = lambda f: f(verts_dual)
-    P1d = lambda f: split_args(integrate_spectral)(
-                    edges_dual[0], edges_dual[1], f)
-    def projection():
+        Vd = self.verts_dual
+        S0d = arange(len(Vd))
+        S1d = (S0d[:-1], S0d[1:])
+
+    def projection(self):
+        P0 = lambda f: f(self.verts)
+        P1 = lambda f: split_args(integrate_spectral)(
+                        self.edges[0], self.edges[1], f)
+        P0d = lambda f: f(self.verts_dual)
+        P1d = lambda f: split_args(integrate_spectral)(
+                        self.edges_dual[0], self.edges_dual[1], f)
         return P0, P1, P0d, P1d
 
-    B0 = [lambda x, i=i: phi0(n, i, x) for i in range(n)]
-    B1 = [lambda x, i=i: phi1(n, i, x) for i in range(n)]
-    B0d = [lambda x, i=i: phid0(n, i, x) for i in range(n)]
-    B1d = [lambda x, i=i: phid1(n, i, x) for i in range(n)]
-    def basis_fn():
+    def basis_fn(self):
+        B0 = [lambda x, i=i: phi0(self.n, i, x) for i in range(self.n)]
+        B1 = [lambda x, i=i: phi1(self.n, i, x) for i in range(self.n)]
+        B0d = [lambda x, i=i: phid0(self.n, i, x) for i in range(self.n)]
+        B1d = [lambda x, i=i: phid1(self.n, i, x) for i in range(self.n)]
         return B0, B1, B0d, B1d
 
-    R0, R1, R0d, R1d = reconstruction(basis_fn())
+    def reconstruction(self):
+        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
+        return R0, R1, R0d, R1d
 
-    D0  = lambda f: roll(f, shift=-1) - f
-    D0d = lambda f: roll(D0(f), shift=+1)
-    def derivative():
+    def derivative(self):
+        D0  = lambda f: roll(f, shift=-1) - f
+        D0d = lambda f: roll(D0(f), shift=+1)
         return D0, D0d
 
-    H0 = lambda x: real(H(x))
-    H1 = lambda x: real(Hinv(x))
-    H0d = H0
-    H1d = H1
-    def hodge_star():
+    def hodge_star(self):
+        H0 = lambda x: real(H(x))
+        H1 = lambda x: real(Hinv(x))
+        H0d = H0
+        H1d = H1
         return H0, H1, H0d, H1d
 
-    def derivative_matrix():
+    def derivative_matrix(self):
+        n = self.n
         rng = arange(n)
         ons = ones(n)
         d = row_stack((
@@ -688,7 +699,7 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
         D = sparse_matrix(d, n, n)
         return D, -D.T
 
-    def differentiation_toeplitz():
+    def differentiation_toeplitz(self):
         raise NotImplemented
         #TODO: fix this implementation
         h = 2*pi/n
@@ -698,15 +709,16 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
         D = toeplitz(column, row)
         return D
 
-    def hodge_star_toeplitz():
+    def hodge_star_toeplitz(self):
         '''
         The Hodge-Star using a Toeplitz matrix.
         '''
-        column = P1d(lambda x: alpha0(n, x))
+        P0, P1, P0d, P1d = self.projection()
+        column = P1d(lambda x: alpha0(self.n, x))
         row = concatenate((column[:1], column[1:][::-1]))
         return toeplitz(column, row)
 
-    def wedge():
+    def wedge(self):
         '''
         Return \alpha ^ \beta. Keep only for primal forms for now.
         '''
@@ -723,7 +735,7 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
             return c[0::2] + c[1::2]
         return w00, w01, _w01
 
-    def contraction(V):
+    def contraction(self, V):
         '''
         Return i_V. Keep only for primal forms for now.
         '''
@@ -731,7 +743,6 @@ def Grid_1D_Periodic(n, xmin=0, xmax=2*pi):
             return Hinv(Sinv(V)) * Hinv(Sinv(alpha))
         return C1
 
-    return bunch(**locals())
 
 def _slow_integration(a, b, f):
     from scipy.integrate import quad

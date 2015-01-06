@@ -71,17 +71,19 @@ def Grid_2D_Cartesian(gx, gy):
     def basis_fn():
         vec = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y))))
         mg = lambda x, y: meshgrid(x, y, copy=False, sparse=False)
-        B0  = vec(*mg(gx.B0,  gy.B0))
-        B0d = vec(*mg(gx.B0d, gy.B0d))
-        B2  = vec(*mg(gx.B1,  gy.B1))
-        B2d = vec(*mg(gx.B1d, gy.B1d))
+        gxB0, gxB1, gxB0d, gxB1d = gx.basis_fn()
+        gyB0, gyB1, gyB0d, gyB1d = gy.basis_fn()
+        B0  = vec(*mg(gxB0,  gyB0))
+        B0d = vec(*mg(gxB0d, gyB0d))
+        B2  = vec(*mg(gxB1,  gyB1))
+        B2d = vec(*mg(gxB1d, gyB1d))
 
         fx = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y), 0)))
         fy = vectorize(lambda u, v: (lambda x, y: (0, u(x)*v(y))))
-        B1  = (fx(*mg(gx.B1, gy.B0)),
-               fy(*mg(gx.B0, gy.B1)))
-        B1d = (fx(*mg(gx.B1d, gy.B0d)),
-               fy(*mg(gx.B0d, gy.B1d)))
+        B1  = (fx(*mg(gxB1, gyB0)),
+               fy(*mg(gxB0, gyB1)))
+        B1d = (fx(*mg(gxB1d, gyB0d)),
+               fy(*mg(gxB0d, gyB1d)))
         return B0, B1, B2, B0d, B1d, B2d
     B0, B1, B2, B0d, B1d, B2d = basis_fn()
 
