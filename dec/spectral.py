@@ -624,31 +624,37 @@ class  Grid_1D_Periodic(object):
     def __init__(self, n, xmin=0, xmax=2*pi):
         assert xmax > xmin
 
-        self.n = n
-        self.xmin = xmin
-        self.xmax = xmax
+        dimension = 1
 
-        self.dimension = 1
+        pnts = linspace(xmin, xmax, num=(n+1))
+        lenx = abs(xmax - xmin)
+        delta = diff(pnts)
 
-        self.pnts = linspace(xmin, xmax, num=(n+1))
-        self.lenx = abs(xmax - xmin)
-        delta = diff(self.pnts)
+        verts = pnts[:-1]
+        edges = (pnts[:-1], pnts[1:])
 
-        self.verts = self.pnts[:-1]
-        self.edges = (self.pnts[:-1], self.pnts[1:])
-
-        self.verts_dual = self.verts + 0.5*delta
-        self.edges_dual = (roll(self.verts_dual,shift=1), self.verts_dual)
-        self.edges_dual[0][0] -= self.lenx
+        verts_dual = verts + 0.5*delta
+        edges_dual = (roll(verts_dual,shift=1), verts_dual)
+        edges_dual[0][0] -= lenx
         delta_dual = delta
 
-        V = self.verts
+        V = verts
         S0 = arange(len(V))
         S1 = (S0[:-1], S0[1:])
 
-        Vd = self.verts_dual
+        Vd = verts_dual
         S0d = arange(len(Vd))
         S1d = (S0d[:-1], S0d[1:])
+
+        self.dimension = dimension
+        self.n = n
+        self.xmin = xmin
+        self.xmax = xmax
+        self.pnts = pnts
+        self.verts = verts
+        self.verts_dual = verts_dual
+        self.edges = edges
+        self.edges_dual = edges_dual
 
     def projection(self):
         P0 = lambda f: f(self.verts)
