@@ -171,12 +171,13 @@ def test_hodge_star_basis_fn():
     for n in range(2,7):
         g = Grid_1D_Chebyshev(n, -1, +1)
         H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
+        h0, h1, h0d, h1d = g.hodge_star()
 
-        eq(H0d, to_matrix(g.H0d, n-1))
-        eq(H1, to_matrix(g.H1, n-1))
+        eq(H0d, to_matrix(h0d, n-1))
+        eq(H1, to_matrix(h1, n-1))
 
-        eq(H0, to_matrix(g.H0, n))
-        eq(H1d, to_matrix(g.H1d, n))
+        eq(H0, to_matrix(h0, n))
+        eq(H1d, to_matrix(h1d, n))
 
 def test_compare_chebyshev_and_lagrange_polynomials():
     '''
@@ -214,9 +215,10 @@ def test_d():
 
     def check_d_bnd(g, f, f_prime):
         D, DD = g.derivative()
-        eq(D(g.P0(f)), g.P1(f_prime))
+        P0, P1, P0d, P1d = g.projection()
+        eq(D(P0(f)), P1(f_prime))
         bc = g.boundary_condition(f)
-        eq( DD(g.P0d(f))+bc, g.P1d(f_prime) )
+        eq( DD(P0d(f))+bc, P1d(f_prime) )
 
     check_d_bnd( Grid_1D_Chebyshev(10), (lambda x: 2*x), (lambda x: 2+0*x) )
     check_d_bnd( Grid_1D_Chebyshev(11), (lambda x: 2*x), (lambda x: 2+0*x) )

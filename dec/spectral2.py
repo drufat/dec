@@ -22,57 +22,66 @@ Grid_2D_Interface = '''
     edges edges_dual
     faces faces_dual
     basis_fn
-    B0 B1 B2 B0d B1d B2d
     projection
-    P0 P1 P2 P0d P1d P2d
-    R0 R1 R2 R0d R1d R2d
+    reconstruction
     derivative
-    D0 D1 D0d D1d
     hodge_star
-    H0 H1 H2 H0d H1d H2d
     gx gy
 '''.split()
 
-def Grid_2D_Cartesian(gx, gy):
+class Grid_2D_Cartesian:
+    
+    def __init__(self, gx, gy):
 
-    dimension = gx.dimension + gy.dimension
+        dimension = gx.dimension + gy.dimension
+    
+        # For all meshgrids hence forth, first argument should have an x, second should have a y
+        verts = meshgrid(gx.verts, gy.verts)
+        verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
+        edges = ((meshgrid(gx.edges[0], gy.verts),
+                  meshgrid(gx.edges[1], gy.verts)),
+                 (meshgrid(gx.verts, gy.edges[0]),
+                  meshgrid(gx.verts, gy.edges[1])))
+        edges_dual = ((meshgrid(gx.edges_dual[0], gy.verts_dual),
+                       meshgrid(gx.edges_dual[1], gy.verts_dual)),
+                      (meshgrid(gx.verts_dual, gy.edges_dual[0]),
+                       meshgrid(gx.verts_dual, gy.edges_dual[1])))
+        faces = (meshgrid(gx.edges[0], gy.edges[0]),
+                 meshgrid(gx.edges[1], gy.edges[0]),
+                 meshgrid(gx.edges[1], gy.edges[1]),
+                 meshgrid(gx.edges[0], gy.edges[1]))
+        faces_dual = (meshgrid(gx.edges_dual[0], gy.edges_dual[0]),
+                      meshgrid(gx.edges_dual[1], gy.edges_dual[0]),
+                      meshgrid(gx.edges_dual[1], gy.edges_dual[1]),
+                      meshgrid(gx.edges_dual[0], gy.edges_dual[1]))
 
-    # For all meshgrids hence forth, first argument should have an x, second should have a y
-    verts = meshgrid(gx.verts, gy.verts)
-    verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
-    edges = ((meshgrid(gx.edges[0], gy.verts),
-              meshgrid(gx.edges[1], gy.verts)),
-             (meshgrid(gx.verts, gy.edges[0]),
-              meshgrid(gx.verts, gy.edges[1])))
-    edges_dual = ((meshgrid(gx.edges_dual[0], gy.verts_dual),
-                   meshgrid(gx.edges_dual[1], gy.verts_dual)),
-                  (meshgrid(gx.verts_dual, gy.edges_dual[0]),
-                   meshgrid(gx.verts_dual, gy.edges_dual[1])))
-    faces = (meshgrid(gx.edges[0], gy.edges[0]),
-             meshgrid(gx.edges[1], gy.edges[0]),
-             meshgrid(gx.edges[1], gy.edges[1]),
-             meshgrid(gx.edges[0], gy.edges[1]))
-    faces_dual = (meshgrid(gx.edges_dual[0], gy.edges_dual[0]),
-                  meshgrid(gx.edges_dual[1], gy.edges_dual[0]),
-                  meshgrid(gx.edges_dual[1], gy.edges_dual[1]),
-                  meshgrid(gx.edges_dual[0], gy.edges_dual[1]))
+        self.dimension = dimension
+        self.gx = gx
+        self.gy = gy
+        self.verts = verts
+        self.verts_dual = verts_dual
+        self.edges = edges
+        self.edges_dual = edges_dual
+        self.faces = faces
+        self.faces_dual = faces_dual
 
-    P0  = lambda f: f(*verts)
-    P0d = lambda f: f(*verts_dual)
-    P2 = lambda f: integrate_2form(faces, f)[0]
-    P2d = lambda f: integrate_2form(faces_dual, f)[0]
-    P1  = lambda f: (integrate_1form(edges[0], f)[0],
-                     integrate_1form(edges[1], f)[0])
-    P1d = lambda f: (integrate_1form(edges_dual[0], f)[0],
-                     integrate_1form(edges_dual[1], f)[0])
-    def projection():
+
+    def projection(self):
+        P0  = lambda f: f(*self.verts)
+        P0d = lambda f: f(*self.verts_dual)
+        P2 = lambda f: integrate_2form(self.faces, f)[0]
+        P2d = lambda f: integrate_2form(self.faces_dual, f)[0]
+        P1  = lambda f: (integrate_1form(self.edges[0], f)[0],
+                         integrate_1form(self.edges[1], f)[0])
+        P1d = lambda f: (integrate_1form(self.edges_dual[0], f)[0],
+                         integrate_1form(self.edges_dual[1], f)[0])
         return P0, P1, P2, P0d, P1d, P2d
 
-    def basis_fn():
+    def basis_fn(self):
         vec = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y))))
         mg = lambda x, y: meshgrid(x, y, copy=False, sparse=False)
-        gxB0, gxB1, gxB0d, gxB1d = gx.basis_fn()
-        gyB0, gyB1, gyB0d, gyB1d = gy.basis_fn()
+        gxB0, gxB1, gxB0d, gxB1d = self.gx.basis_fn()
+        gyB0, gyB1, gyB0d, gyB1d = self.gy.basis_fn()
         B0  = vec(*mg(gxB0,  gyB0))
         B0d = vec(*mg(gxB0d, gyB0d))
         B2  = vec(*mg(gxB1,  gyB1))
@@ -85,11 +94,12 @@ def Grid_2D_Cartesian(gx, gy):
         B1d = (fx(*mg(gxB1d, gyB0d)),
                fy(*mg(gxB0d, gyB1d)))
         return B0, B1, B2, B0d, B1d, B2d
-    B0, B1, B2, B0d, B1d, B2d = basis_fn()
 
-    R0, R1, R2, R0d, R1d, R2d = reconstruction(basis_fn())
+    def reconstruction(self):
+        R0, R1, R2, R0d, R1d, R2d = reconstruction(basis_fn())
+        return R0, R1, R2, R0d, R1d, R2d
 
-    def derivative():
+    def derivative(self):
 
         def deriv(g, axis):
             d, dd = g.derivative()
@@ -97,8 +107,8 @@ def Grid_2D_Cartesian(gx, gy):
             DD = lambda arr: apply_along_axis(dd, axis, arr)
             return D, DD
 
-        Dx, Ddx = deriv(gx, axis=1)
-        Dy, Ddy = deriv(gy, axis=0)
+        Dx, Ddx = deriv(self.gx, axis=1)
+        Dy, Ddy = deriv(self.gy, axis=0)
 
         D0 = lambda f: (Dx(f), Dy(f))
         D0d = lambda f: (Ddx(f), Ddy(f))
@@ -106,43 +116,41 @@ def Grid_2D_Cartesian(gx, gy):
         D1d = lambda f: -Ddy(f[0]) + Ddx(f[1])
 
         return D0, D1, D0d, D1d
-    D0, D1, D0d, D1d = derivative()
 
-    def boundary_condition():
+    def boundary_condition(self):
 
         def BC0(f):
-            ((x0, y0), (x1,y1)) = edges_dual[0]
+            ((x0, y0), (x1,y1)) = self.edges_dual[0]
             bc0 = zeros(x0.shape)
-            ma = (x0==gx.xmin)
+            ma = (x0==self.gx.xmin)
             bc0[ma] -= f(x0[ma], y0[ma])
-            ma = (x1==gx.xmax)
+            ma = (x1==self.gx.xmax)
             bc0[ma] += f(x1[ma], y1[ma])
 
-            ((x0, y0), (x1,y1)) = edges_dual[1]
+            ((x0, y0), (x1,y1)) = self.edges_dual[1]
             bc1 = zeros(x1.shape)
-            ma = (y0==gy.xmin)
+            ma = (y0==self.gy.xmin)
             bc1[ma] -= f(x0[ma], y0[ma])
-            ma = (y1==gy.xmax)
+            ma = (y1==self.gy.xmax)
             bc1[ma] += f(x1[ma], y1[ma])
             return bc0, bc1
 
         def BC1(f):
-            ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = faces_dual
+            ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = self.faces_dual
             bc = zeros(x0.shape)
-            ma = (y0==gy.xmin)
+            ma = (y0==self.gy.xmin)
             bc[ma] += integrate_1form( ((x0[ma], y0[ma]), (x1[ma], y1[ma])), f)[0]
-            ma = (x1==gx.xmax)
+            ma = (x1==self.gx.xmax)
             bc[ma] += integrate_1form( ((x1[ma], y1[ma]), (x2[ma], y2[ma])), f)[0]
-            ma = (y2==gy.xmax)
+            ma = (y2==self.gy.xmax)
             bc[ma] += integrate_1form( ((x2[ma], y2[ma]), (x3[ma], y3[ma])), f)[0]
-            ma = (x3==gx.xmin)
+            ma = (x3==self.gx.xmin)
             bc[ma] += integrate_1form( ((x3[ma], y3[ma]), (x0[ma], y0[ma])), f)[0]
             return bc
 
         return BC0, BC1
-    BC0, BC1 = boundary_condition()
 
-    def hodge_star():
+    def hodge_star(self):
 
         def hodge(g, axis):
             h0, h1, h0d, h1d = g.hodge_star()
@@ -152,8 +160,8 @@ def Grid_2D_Cartesian(gx, gy):
             H1d = lambda arr: apply_along_axis(h1d, axis, arr)
             return H0, H1, H0d, H1d
 
-        H0x, H1x, H0dx, H1dx = hodge(gx, axis=1)
-        H0y, H1y, H0dy, H1dy = hodge(gy, axis=0)
+        H0x, H1x, H0dx, H1dx = hodge(self.gx, axis=1)
+        H0y, H1y, H0dy, H1dy = hodge(self.gy, axis=0)
 
         H0 = lambda f: H0x(H0y(f))
         H2 = lambda f: H1x(H1y(f))
@@ -164,9 +172,6 @@ def Grid_2D_Cartesian(gx, gy):
         H1d = lambda f: (-H0dx(H1dy(f[1])), H0dy(H1dx(f[0])))
 
         return H0, H1, H2, H0d, H1d, H2d
-    H0, H1, H2, H0d, H1d, H2d = hodge_star()
-
-    return bunch(**locals())
 
 def Grid_2D_Periodic(N, M):
     return Grid_2D_Cartesian(Grid_1D_Periodic(N), Grid_1D_Periodic(M))

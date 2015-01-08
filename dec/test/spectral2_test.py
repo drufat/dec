@@ -22,8 +22,9 @@ def test_d():
 
     def check_d0(g, f, df):
         D0, D1, D0d, D1d = g.derivative()
-        eq2( D0(g.P0(f)), g.P1(df))
-        eq2(D0d(g.P0d(f)), g.P1d(df))
+        P0, P1, P2, P0d, P1d, P2d = g.projection()
+        eq2( D0(P0(f)), P1(df))
+        eq2(D0d(P0d(f)), P1d(df))
 
     check_d0(Grid_2D_Periodic(4, 3),
              lambda x, y: sin(x) ,
@@ -35,8 +36,9 @@ def test_d():
 
     def check_d1(g, f, df):
         D0, D1, D0d, D1d = g.derivative()
-        eq2(D1(g.P1(f)), g.P2(df))
-        eq2(D1d(g.P1d(f)), g.P2d(df))
+        P0, P1, P2, P0d, P1d, P2d = g.projection()
+        eq2(D1(P1(f)), P2(df))
+        eq2(D1d(P1d(f)), P2d(df))
 
     check_d1( Grid_2D_Periodic(5, 6),
              lambda x, y: (sin(x), sin(y)) ,
@@ -47,8 +49,11 @@ def test_d():
              lambda x, y: (cos(x) + cos(y)) )
 
     def check_d0_bndry(g, f, df):
-        eq2( g.D0(g.P0(f)), g.P1(df))
-        eq( flat(g.D0d(g.P0d(f))) + flat(g.BC0(f)), flat(g.P1d(df)) )
+        P0, P1, P2, P0d, P1d, P2d = g.projection()
+        D0, D1, D0d, D1d = g.derivative()
+        BC0, BC1 = g.boundary_condition() 
+        eq2( D0(P0(f)), P1(df))
+        eq( flat(D0d(P0d(f))) + flat(BC0(f)), flat(P1d(df)) )
 
     check_d0_bndry(Grid_2D_Chebyshev(3, 5),
              lambda x, y: x*y ,
@@ -59,9 +64,11 @@ def test_d():
              lambda x, y: (1,0) )
 
     def check_d1_bndry(g, f, df):
+        P0, P1, P2, P0d, P1d, P2d = g.projection()
         D0, D1, D0d, D1d = g.derivative()
-        eq2(D1(g.P1(f)), g.P2(df))
-        eq2(D1d(g.P1d(f)) + g.BC1(f), g.P2d(df))
+        BC0, BC1 = g.boundary_condition() 
+        eq2(D1(P1(f)), P2(df))
+        eq2(D1d(P1d(f)) + BC1(f), P2d(df))
 
     check_d1_bndry( Grid_2D_Chebyshev(3, 5),
              lambda x, y: (-sin(y), sin(x)) ,
