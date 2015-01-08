@@ -580,9 +580,11 @@ def reconstruction(basis_fn):
     '''
     Give the reconstruction functions for the set of basis functions basis_fn.
     '''
-    def summation(a, B):
-        return lambda *x: sum(a[i]*f(*x) for i, f in enumerate(B))
-    return [(lambda a: summation(a, B)) for B in basis_fn]
+    def R(a, B):
+        def r(*x):
+            return sum(a[i]*f(*x) for i, f in enumerate(B))
+        return r
+    return [(lambda a, B=B: R(a, B)) for B in basis_fn]
 
 Grid_1D_Interface = '''
     dimension
@@ -662,10 +664,11 @@ class  Grid_1D_Periodic(object):
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
-        B0 = [lambda x, i=i: phi0(self.n, i, x) for i in range(self.n)]
-        B1 = [lambda x, i=i: phi1(self.n, i, x) for i in range(self.n)]
-        B0d = [lambda x, i=i: phid0(self.n, i, x) for i in range(self.n)]
-        B1d = [lambda x, i=i: phid1(self.n, i, x) for i in range(self.n)]
+        n = self.n
+        B0 = [lambda x, i=i: phi0(n, i, x) for i in range(n)]
+        B1 = [lambda x, i=i: phi1(n, i, x) for i in range(n)]
+        B0d = [lambda x, i=i: phid0(n, i, x) for i in range(n)]
+        B1d = [lambda x, i=i: phid1(n, i, x) for i in range(n)]
         return B0, B1, B0d, B1d
 
     def reconstruction(self):
@@ -1530,3 +1533,11 @@ class Grid_1D_Chebyshev:
         H0d = H0d_cheb
         H1d = H1d_cheb
         return H0, H1, H0d, H1d
+
+    def contraction(self, V):
+        '''
+        Implement contraction where V is the one-form corresponding to the vector field.
+        '''
+        def C1(alpha):
+            return None
+        return C1

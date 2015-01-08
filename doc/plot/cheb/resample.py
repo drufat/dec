@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 N = 5
 g = Grid_1D_Periodic(N)
-R0, _, _, _ = reconstruction(g.basis_fn())
+R0, _, _, _ = g.reconstruction()
 
 random.seed(seed=1)
 y = random.rand(N)

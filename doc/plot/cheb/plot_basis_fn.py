@@ -14,7 +14,7 @@ def draw_stemlines(x, y):
     setp(stemlines, 'color', 'k')
 
 def _savefig(name):
-    savefig("Documents/Research/Desbrun/latex/SpectralDEC/figs/"+name)
+    savefig(name)
 
 x = linspace(-pi, 3 * pi, 1000)
 
@@ -28,13 +28,13 @@ fix_axis_labels()
 #_savefig("6a.pdf")
 
 figure()
-plot(x, beta0(6, x) * h, 'k', linewidth=2)
+plot(x, beta0(N, x) * h, 'k', linewidth=2)
 rect = 0 * x; rect[logical_and(-h / 2 < x, x < h / 2)] = 1; rect[logical_and(2 * pi - h / 2 < x, x < 2 * pi + h / 2)] = 1
 plot(x, rect, 'k--')
 for n in arange(-N, 2 * N):
     color = 'green' if n % 2 else 'red'
     cut = logical_and(-h / 2 + n * h < x, x < h / 2 + n * h)
-    fill_between(x[cut], beta0(6, x)[cut] * h, rect[cut], color=color)
+    fill_between(x[cut], beta0(N, x)[cut] * h, rect[cut], color=color)
 fix_axis_labels()
 #_savefig("6b.pdf")
 
@@ -42,8 +42,8 @@ figure()
 N = 7
 h = 2 * pi / N
 n = arange(-N, 2 * N)
-plot(x, alpha0(7, x), 'k', linewidth=2)
-draw_stemlines(n * h, alpha0(7, n * h))
+plot(x, alpha0(N, x), 'k', linewidth=2)
+draw_stemlines(n * h, alpha0(N, n * h))
 fix_axis_labels()
 #_savefig("7a.pdf")
 
@@ -54,7 +54,7 @@ plot(x, rect, 'k--')
 for n in arange(-N, 2 * N):
     color = 'green' if n % 2 else 'red'
     cut = logical_and(-h / 2 + n * h < x, x < h / 2 + n * h)
-    fill_between(x[cut], beta0(7, x)[cut] * h, rect[cut], color=color)
+    fill_between(x[cut], beta0(N, x)[cut] * h, rect[cut], color=color)
 fix_axis_labels()
 #_savefig("7b.pdf")
 

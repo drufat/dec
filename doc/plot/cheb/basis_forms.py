@@ -7,7 +7,7 @@ N = 4
 g = Grid_1D_Regular(N)
 #g = Grid_1D_Chebyshev(N)
 
-z = linspace(g.xmin, g.xmax, 100) + 1e-16
+z = linspace(g.xmin, g.xmax, 100) #+ 1e-16
 B0, B1, B0d, B1d = g.basis_fn()
 H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
 H1d = linalg.inv(H0)

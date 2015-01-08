@@ -125,25 +125,28 @@ def test_integrals():
 
 def test_basis_functions():
 
-    def check_periodic(n):
-        g = Grid_1D_Periodic(n, 0, 2*pi)
-        for P, B in zip(g.projection(), g.basis_fn()):
-            eq( vstack(P(b) for b in B), eye(len(B)) )
-
-    def check_regular(n):
-        g = Grid_1D_Regular(n, 0, pi)
-        for P, B in zip(g.projection(), g.basis_fn()):
-            eq( vstack(P(b) for b in B), eye(len(B)) )
-
-    def check_chebyshev(n):
-        g = Grid_1D_Chebyshev(n, -1, +1)
+    def check_grid(g):
         for P, B in zip(g.projection(), g.basis_fn()):
             eq( vstack(P(b) for b in B), eye(len(B)) )
 
     for n in (2, 3, 4):
-        check_periodic(n)
-        check_regular(n)
-        check_chebyshev(n)
+        check_grid(Grid_1D_Periodic(n, 0, 2*pi))
+        check_grid(Grid_1D_Regular(n, 0, pi))
+        check_grid(Grid_1D_Chebyshev(n, -1, +1))
+
+def test_projection_reconstruction():
+    
+    random.seed(seed=1)
+    
+    def check_grid(g):
+        for P, R, B in zip(g.projection(), g.reconstruction(), g.basis_fn()):
+            y = random.rand(len(B))
+            eq( P(R(y)), y )
+
+    for n in (2, 3, 4):
+        check_grid(Grid_1D_Periodic(n, 0, 2*pi))
+        check_grid(Grid_1D_Chebyshev(n, -1, 1))
+
 
 def test_hodge_star_inv():
 
@@ -314,14 +317,34 @@ def test_associativity_old():
     eq(eq1, eq2)
     eq(eq2, eq3)
 
-def test_contraction():
+def test_contraction_periodic():
 
     g = Grid_1D_Periodic(14)
     P0, P1, P0d, P1d = g.projection()
 
-    V = P1(lambda x: sin(4 * x))
-    alpha1 = P1(lambda x: cos(4 * x))
-    beta0 = P0(lambda x: sin(4 * x) * cos(4 * x))
+    def v(x): return sin(4 * x)
+    def a(x): return cos(4 * x)
+    def b(x): return a(x)*v(x) 
+
+    V = P1(v)
+    alpha1 = P1(a)
+    beta0 = P0(b)
 
     C1 = g.contraction(V)
     eq(C1(alpha1), beta0)
+
+# def test_contraction_chebyshev():
+# 
+#     g = Grid_1D_Chebyshev(14)
+#     P0, P1, P0d, P1d = g.projection()
+# 
+#     def v(x): return x**2
+#     def a(x): return 2*x
+#     def b(x): return a(x)*v(x) 
+# 
+#     V = P1(v)
+#     alpha1 = P1(a)
+#     beta0 = P0(b)
+# 
+#     C1 = g.contraction(V)
+#     eq(C1(alpha1), beta0)
