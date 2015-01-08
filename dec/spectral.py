@@ -615,7 +615,7 @@ def check(g, interface):
         rslt = (rslt and hasattr(g, i))
     return rslt
 
-class  Grid_1D_Periodic(object):
+class Grid_1D_Periodic:
 
     def __init__(self, n, xmin=0, xmax=2*pi):
         assert xmax > xmin
@@ -1422,8 +1422,11 @@ def H1d_cheb(f):
     r'''
 
     .. math::
-
-        \widetilde{\mathbf{H}}^{1} = \mathbf{M}_{0}^{\dagger}\left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-\mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-\mathbf{B}^{\dagger}\mathbf{I}^{-\frac{h}{2},0}\right)\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+\mathbf{B}+\mathbf{B}^{\dagger}
+        
+        \widetilde{\mathbf{H}}^{1} = \mathbf{M}_{0}^{\dagger}
+                                     \left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-\mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-
+                                                                    \mathbf{B}^{\dagger}\mathbf{I}^{-\frac{h}{2},0}\right)
+                                     \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}{}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+\mathbf{B}+\mathbf{B}^{\dagger}
 
     '''
     N = f.shape[0]; h = pi/(N-1)
