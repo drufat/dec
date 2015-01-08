@@ -586,7 +586,8 @@ def reconstruction(basis_fn):
 
 Grid_1D_Interface = '''
     dimension
-    xmin xmax
+    xmin xmax 
+    delta delta_dual
     verts verts_dual
     edges edges_dual
     basis_fn
@@ -594,13 +595,6 @@ Grid_1D_Interface = '''
     derivative
     hodge_star
 '''.split()
-'''
-    B0 B1 B0d B1d
-    P0 P1 P0d P1d
-    R0 R1 R0d R1d
-    D0 D0d
-    H0 H1 H0d H1d
-'''
 
 def check(g, interface):
     '''
@@ -650,6 +644,8 @@ class  Grid_1D_Periodic(object):
         self.n = n
         self.xmin = xmin
         self.xmax = xmax
+        self.delta = delta
+        self.delta_dual = delta_dual
         self.pnts = pnts
         self.verts = verts
         self.verts_dual = verts_dual
@@ -854,6 +850,8 @@ class Grid_1D_Regular:
         self.n = n
         self.xmin = xmin
         self.xmax = xmax
+        self.delta = delta
+        self.delta_dual = delta_dual
         self.pnts = pnts
         self.verts = verts
         self.verts_dual = verts_dual
@@ -1487,12 +1485,13 @@ class Grid_1D_Chebyshev:
         self.n = n
         self.xmin = xmin
         self.xmax = xmax
+        self.delta = delta
+        self.delta_dual = delta_dual
         self.pnts = p
         self.verts = verts
         self.verts_dual = verts_dual
         self.edges = edges
         self.edges_dual = edges_dual
-
 
     def projection(self):
         P0 = lambda f: f(self.verts)

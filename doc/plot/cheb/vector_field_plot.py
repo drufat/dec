@@ -10,7 +10,8 @@ g = Grid_2D_Periodic(5, 5)
 
 plt.scatter(*g.verts)
 
-U, V = g.B1[0][2, 2](X, Y)
+B0, B1, B2, B0d, B1d, B2d = g.basis_fn()
+U, V = B1[0][2, 2](X, Y)
 
 plt.quiver(X, Y, U, V)
 
