@@ -9,7 +9,7 @@ def fix_axis_labels():
     plt.axis([-1.5, 1.5, -0.5, 1.5])
 
 def draw_stemlines(x, y):
-    markerline, stemlines, baseline = stem(x, y, '--')
+    markerline, stemlines, baseline = plt.stem(x, y, '--')
     plt.setp(markerline, 'markerfacecolor', 'k')
     plt.setp(baseline, 'color', 'k', 'linewidth', 0.5)
     plt.setp(stemlines, 'color', 'k')
