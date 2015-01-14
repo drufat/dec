@@ -92,36 +92,33 @@ def test_one_form():
                     eq(i(x, f), j(x, f))
 
 def test_integrals():
-
+    
     for N in (10, 11, 12, 13):
 
-        x = Grid_1D_Periodic(N, 0, 2*pi).pnts
+        g = Grid_1D_Periodic(N, 0, 2*pi)
         for f in (sin,
                   cos):
-            for I, J in itertools.combinations((
-                        integrate_boole1,
-                        integrate_spectral_coarse,
-                        integrate_spectral), 2):
-                eq(I(x, f), J(x, f))
+            reference = slow_integration(g.edges[0], g.edges[1], f)
+            eq( integrate_boole1(g.pnts, f), reference )
+            eq( integrate_spectral_coarse(g.pnts, f), reference )
+            eq( integrate_spectral(g.pnts, f), reference )
 
-        x = Grid_1D_Chebyshev(N, -1, +1).verts
+        g = Grid_1D_Chebyshev(N, -1, +1)
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
-            for I, J in itertools.combinations((
-                        integrate_boole1,
-                        integrate_chebyshev), 2):
-                eq(I(x, f), J(x, f))
+            reference = slow_integration(g.edges[0], g.edges[1], f)
+            eq( integrate_boole1(g.verts, f), reference )
+            eq( integrate_chebyshev(g.verts, f), reference )
 
-        x = Grid_1D_Chebyshev(N, -1, +1).verts_dual
-        x = concatenate(([-1], x, [+1]))
+        g = Grid_1D_Chebyshev(N, -1, +1)
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
-            for I, J in itertools.combinations((
-                        integrate_boole1,
-                        integrate_chebyshev_dual), 2):
-                eq(I(x, f), J(x, f))
+            reference = slow_integration(g.edges_dual[0], g.edges_dual[1], f)
+            x = concatenate(([-1], g.verts_dual, [+1]))
+            eq( integrate_boole1(x, f), reference )
+            eq( integrate_chebyshev_dual(x, f), reference )
 
 def test_basis_functions():
 
@@ -129,7 +126,7 @@ def test_basis_functions():
         for P, B in zip(g.projection(), g.basis_fn()):
             eq( vstack(P(b) for b in B), eye(len(B)) )
 
-    for n in (2, 3, 4):
+    for n in range(3, 6):
         check_grid(Grid_1D_Periodic(n, 0, 2*pi))
         check_grid(Grid_1D_Regular(n, 0, pi))
         check_grid(Grid_1D_Chebyshev(n, -1, +1))
@@ -145,14 +142,52 @@ def test_projection_reconstruction():
 
     for n in (2, 3, 4):
         check_grid(Grid_1D_Periodic(n, 0, 2*pi))
+        check_grid(Grid_1D_Regular(n, 0, pi))
         check_grid(Grid_1D_Chebyshev(n, -1, 1))
 
+def test_hodge_star_basis_fn():
+
+    for n in range(2,4):
+        g = Grid_1D_Periodic(n)
+        H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
+        h0, h1, h0d, h1d = g.hodge_star()
+
+        eq(H0d, to_matrix(h0d, n))
+        eq(H1, to_matrix(h1, n))
+
+        eq(H0, to_matrix(h0, n))
+        eq(H1d, to_matrix(h1d, n))
+
+    for n in range(2,5):
+        g = Grid_1D_Regular(n, 0, pi)
+        H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
+        h0, h1, h0d, h1d = g.hodge_star()
+   
+        eq(H0d, to_matrix(h0d, n-1))
+        eq(H1, to_matrix(h1, n-1))
+   
+        eq(H0, to_matrix(h0, n))
+        eq(H1d, to_matrix(h1d, n))
+
+    for n in range(2,4):
+        g = Grid_1D_Chebyshev(n, -1, +1)
+        H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
+        h0, h1, h0d, h1d = g.hodge_star()
+ 
+        eq(H0d, to_matrix(h0d, n-1))
+        eq(H1, to_matrix(h1, n-1))
+  
+        eq(H0, to_matrix(h0, n))
+        eq(H1d, to_matrix(h1d, n))
 
 def test_hodge_star_inv():
 
     def check_equal(g):
-        H0, H1, H0d, H1d = [to_matrix(H, len(g.verts)) for H in g.hodge_star()]
-
+        h0, h1, h0d, h1d = g.hodge_star()
+        H0 = to_matrix(h0, len(g.verts))
+        H1 = to_matrix(h1, len(g.delta))
+        H0d = to_matrix(h0d, len(g.delta))
+        H1d = to_matrix(h1d, len(g.verts))
         eq( H1d, linalg.inv(H0) )
         eq( H0d, linalg.inv(H1) )
 
@@ -160,27 +195,6 @@ def test_hodge_star_inv():
         check_equal(Grid_1D_Periodic(n))
         check_equal(Grid_1D_Regular(n))
         check_equal(Grid_1D_Chebyshev(n))
-
-def test_hodge_star_basis_fn():
-
-    def check_equal(g):
-        for A, B in zip(hodge_star_matrix(g.projection(), g.basis_fn()),
-                          g.hodge_star()) :
-            eq( A, to_matrix(B, n) )
-
-    for n in range(2,7):
-        check_equal(Grid_1D_Periodic(n, 0, 2*pi))
-
-    for n in range(2,7):
-        g = Grid_1D_Chebyshev(n, -1, +1)
-        H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
-        h0, h1, h0d, h1d = g.hodge_star()
-
-        eq(H0d, to_matrix(h0d, n-1))
-        eq(H1, to_matrix(h1, n-1))
-
-        eq(H0, to_matrix(h0, n))
-        eq(H1d, to_matrix(h1d, n))
 
 def test_compare_chebyshev_and_lagrange_polynomials():
     '''

@@ -40,8 +40,8 @@ def alpha0(N, x):
 
     if hasattr(y, '__setitem__'):
         y[x==0] = 1
-    else:
-        if x==0: y = 1
+    elif x==0:
+        y = 1
 
     return y
 
@@ -204,7 +204,6 @@ def rho(N, n, x):
     '''
     return 2*gamma(2*N-2, n)*delta(N, x) + 2*gamma(2*N-2, N-n-1)*delta(N, pi-x)
 
-
 def kappa0(N, n, x):
     r'''
     Basis functions for primal 0-forms.
@@ -213,14 +212,25 @@ def kappa0(N, n, x):
         \kappa_{N,n}^{0}(x) =
         \begin{cases}
             \alpha_{2N-2,n}(x), & n\in\{0,N-1\}\\
-            \alpha_{2N-2,n}(x)+\alpha_{2N-2,2N-2-n}(x), & n\in\{1,\dots,N-2\}
+            \alpha_{2N-2,n}(x)+\alpha_{2N-2,n}(2\pi-x), & n\in\{1,\dots,N-2\}
         \end{cases}
    '''
     if n in (0, N-1):
         return  alpha(2*N-2, n, x)
     else:
         return (alpha(2*N-2, n, x) +
-                alpha(2*N-2, 2*N-2-n, x))
+                alpha(2*N-2, n, 2*pi - x))
+
+def kappad0(N, n, x):
+    r'''
+
+    .. math::
+        \widetilde{\kappa}_{N,n}^{0}(x)=
+        \alpha_{2N-2,\, n+\frac{1}{2}}(x) +
+        \alpha_{2N-2,\, n+\frac{1}{2}}(2\pi-x),\quad n\in\{0,\dots,N-2\}
+    '''
+    return (alpha(2*N-2, n+0.5, x) +
+            alpha(2*N-2, n+0.5, 2*pi - x))
 
 def kappa1(N, n, x):
     r'''
@@ -228,22 +238,23 @@ def kappa1(N, n, x):
     .. math::
         \kappa_{N,n}^{1}(x) = \left(
         \beta_{2N-2,n+\frac{1}{2}}(x)-
-        \beta_{2N-2,2N-3-n+\frac{1}{2}}(x)\right)
+        \beta_{2N-2,n+\frac{1}{2}}(2\pi-x)\right)
         \mathbf{d}x,n\in\{0,\dots,N-2\}
     '''
     return (beta(2*N-2, n+0.5, x) -
-            beta(2*N-2, 2*N-3-n+0.5, x))
+            beta(2*N-2, n+0.5, 2*pi - x))
 
-def kappad0(N, n, x):
+def kappa1_symm(N, n, x):
     r'''
 
     .. math::
-        \widetilde{\kappa}_{N,n}^{0}(x)=
-        \alpha_{2N-2,\, n+\frac{1}{2}}(x)+
-        \alpha_{2N-2,\,2N-3-n+\frac{1}{2}}(x),\quad n\in\{0,\dots,N-2\}
+        \kappa_{N,n}^{S1}(x) = \left(
+        \beta_{2N-2,n+\frac{1}{2}}(x)+
+        \beta_{2N-2,n+\frac{1}{2}}(2\pi-x)\right)
+        \mathbf{d}x,n\in\{0,\dots,N-2\}
     '''
-    return (alpha(2*N-2, n+0.5, x) +
-            alpha(2*N-2, 2*N-3-n+0.5, x))
+    return (beta(2*N-2, n+0.5, x) + 
+            beta(2*N-2, n+0.5, 2*pi - x))
 
 def kappad1(N, n, x):
     r'''
@@ -252,7 +263,8 @@ def kappad1(N, n, x):
         \widetilde{\kappa}_{N,n}^{1}(x)=
         \begin{cases}
             \delta(x)\mathbf{d}x & \qquad n=0\\
-            \left(\beta_{2N-2,n}(x)-\beta_{2N-2,2N-2-n}(x)-\rho_{N,n}(x)\right)\mathbf{d}x & \qquad n\in\{1,\dots,N-2\}\\
+            \left(\beta_{2N-2,n}(x)-
+                  \beta_{2N-2,n}(2\pi-x)-\rho_{N,n}(x)\right)\mathbf{d}x & \qquad n\in\{1,\dots,N-2\}\\
             \delta(\pi-x)\mathbf{d}x & \qquad n=N-1
         \end{cases}
     '''
@@ -262,9 +274,20 @@ def kappad1(N, n, x):
         return delta(N, pi - x)
 
     y = (beta(2*N-2, n, x) -
-         beta(2*N-2, 2*N-2-n, x)
+         beta(2*N-2, n, 2*pi - x)
          - rho(N, n, x) )
     return y
+
+def kappad1_symm(N, n, x):
+    r'''
+
+    .. math::
+        \widetilde{\kappa}_{N,n}^{S1}(x) = \left(
+            \beta_{2N-2,n}(x)+
+            \beta_{2N-2,n}(2\pi-x) \right)
+        \mathbf{d}x,n\in\{0,\dots,N-2\}
+    '''
+    return (beta(2*N-2, n, x) + beta(2*N-2, n, 2*pi - x))
 
 ############################################################
 # Chebyshev Basis Functions
@@ -274,6 +297,7 @@ def kappad1(N, n, x):
 # array([ 0.125,  0.657, -2.177, -9.941, -5.121,  9.941,  7.877, -0.   ,
 #        -0.   ,  0.   ,  0.   ])
 ############################################################
+
 
 #TODO: This is a dirty hack. Compute the limits explicilty?
 def __fix_singularity_at_boundary(x):
@@ -324,10 +348,6 @@ def psid1(N, n, x):
     '''
     x = __fix_singularity_at_boundary(x)
     return kappad1(N, n, arccos(-x))/sqrt(1 - x**2)
-
-###########################
-# Lagrange polynomials
-###########################
 
 def lagrange_polynomials(x):
     r'''
@@ -469,13 +489,87 @@ def fourier_T(x, h):
     n = freq(N)
     return x*exp(1j*n*h)
 
-def fourier_J(x, a, b, c):
+def fourier_K(x, a, b):
     r'''
-    Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) \sin(\xi+c) d\xi`
+    Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) \sin(\xi) d\xi`
     '''
-    c = fourier_I(x, a, b)
-    b = (roll(c[2:]*x,+1)*exp(1j*c) - roll(c[:-2]*x,-1)*exp(-1j*c))/2j
-    return b
+    x = x.copy()
+    N = x.shape[0]
+    x = hstack([[0], x, [0]])
+    x = (roll(x,+1) - roll(x,-1))/2j
+    x *= I_diag(N+2, a, b) 
+    rslt = x[1:-1]
+    rslt[0]  += x[-1]
+    rslt[-1] += x[0]
+    return rslt
+
+def fourier_K_inv(x, a, b):
+    # Make sure type is coerced to complex, otherwise numpy ignores the complex parts
+    # and reverts to reals.
+    x = array(x.copy(), dtype=complex)
+    N = x.shape[0]
+    I = I_diag(N+2, a, b)
+    x /= I[1:-1]
+    
+    if (isclose(I[0], I[N]) or 
+        isclose(I[1], I[N+1]) or 
+        isclose(I[0]*I[1], I[N]*I[N+1])):
+        raise ValueError("Singular operator.")
+    
+    y = zeros(N, dtype=complex)
+    E = sum(x[::2]); O = sum(x[1::2])
+    if N % 2 == 0:
+        y[0]  = O/(1-I[0]/I[N])
+        y[-1] = E/(I[N+1]/I[1]-1)
+    else:
+        y[0]  = (I[1]/I[N+1]*E+O)/(1-I[1]*I[0]/I[N]/I[N+1])
+        y[-1] = (I[N]/I[0]*E+O)/(I[N]*I[N+1]/I[0]/I[1]-1)
+    x[0]  -= y[-1]*I[N+1]/I[1]
+    x[-1] -= -y[0]*I[0]/I[N]
+    
+    x = hstack([[-y[0]], x , [y[-1]]])
+    y[::2] = -cumsum(x[::2])[:-1]
+    y[1::2] = cumsum(x[1::2][::-1])[:-1][::-1]
+    
+    y *= 2j
+    
+    return y
+
+def test_linearity():
+    random.seed(1)
+    for N in range(4, 10):
+        h = 2*pi/N
+        fk = lambda x: fourier_K(x, 0, h/2)
+        fk_inv = lambda x: fourier_K_inv(x, 0, h/2)
+        for i in range(10):
+            a = random.rand(N)
+            b = random.rand(N)
+            c = fk_inv(a + i*b)
+            d = fk_inv(a) + i*fk_inv(b)
+            assert allclose(c, d)
+            c = fk(a + i*b)
+            d = fk(a) + i*fk(b)
+            assert allclose(c, d)
+
+def test_fourier_K_inv():
+    random.seed(1)
+    for N in range(4, 10):
+        h = 2*pi/N
+        fk = lambda x: fourier_K(x, 0, h/2)
+        fk_inv = lambda x: fourier_K_inv(x, 0, h/2)
+        a = random.rand(N)
+        b = fk_inv(fk(a))
+        c = fk(fk_inv(a))
+        assert allclose(a, b)
+        assert allclose(a, c)
+        K    = to_matrix(fk, N)
+        Kinv = to_matrix(fk_inv, N)
+        assert allclose(K.dot(a), fk(a))
+        assert allclose(Kinv.dot(a), fk_inv(a))
+        assert allclose(linalg.matrix_rank(Kinv, 1e-5), N)
+        
+        assert allclose(linalg.inv(K), Kinv)
+        assert allclose(linalg.inv(Kinv), K)
 
 def refine(x):
     '''
@@ -750,66 +844,25 @@ class Grid_1D_Periodic:
         return C1
 
 
-def _slow_integration(a, b, f):
+def slow_integration(a, b, f):
     from scipy.integrate import quad
     return array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
 
 def A_diag(N):
     r'''
-
+    
     .. math::
         \mathbf{A}=\text{diag}\left(\begin{array}{ccccccc}\frac{1}{2} & 1 & 1 & \dots & 1 & 1 & \frac{1}{2}\end{array}\right)
+        
+    >>> A_diag(2)
+    array([ 0.5,  0.5])
+    >>> A_diag(3)
+    array([ 0.5,  1. ,  0.5])
 
     '''
+    assert N > 1
     d = concatenate(([0.5], ones(N-2), [0.5]))
     return d
-
-def H0_regular(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^{0}=
-            \mathbf{A}
-            \mathbf{M}_{0}^{\dagger}
-            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-            \mathbf{M}_{0}^{+}
-    '''
-    f = mirror0(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror0(f)
-    f = f*A_diag(f.shape[0])
-    return  real(f)
-
-def H1_regular(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^{1}=
-            \mathbf{M}_{1}^{\dagger}
-            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
-            \mathbf{M}_{1}^{-}
-    '''
-    f = mirror1(f, -1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, h/2)(f)
-    f = unmirror1(f)
-    return f
-
-def H0d_regular(f):
-    r'''
-
-    .. math::
-        \widetilde{\mathbf{H}}^{0}=
-            \mathbf{M}_{1}^{\dagger}
-            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-            \mathbf{M}_{1}^{-}
-    '''
-    f = mirror1(f, -1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror1(f)
-    return f
 
 def H1d_regular(f):
     r'''
@@ -828,7 +881,58 @@ def H1d_regular(f):
     f = unmirror0(f)
     return f
 
+def H0_regular(f):
+    r'''
+
+    .. math::
+        \mathbf{H}^{0}=
+            \mathbf{A}
+            \mathbf{M}_{0}^{\dagger}
+            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
+            \mathbf{M}_{0}^{+}
+    '''
+    f = mirror0(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space(-h/2, h/2)(f)
+    f = unmirror0(f)
+    f = f*A_diag(f.shape[0])
+    return  f
+
+def H1_regular(f):
+    r'''
+
+    .. math::
+        \mathbf{H}^{1}=
+            \mathbf{M}_{1}^{\dagger}
+            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
+            \mathbf{M}_{1}^{+}
+    '''
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space_inv(-h/2, h/2)(f)
+    f = unmirror1(f)
+    return f
+
+def H0d_regular(f):
+    r'''
+
+    .. math::
+        \widetilde{\mathbf{H}}^{0}=
+            \mathbf{M}_{1}^{\dagger}
+            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
+            \mathbf{M}_{1}^{+}
+    '''
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space(-h/2, h/2)(f)
+    f = unmirror1(f)
+    return f
+
 class Grid_1D_Regular:
+    '''
+    Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
+    the correct ones. 
+    '''
     
     def __init__(self, n, xmin=0, xmax=pi):
     
@@ -863,17 +967,17 @@ class Grid_1D_Regular:
         
     def projection(self):
         P0 = lambda f: f(self.verts)
-        P1 = lambda f: _slow_integration(self.edges[0], self.edges[1], f)
+        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
         P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: _slow_integration(self.edges_dual[0], self.edges_dual[1], f)
+        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
         n = self.n
         B0 = [lambda x, i=i: kappa0(n, i, x) for i in range(n)]
-        B1 = [lambda x, i=i: kappa1(n, i, x) for i in range(n-1)]
+        B1 = [lambda x, i=i: kappa1_symm(n, i, x) for i in range(n-1)]
         B0d = [lambda x, i=i: kappad0(n, i, x) for i in range(n-1)]
-        B1d = [lambda x, i=i: kappad1(n, i, x) for i in range(n)]
+        B1d = [lambda x, i=i: kappad1_symm(n, i, x) for i in range(n)]
         return B0, B1, B0d, B1d
 
     def reconstruction(self):
@@ -891,7 +995,6 @@ class Grid_1D_Regular:
         H0d = H0d_regular
         H1d = H1d_regular
         return H0, H1, H0d, H1d
-
 
 def extend(f, n):
     r'''
@@ -920,7 +1023,10 @@ def extend(f, n):
         0
         \end{array}\right\} n
         \end{bmatrix}
-
+        
+    >>> extend(array([ 1.,  2.,  3.,  4.]), 2)
+    array([ 0.,  0.,  2.,  4.,  6.,  8.,  0.,  0.])
+    
     '''
     N = f.shape[0]
     return (N+2.0*n)/N*_extend(f, n)
@@ -960,6 +1066,10 @@ def unextend(f, n):
         x_{N-1}+x_{-1}
         \end{array}\right\} n
         \end{bmatrix}
+
+    >>> unextend(array([ 0.,  0.,  2.,  4.,  6.,  8.,  0.,  0.]), 2)
+    array([ 1.,  2.,  3.,  4.])
+
     '''
     N = f.shape[0]
     return (N-2.0*n)/N*_unextend(f, n)
@@ -1171,6 +1281,14 @@ def H_sin_dual(a):
 
     return Finv(b)
 
+def I_sin(a, b, v):
+
+    v = F(v)
+    c = I_diag(v.shape[0], a, b)
+    v = (roll(c*v,+1) - roll(c*v,-1))/2j
+
+    return Finv(v)
+
 def Omega(N):
     r'''
 
@@ -1281,7 +1399,6 @@ def pick(f, n):
 
     return f[n]*ones(f.shape[0])
 
-
 def reverse(f):
     r'''
 
@@ -1314,6 +1431,11 @@ def reverse(f):
     '''
     return f[::-1]
 
+def S_space(a):
+    return lambda f: Finv(F(f)*S_diag(f.shape[0], a))
+
+def S_space_inv(a):
+    return lambda f: Finv(F(f)/S_diag(f.shape[0], a))
 
 def I_space(a, b):
     return lambda f: Finv(F(f)*I_diag(f.shape[0], a, b))
@@ -1351,9 +1473,11 @@ def H0d_cheb(f):
     r'''
 
     .. math::
-        \widetilde{\mathbf{H}}^0 = {\mathbf{M}_1}^{\dagger}
-                \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}
-                \widetilde{\mathbf{\Omega}} \mathbf{M}_1^+
+        \widetilde{\mathbf{H}}^0 = 
+            {\mathbf{M}_1}^{\dagger}
+             \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}
+             \widetilde{\mathbf{\Omega}} 
+             \mathbf{M}_1^+
     '''
 
     f = mirror1(f, +1)
@@ -1362,16 +1486,17 @@ def H0d_cheb(f):
     f = I_space(-h/2, h/2)(f)
     f = unmirror1(f)
 
-    return f
+    return real(f)
 
 def H1_cheb(f):
     r'''
 
     .. math::
-        \mathbf{H}^1 = {\mathbf{M}_1}^{\dagger}
-                \widetilde{\mathbf{\Omega}}^{-1}
-                {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1}
-                \mathbf{M}_1^-
+        \mathbf{H}^1 =
+            {\mathbf{M}_1}^{\dagger}
+            \widetilde{\mathbf{\Omega}}^{-1}
+            {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1}
+            \mathbf{M}_1^-
     '''
 
     f = mirror1(f, -1)
@@ -1380,16 +1505,25 @@ def H1_cheb(f):
     f = f/Omega_d(N)
     f = unmirror1(f)
 
-    return f
+    return real(f)
 
 def H0_cheb(f):
-    '''
-    Attempt to simplify the hodge-star.
+    r'''
+    .. math::
+
+        \mathbf{H}^0 &=& 
+                \mathbf{A}
+                \mathbf{M}_0^{\dagger}
+                \mathbf{I}^{0, +\frac{h}{2}}
+                \mathbf{\Omega} 
+                \mathbf{E}^{N-1}
+                \mathbf{M}_0^{+}
     '''
     N = f.shape[0]; h = pi/(N-1)
     f = mirror0(f, +1)
     f = E_space(N-1)(f)
-    f = I_space(0, h/2)(f*Omega(f.shape[0]))
+    f = f*Omega(f.shape[0])
+    f = I_space(0, h/2)(f)
     f = unmirror1(f)
     f = matA(f)
     return real(f)
@@ -1424,9 +1558,11 @@ def H1d_cheb(f):
     .. math::
         
         \widetilde{\mathbf{H}}^{1} = \mathbf{M}_{0}^{\dagger}
-                                     \left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-\mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-
+                                     \left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-
+                                                                    \mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-
                                                                     \mathbf{B}^{\dagger}\mathbf{I}^{-\frac{h}{2},0}\right)
-                                     \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}{}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+\mathbf{B}+\mathbf{B}^{\dagger}
+                                     \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}{}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+
+                                     \mathbf{B}+\mathbf{B}^{\dagger}
 
     '''
     N = f.shape[0]; h = pi/(N-1)
@@ -1501,10 +1637,12 @@ class Grid_1D_Chebyshev:
 
     def projection(self):
         P0 = lambda f: f(self.verts)
-        P1 = lambda f: integrate_chebyshev(self.verts, f)
+        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
+        #P1 = lambda f: integrate_chebyshev(self.verts, f)
         P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: integrate_chebyshev_dual(
-                concatenate(([-1], self.verts_dual, [+1])), f)
+        #P1d = lambda f: integrate_chebyshev_dual(
+        #        concatenate(([-1], self.verts_dual, [+1])), f)
+        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
