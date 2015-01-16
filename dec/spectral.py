@@ -454,7 +454,6 @@ def I_diag(N, a, b):
 
 def S_diag(N, a):
     r'''
-
     A diagonal matrix that corresponds to shifting in Fourier Space
     Corresponds to :math:`f(x) \mapsto f(x-h)`
 
@@ -1147,26 +1146,6 @@ def matB1(f):
 def matC(f):
     return concatenate(( [0], f[1:-1], [0] ))
 
-def H0d_cheb(f):
-    f = mirror1(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_S(f, -h/2)
-    f = fourier_K(f, 0, h)
-    f = Finv(f)
-    f = unmirror1(f)
-    return real(f)
-
-def H1_cheb(f):
-    f = mirror1(f, -1)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K_inv(f, 0, h)
-    f = fourier_S(f, +h/2)
-    f = Finv(f)
-    f = unmirror1(f)
-    return real(f)
-
 def fold1(f, sgn=+1):
     '''
     
@@ -1199,6 +1178,26 @@ def unfold0(f):
     '''
     return hstack([ [f[0]], .5*f[1:-1], [-f[-1]], -.5*f[1:-1][::-1] ])
 
+def H0d_cheb(f):
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_S(f, -h/2)
+    f = fourier_K(f, 0, h)
+    f = Finv(f)
+    f = unmirror1(f)
+    return real(f)
+
+def H1_cheb(f):
+    f = mirror1(f, -1)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K_inv(f, 0, h)
+    f = fourier_S(f, +h/2)
+    f = Finv(f)
+    f = unmirror1(f)
+    return real(f)
+
 def H0_cheb(f):
     '''
     
@@ -1216,14 +1215,7 @@ def H0_cheb(f):
     return real(f)
 
 def H1d_cheb_new(f):
-    '''
-    
-    >>> to_matrix(H1d_cheb, 2)
-    array([[ 1.5, -0.5],
-           [-0.5,  1.5]])
-    '''
- 
-    
+     
 #     f=f.copy()
 #     aa, bb = f[0], f[-1]
 #     f[0], f[-1] = 0, 0
@@ -1244,6 +1236,12 @@ def H1d_cheb_new(f):
     return real(f)
 
 def H1d_cheb(f):
+    '''
+    
+    >>> to_matrix(H1d_cheb, 2)
+    array([[ 1.5, -0.5],
+           [-0.5,  1.5]])
+    '''
     N = f.shape[0]; h = pi/(N-1)
     def endpoints(f):
         f0 = mirror0(matC(f), -1)

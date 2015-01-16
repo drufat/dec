@@ -5,6 +5,7 @@ Spectral DEC in 2D
 from numpy import *
 from dec.helper import *
 from dec.grid1 import *
+from dec.spectral import *
 
 def cartesian_product(X, Y):
     '''
@@ -151,26 +152,46 @@ class Grid_2D_Cartesian:
 
     def hodge_star(self):
 
-        def hodge(g, axis):
-            h0, h1, h0d, h1d = g.hodge_star()
-            H0 = lambda arr: apply_along_axis(h0, axis, arr)
-            H1 = lambda arr: apply_along_axis(h1, axis, arr)
-            H0d = lambda arr: apply_along_axis(h0d, axis, arr)
-            H1d = lambda arr: apply_along_axis(h1d, axis, arr)
-            return H0, H1, H0d, H1d
-
-        H0x, H1x, H0dx, H1dx = hodge(self.gx, axis=1)
-        H0y, H1y, H0dy, H1dy = hodge(self.gy, axis=0)
+        H0x, H1x, H0dx, H1dx = apply_operators(self.gx.hodge_star(), axis=1)
+        H0y, H1y, H0dy, H1dy = apply_operators(self.gy.hodge_star(), axis=0)
 
         H0 = lambda f: H0x(H0y(f))
         H2 = lambda f: H1x(H1y(f))
         H0d = lambda f: H0dx(H0dy(f))
         H2d = lambda f: H1dx(H1dy(f))
 
-        H1 = lambda f: (-H0x(H1y(f[1])), H0y(H1x(f[0])))
-        H1d = lambda f: (-H0dx(H1dy(f[1])), H0dy(H1dx(f[0])))
+        def H1(f):
+            fx, fy = f
+            return -H0x(H1y(fy)), H0y(H1x(fx))
+        
+        def H1d(f):
+            fx, fy = f
+            return -H0dx(H1dy(fy)), H0dy(H1dx(fx))
 
         return H0, H1, H2, H0d, H1d, H2d
+    
+    def contraction(self, V):
+        H0x, H1x, H0dx, H1dx = apply_operators(self.gx.hodge_star(), axis=1)
+        H0y, H1y, H0dy, H1dy = apply_operators(self.gy.hodge_star(), axis=0)
+        Sx, Sinvx = apply_operators(self.gx.switch(), axis=1)
+        Sy, Sinvy = apply_operators(self.gy.switch(), axis=0)
+
+        Vx, Vy = V
+        vx, vy = Sinvx(H1x(Vx)), Sinvy(H1y(Vy))
+
+        def C1(f):
+            alphax, alphay = f
+            ax, ay = Sinvx(H1x(alphax)), Sinvy(H1y(alphay))
+            return ( ax*vx + ay*vy )
+        
+        def C2(f):
+            o = H1x(H1y(f))
+            raise ( -o*vy, o*vx )
+        
+        return C1, C2
+
+def apply_operators(H, axis):
+    return [lambda arr, h=h: apply_along_axis(h, axis, arr) for h in H]
 
 def Grid_2D_Periodic(N, M):
     return Grid_2D_Cartesian(Grid_1D_Periodic(N), Grid_1D_Periodic(M))

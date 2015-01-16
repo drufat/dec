@@ -80,10 +80,47 @@ class Grid_1D_Chebyshev:
         H1d = H1d_cheb
         return H0, H1, H0d, H1d
 
+    def switch(self):
+        return S_cheb, S_cheb_pinv
+
     def contraction(self, V):
         '''
         Implement contraction where V is the one-form corresponding to the vector field.
         '''
-        def C1(alpha):
-            return None
+        S, Sinv = self.switch()
+        H0, H1, H0d, H1d = self.hodge_star()
+
+        def C1(f):                
+            return Sinv(H1(V)) * Sinv(H1(f))
+        
         return C1
+    
+def S_cheb(f):
+    '''
+    Shift from primal to dual 0-forms.
+    >>> S_cheb(array([-1, 0, 1]))
+    array([-0.70710678,  0.70710678])
+    >>> S_cheb(array([1, 0, -1]))
+    array([ 0.70710678, -0.70710678])
+    '''
+    f = mirror0(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = Finv(F(f)*S_diag(N, h/2))
+    f = unmirror1(f)
+    return real(f)
+
+def S_cheb_pinv(f):
+    '''
+    This is a pseudo inverse of S_cheb.     
+    >>> allclose(  S_cheb_pinv(array([ -1/sqrt(2),  1/sqrt(2)])), 
+    ...            array([ -1, 0, 1]))
+    True
+    >>> allclose(  S_cheb_pinv(array([ 1/sqrt(2),  -1/sqrt(2)])), 
+    ...            array([ 1, 0, -1]))
+    True
+    '''
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = Finv(F(f)*S_diag(N, -h/2))
+    f = unmirror0(f)
+    return real(f)

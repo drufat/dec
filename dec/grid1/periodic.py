@@ -126,12 +126,21 @@ class Grid_1D_Periodic:
             return c[0::2] + c[1::2]
         return w00, w01, _w01
 
+    def switch(self):
+        '''
+        Switch between primal and dual 0-forms. The operator is only invertible 
+        if they have the same size.
+        '''
+        return S, Sinv
+
     def contraction(self, V):
         '''
         Return i_V. Keep only for primal forms for now.
         '''
-        def C1(alpha):
-            return Hinv(Sinv(V)) * Hinv(Sinv(alpha))
+        S, Sinv = self.switch()
+        H0, H1, H0d, H1d = self.hodge_star()
+        def C1(f):                
+            return Sinv(H1(V)) * Sinv(H1(f))
         return C1
 
 

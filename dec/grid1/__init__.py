@@ -1,4 +1,3 @@
-from dec.spectral import *
 from .periodic import Grid_1D_Periodic
 from .regular import Grid_1D_Regular
 from .chebyshev import Grid_1D_Chebyshev

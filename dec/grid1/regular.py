@@ -1,13 +1,12 @@
 from dec.spectral import *
+'''
+Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
+the correct ones. 
+'''
 
 class Grid_1D_Regular:
-    '''
-    Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
-    the correct ones. 
-    '''
     
     def __init__(self, n, xmin=0, xmax=pi):
-    
         assert xmax > xmin
     
         dimension = 1
@@ -67,4 +66,4 @@ class Grid_1D_Regular:
         H0d = H0d_regular
         H1d = H1d_regular
         return H0, H1, H0d, H1d
-
+    
