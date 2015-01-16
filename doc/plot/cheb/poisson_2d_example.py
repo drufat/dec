@@ -1,5 +1,5 @@
 import dec
-from dec.spectral2 import *
+from dec.grid2 import *
 
 def run():
 

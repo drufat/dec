@@ -321,3 +321,21 @@ def integrate_2form(face, f):
         error += e
 
     return integral, error
+
+def check(g, interface):
+    '''
+    Check whether an object satisfies an interface.
+
+    >>> from dec.grid1 import *
+    >>> check(Grid_1D_Periodic(4), Grid_1D_Interface)
+    True
+    >>> check(Grid_1D_Chebyshev(4), Grid_1D_Interface)
+    True
+    >>> check(Grid_1D_Regular(4), Grid_1D_Interface)
+    True
+
+    '''
+    rslt = True
+    for i in interface:
+        rslt = (rslt and hasattr(g, i))
+    return rslt

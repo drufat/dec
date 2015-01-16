@@ -1,4 +1,4 @@
-from dec.spectral2 import *
+from dec.grid2 import *
 import itertools
 import collections
 from numpy.testing import assert_array_almost_equal

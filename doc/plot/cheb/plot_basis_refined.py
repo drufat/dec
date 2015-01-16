@@ -1,5 +1,5 @@
 from pylab import *
-from dec.spectral import *
+from dec.grid1 import *
 
 
 #G = Grid_1D_Periodic; s = pi; b = phi1

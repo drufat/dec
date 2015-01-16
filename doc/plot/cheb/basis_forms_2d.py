@@ -1,5 +1,5 @@
 from numpy import *
-from dec.spectral2 import Grid_2D_Periodic
+from dec.grid2 import Grid_2D_Periodic
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 

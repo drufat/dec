@@ -419,16 +419,16 @@ def Hinv(a):
 def I(a, x0, x1):
     N = len(a)
     return Finv ( I_diag(N, x0, x1) * F(a) )
-
+ 
 def Iinv(a, x0, x1):
     N = len(a)
     return Finv ( F(a) / I_diag(N, x0, x1) )
-
+ 
 def S(a):
     N = len(a)
     h = 2*pi/N
     return Finv( F(a) * S_diag(N, h/2) )
-
+ 
 def Sinv(a):
     N = len(a)
     h = 2*pi/N
@@ -481,6 +481,14 @@ def fourier_I_inv(x, a, b):
     y[n==0] = b - a
     return x/y
 
+def fourier_S(x, a):
+    n = freq(x.shape[0])
+    return x*exp(1j*n*a)
+
+def fourier_S_inv(x, a):
+    n = freq(x.shape[0])
+    return x*exp(-1j*n*a)
+
 def fourier_T(x, h):
     r'''
     Corresponds to :math:`f(x) \mapsto f(x+a)`
@@ -511,14 +519,14 @@ def fourier_K_inv(x, a, b):
     I = I_diag(N+2, a, b)
     x /= I[1:-1]
     
+    y = zeros(N, dtype=complex)
+    E = sum(x[::2]); O = sum(x[1::2])
     if (isclose(I[0], I[N]) or 
         isclose(I[1], I[N+1]) or 
         isclose(I[0]*I[1], I[N]*I[N+1])):
-        raise ValueError("Singular operator.")
-    
-    y = zeros(N, dtype=complex)
-    E = sum(x[::2]); O = sum(x[1::2])
-    if N % 2 == 0:
+        pass
+        #raise ValueError("Singular operator.")
+    elif N % 2 == 0:
         y[0]  = O/(1-I[0]/I[N])
         y[-1] = E/(I[N+1]/I[1]-1)
     else:
@@ -534,42 +542,6 @@ def fourier_K_inv(x, a, b):
     y *= 2j
     
     return y
-
-def test_linearity():
-    random.seed(1)
-    for N in range(4, 10):
-        h = 2*pi/N
-        fk = lambda x: fourier_K(x, 0, h/2)
-        fk_inv = lambda x: fourier_K_inv(x, 0, h/2)
-        for i in range(10):
-            a = random.rand(N)
-            b = random.rand(N)
-            c = fk_inv(a + i*b)
-            d = fk_inv(a) + i*fk_inv(b)
-            assert allclose(c, d)
-            c = fk(a + i*b)
-            d = fk(a) + i*fk(b)
-            assert allclose(c, d)
-
-def test_fourier_K_inv():
-    random.seed(1)
-    for N in range(4, 10):
-        h = 2*pi/N
-        fk = lambda x: fourier_K(x, 0, h/2)
-        fk_inv = lambda x: fourier_K_inv(x, 0, h/2)
-        a = random.rand(N)
-        b = fk_inv(fk(a))
-        c = fk(fk_inv(a))
-        assert allclose(a, b)
-        assert allclose(a, c)
-        K    = to_matrix(fk, N)
-        Kinv = to_matrix(fk_inv, N)
-        assert allclose(K.dot(a), fk(a))
-        assert allclose(Kinv.dot(a), fk_inv(a))
-        assert allclose(linalg.matrix_rank(Kinv, 1e-5), N)
-        
-        assert allclose(linalg.inv(K), Kinv)
-        assert allclose(linalg.inv(Kinv), K)
 
 def refine(x):
     '''
@@ -680,170 +652,6 @@ def reconstruction(basis_fn):
         return r
     return [(lambda a, B=B: R(a, B)) for B in basis_fn]
 
-Grid_1D_Interface = '''
-    dimension
-    xmin xmax 
-    delta delta_dual
-    verts verts_dual
-    edges edges_dual
-    basis_fn
-    projection
-    derivative
-    hodge_star
-'''.split()
-
-def check(g, interface):
-    '''
-    Check whether an object satisfies an interface.
-
-    >>> check(Grid_1D_Periodic(4), Grid_1D_Interface)
-    True
-    >>> check(Grid_1D_Chebyshev(4), Grid_1D_Interface)
-    True
-    >>> check(Grid_1D_Regular(4), Grid_1D_Interface)
-    True
-
-    '''
-    rslt = True
-    for i in interface:
-        rslt = (rslt and hasattr(g, i))
-    return rslt
-
-class Grid_1D_Periodic:
-
-    def __init__(self, n, xmin=0, xmax=2*pi):
-        assert xmax > xmin
-
-        dimension = 1
-
-        pnts = linspace(xmin, xmax, num=(n+1))
-        lenx = abs(xmax - xmin)
-        delta = diff(pnts)
-
-        verts = pnts[:-1]
-        edges = (pnts[:-1], pnts[1:])
-
-        verts_dual = verts + 0.5*delta
-        edges_dual = (roll(verts_dual,shift=1), verts_dual)
-        edges_dual[0][0] -= lenx
-        delta_dual = delta
-
-        V = verts
-        S0 = arange(len(V))
-        S1 = (S0[:-1], S0[1:])
-
-        Vd = verts_dual
-        S0d = arange(len(Vd))
-        S1d = (S0d[:-1], S0d[1:])
-
-        self.dimension = dimension
-        self.n = n
-        self.xmin = xmin
-        self.xmax = xmax
-        self.delta = delta
-        self.delta_dual = delta_dual
-        self.pnts = pnts
-        self.verts = verts
-        self.verts_dual = verts_dual
-        self.edges = edges
-        self.edges_dual = edges_dual
-
-    def projection(self):
-        P0 = lambda f: f(self.verts)
-        P1 = lambda f: split_args(integrate_spectral)(
-                        self.edges[0], self.edges[1], f)
-        P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: split_args(integrate_spectral)(
-                        self.edges_dual[0], self.edges_dual[1], f)
-        return P0, P1, P0d, P1d
-
-    def basis_fn(self):
-        n = self.n
-        B0 = [lambda x, i=i: phi0(n, i, x) for i in range(n)]
-        B1 = [lambda x, i=i: phi1(n, i, x) for i in range(n)]
-        B0d = [lambda x, i=i: phid0(n, i, x) for i in range(n)]
-        B1d = [lambda x, i=i: phid1(n, i, x) for i in range(n)]
-        return B0, B1, B0d, B1d
-
-    def reconstruction(self):
-        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
-        return R0, R1, R0d, R1d
-
-    def derivative(self):
-        D0  = lambda f: roll(f, shift=-1) - f
-        D0d = lambda f: roll(D0(f), shift=+1)
-        return D0, D0d
-
-    def hodge_star(self):
-        H0 = lambda x: real(H(x))
-        H1 = lambda x: real(Hinv(x))
-        H0d = H0
-        H1d = H1
-        return H0, H1, H0d, H1d
-
-    def derivative_matrix(self):
-        n = self.n
-        rng = arange(n)
-        ons = ones(n)
-        d = row_stack((
-                   column_stack((
-                     rng,
-                     roll(rng, shift= -1),
-                     +ons)),
-                   column_stack((
-                     rng,
-                     rng,
-                     -ons))
-                   ))
-        D = sparse_matrix(d, n, n)
-        return D, -D.T
-
-    def differentiation_toeplitz(self):
-        raise NotImplemented
-        #TODO: fix this implementation
-        n = self.n
-        h = 2*pi/n
-        assert n % 2 == 0
-        column = concatenate(( [ 0 ], (-1)**arange(1,n) / tan(arange(1,n)*h/2)  ))
-        row = concatenate(( column[:1], column[1:][::-1] ))
-        D = toeplitz(column, row)
-        return D
-
-    def hodge_star_toeplitz(self):
-        '''
-        The Hodge-Star using a Toeplitz matrix.
-        '''
-        P0, P1, P0d, P1d = self.projection()
-        column = P1d(lambda x: alpha0(self.n, x))
-        row = concatenate((column[:1], column[1:][::-1]))
-        return toeplitz(column, row)
-
-    def wedge(self):
-        '''
-        Return \alpha ^ \beta. Keep only for primal forms for now.
-        '''
-        def w00(alpha, beta):
-            return alpha * beta
-        def _w01(alpha, beta):
-            return S(H( alpha * Hinv(Sinv(beta)) ))
-        def w01(alpha, beta):
-#            a = interweave(alpha, T(alpha, [S]))
-#            b = interweave(T(beta, [Hinv, Sinv]), T(beta, [Hinv]))
-            a = refine(alpha)
-            b = refine(Hinv(Sinv(beta)))
-            c = S(H(a * b))
-            return c[0::2] + c[1::2]
-        return w00, w01, _w01
-
-    def contraction(self, V):
-        '''
-        Return i_V. Keep only for primal forms for now.
-        '''
-        def C1(alpha):
-            return Hinv(Sinv(V)) * Hinv(Sinv(alpha))
-        return C1
-
-
 def slow_integration(a, b, f):
     from scipy.integrate import quad
     return array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
@@ -927,74 +735,6 @@ def H0d_regular(f):
     f = I_space(-h/2, h/2)(f)
     f = unmirror1(f)
     return f
-
-class Grid_1D_Regular:
-    '''
-    Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
-    the correct ones. 
-    '''
-    
-    def __init__(self, n, xmin=0, xmax=pi):
-    
-        assert xmax > xmin
-    
-        dimension = 1
-    
-        N = n
-        pnts = linspace(xmin, xmax, num=n)
-        lenx = abs(xmax - xmin)
-        delta = diff(pnts)
-    
-        verts = pnts
-        verts_dual = verts[:-1] + 0.5*delta
-    
-        edges = (pnts[:-1], pnts[1:])
-        tmp = concatenate(([xmin], verts_dual, [xmax]))
-        delta_dual = diff(tmp)
-        edges_dual = (tmp[:-1], tmp[1:])
-        
-        self.dimension = dimension
-        self.n = n
-        self.xmin = xmin
-        self.xmax = xmax
-        self.delta = delta
-        self.delta_dual = delta_dual
-        self.pnts = pnts
-        self.verts = verts
-        self.verts_dual = verts_dual
-        self.edges = edges
-        self.edges_dual = edges_dual
-        
-    def projection(self):
-        P0 = lambda f: f(self.verts)
-        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
-        P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
-        return P0, P1, P0d, P1d
-
-    def basis_fn(self):
-        n = self.n
-        B0 = [lambda x, i=i: kappa0(n, i, x) for i in range(n)]
-        B1 = [lambda x, i=i: kappa1_symm(n, i, x) for i in range(n-1)]
-        B0d = [lambda x, i=i: kappad0(n, i, x) for i in range(n-1)]
-        B1d = [lambda x, i=i: kappad1_symm(n, i, x) for i in range(n)]
-        return B0, B1, B0d, B1d
-
-    def reconstruction(self):
-        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
-        return R0, R1, R0d, R1d
-
-    def derivative(self):
-        D0 = lambda f: diff(f)
-        D0d = lambda f: diff(concatenate(([0], f, [0])))
-        return D0, D0d
-
-    def hodge_star(self):
-        H0 = H0_regular
-        H1 = H1_regular
-        H0d = H0d_regular
-        H1d = H1d_regular
-        return H0, H1, H0d, H1d
 
 def extend(f, n):
     r'''
@@ -1221,74 +961,6 @@ def unmirror1(f):
     '''
     return f[:(len(f)/2)]
 
-#########
-# Methods using FFT
-#########
-
-def H_exp(a):
-    r'''
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \exp(i \xi) d\xi`
-
-    This transformation is singular non-invertible.
-    '''
-
-    N = len(a)
-    h = 2*pi/N
-    c = I_diag(N+2, -h/2, h/2)
-
-    a = F(a)
-    b = roll(c[2:]*a,+1)
-    return Finv(b)
-
-def H_sin(a):
-    r'''
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi) d\xi`
-
-    This transformation is singular non-invertible.
-
-    >>> x = linspace(0, 2*pi, 6)[:-1]
-    >>> round_(real( H_sin(sin(2*x)) ), 3)
-    array([ 0.271,  0.438, -0.573, -0.573,  0.438])
-    '''
-
-    N = len(a)
-    h = 2*pi/N
-
-    a = F(a)
-    c = I_diag(N+2, -h/2, h/2)
-    b = (roll(c[2:]*a,+1) - roll(c[:-2]*a,-1))/2j
-
-    return Finv(b)
-
-def H_sin_dual(a):
-    r'''
-    :math:`\int_{x-h/2}^{x+h/2}f(\xi) \sin(\xi+\frac{h}{2}) d\xi`
-
-    This transformation is singular non-invertible.
-
-    >>> x = linspace(0, 2*pi, 6)[:-1]
-    >>> round_(real( H_sin_dual(sin(2*x)) ), 3)
-    array([ 0.219,  0.573, -0.084, -0.844,  0.135])
-    '''
-
-    N = len(a)
-    h = 2*pi/N
-
-    a = F(a)
-    c = I_diag(N+2, -h/2, h/2)
-    s = exp(1j*h/2)
-    b = (roll(c[2:]*a,+1)*s - roll(c[:-2]*a,-1)/s)/2j
-
-    return Finv(b)
-
-def I_sin(a, b, v):
-
-    v = F(v)
-    c = I_diag(v.shape[0], a, b)
-    v = (roll(c*v,+1) - roll(c*v,-1))/2j
-
-    return Finv(v)
-
 def Omega(N):
     r'''
 
@@ -1443,6 +1115,12 @@ def I_space(a, b):
 def I_space_inv(a, b):
     return lambda f: Finv(F(f)/I_diag(f.shape[0], a, b))
 
+def K_space(a, b):
+    return lambda f: Finv(fourier_K(F(f), a, b))
+
+def K_space_inv(a, b):
+    return lambda f: Finv(fourier_K_inv(F(f), a, b))
+
 def T_space(a):
     return lambda f: Finv(F(f)*S_diag(f.shape[0], a))
 
@@ -1470,103 +1148,103 @@ def matC(f):
     return concatenate(( [0], f[1:-1], [0] ))
 
 def H0d_cheb(f):
-    r'''
-
-    .. math::
-        \widetilde{\mathbf{H}}^0 = 
-            {\mathbf{M}_1}^{\dagger}
-             \mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}
-             \widetilde{\mathbf{\Omega}} 
-             \mathbf{M}_1^+
-    '''
-
     f = mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = f*Omega_d(N)
-    f = I_space(-h/2, h/2)(f)
+    f = F(f)
+    f = fourier_S(f, -h/2)
+    f = fourier_K(f, 0, h)
+    f = Finv(f)
     f = unmirror1(f)
-
     return real(f)
 
 def H1_cheb(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^1 =
-            {\mathbf{M}_1}^{\dagger}
-            \widetilde{\mathbf{\Omega}}^{-1}
-            {\mathbf{I}^{-\frac{h}{2}, \frac{h}{2}}}^{-1}
-            \mathbf{M}_1^-
-    '''
-
     f = mirror1(f, -1)
     N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, h/2)(f)
-    f = f/Omega_d(N)
+    f = F(f)
+    f = fourier_K_inv(f, 0, h)
+    f = fourier_S(f, +h/2)
+    f = Finv(f)
     f = unmirror1(f)
-
     return real(f)
+
+def fold1(f, sgn=+1):
+    '''
+    
+    >>> fold1(array([0, 1, 2, 3]), +1)
+    array([3, 3])
+    >>> fold1(array([0, 1, 2, 3]), -1)
+    array([-3, -1])
+
+    '''    
+    return f[:f.shape[0]/2] + sgn*f[::-1][:f.shape[0]/2]
+
+
+def fold0(f, sgn=+1):
+    '''
+    
+    >>> fold0(array([0, 1, 2, 3]), +1)
+    array([0, 4, 2])
+    >>> fold0(array([0, 1, 2, 3]), -1)
+    array([ 0, -2, -2])
+
+    '''    
+    return (    hstack([f[:f.shape[0]/2], [0]]) + 
+            sgn*hstack([[0], f[::-1][:f.shape[0]/2]]) )
+
+def unfold0(f):
+    '''
+    
+    >>> unfold0(array([ 1, 1, 1]))
+    array([ 1. ,  0.5, -1. , -0.5])
+    '''
+    return hstack([ [f[0]], .5*f[1:-1], [-f[-1]], -.5*f[1:-1][::-1] ])
 
 def H0_cheb(f):
-    r'''
-    .. math::
-
-        \mathbf{H}^0 &=& 
-                \mathbf{A}
-                \mathbf{M}_0^{\dagger}
-                \mathbf{I}^{0, +\frac{h}{2}}
-                \mathbf{\Omega} 
-                \mathbf{E}^{N-1}
-                \mathbf{M}_0^{+}
     '''
-    N = f.shape[0]; h = pi/(N-1)
+    
+    >>> to_matrix(H0_cheb, 2)
+    array([[ 0.75,  0.25],
+           [ 0.25,  0.75]])
+       
+    '''
     f = mirror0(f, +1)
-    f = E_space(N-1)(f)
-    f = f*Omega(f.shape[0])
-    f = I_space(0, h/2)(f)
-    f = unmirror1(f)
-    f = matA(f)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K(f, 0, h/2)
+    f = Finv(f)
+    f = fold0(f, -1)
     return real(f)
 
-def H0_cheb_alternate(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^0 = \mathbf{M}_0^{\dagger}
-            (\mathcal{A}^{0} \mathbf{E}^{-1} \mathbf{I}^{-\frac{h}{2}, 0} +
-             \mathcal{A}^{N-1} \mathbf{E}^{-1} \mathbf{I}^{0, +\frac{h}{2}})
-             \mathbf{\Omega} \mathbf{E}^{1}
-             \mathbf{M}_0^{+}
+def H1d_cheb_new(f):
     '''
-    N = f.shape[0]
-    f = mirror0(f, +1)
-    h = 2*pi/f.shape[0]
-    f = E_space(1)(f)
-    f = f*Omega(f.shape[0])
-    l, r = I_space(-h/2, 0)(f), I_space(0, +h/2)(f)
-    l, r = E_space_inv(1)(l), E_space_inv(1)(r)
-    l[0], r[N-1] = 0, 0
-    f = l+r
+    
+    >>> to_matrix(H1d_cheb, 2)
+    array([[ 1.5, -0.5],
+           [-0.5,  1.5]])
+    '''
+ 
+    
+#     f=f.copy()
+#     aa, bb = f[0], f[-1]
+#     f[0], f[-1] = 0, 0
+#     f = mirror0(f, -1)
+#     N = f.shape[0]; h = 2*pi/N
+#     f = F(f)
+#     f = fourier_K_inv(f, -h/2, h/2)
+#     f = Finv(f)
+#     f = unmirror0(f)
+#     return real(f)
+    
+    f = unfold0(f)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K_inv(f, 0, h/2)
+    f = Finv(f)
     f = unmirror0(f)
-    #TODO: Is it possible to avoid discarding the imaginary part?
-    f = real(f)
-    return  f
+    return real(f)
 
 def H1d_cheb(f):
-    r'''
-
-    .. math::
-        
-        \widetilde{\mathbf{H}}^{1} = \mathbf{M}_{0}^{\dagger}
-                                     \left(\mathbf{T^{-\frac{h}{2}}}\mathbf{\Omega}^{-1}\mathbf{T}^{\frac{h}{2}}-
-                                                                    \mathbf{B}\mathbf{I}^{0,\frac{h}{2}}-
-                                                                    \mathbf{B}^{\dagger}\mathbf{I}^{-\frac{h}{2},0}\right)
-                                     \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}{}^{-1}\mathbf{M}_{0}^{-}\mathbf{C}+
-                                     \mathbf{B}+\mathbf{B}^{\dagger}
-
-    '''
     N = f.shape[0]; h = pi/(N-1)
-    B = half_edge_base(N)
     def endpoints(f):
         f0 = mirror0(matC(f), -1)
         aa = f - unmirror0(I_space(0, h/2)(I_space_inv(-h/2, h/2)(f0)))
@@ -1594,91 +1272,3 @@ def laplacian(g):
     Ld = lambda x: H1(D(H1d(DD(x))))
 
     return L, Ld
-
-class Grid_1D_Chebyshev:
-    
-    def __init__(self, n, xmin=-1, xmax=+1):
-
-        N = n
-        dimension = 1
-    
-        # 2n-1 points: n primal, n-1 dual
-        x = sin(linspace(-pi/2, pi/2, 2*n-1))
-        p = 0.5*(xmin*(1-x) + xmax*(1+x))
-    
-        verts = p[::2]
-        delta = diff(verts)
-        edges = (verts[:-1], verts[1:])
-    
-        verts_dual = p[1::2]
-        tmp = concatenate(([p[0]], verts_dual, [p[-1]]))
-        delta_dual = diff(tmp)
-        edges_dual = (tmp[:-1], tmp[1:])
-    
-        V = verts
-        S0 = arange(len(V))
-        S1 = (S0[:-1], S0[1:])
-    
-        Vd = verts_dual
-        S0d = arange(len(Vd))
-        S1d = (S0d[:-1], S0d[1:])
-
-        self.dimension = dimension
-        self.n = n
-        self.xmin = xmin
-        self.xmax = xmax
-        self.delta = delta
-        self.delta_dual = delta_dual
-        self.pnts = p
-        self.verts = verts
-        self.verts_dual = verts_dual
-        self.edges = edges
-        self.edges_dual = edges_dual
-
-    def projection(self):
-        P0 = lambda f: f(self.verts)
-        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
-        #P1 = lambda f: integrate_chebyshev(self.verts, f)
-        P0d = lambda f: f(self.verts_dual)
-        #P1d = lambda f: integrate_chebyshev_dual(
-        #        concatenate(([-1], self.verts_dual, [+1])), f)
-        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
-        return P0, P1, P0d, P1d
-
-    def basis_fn(self):
-        n = self.n
-        B0  = [lambda x, i=i:  psi0(n, i, x) for i in range(n)]
-        B1  = [lambda x, i=i:  psi1(n, i, x) for i in range(n-1)]
-        B0d = [lambda x, i=i: psid0(n, i, x) for i in range(n-1)]
-        B1d = [lambda x, i=i: psid1(n, i, x) for i in range(n)]
-        return B0, B1, B0d, B1d
-
-    def reconstruction(self):
-        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
-        return R0, R1, R0d, R1d
-
-    def boundary_condition(self, f):
-        bc = zeros((self.n, ))
-        bc[ 0] = -f(self.xmin)
-        bc[-1] = +f(self.xmax)
-        return bc
-
-    def derivative(self):
-        D0 = lambda f: diff(f)
-        D0d = lambda f: diff(concatenate(([0], f, [0])))
-        return D0, D0d
-
-    def hodge_star(self):
-        H0 = H0_cheb
-        H1 = H1_cheb
-        H0d = H0d_cheb
-        H1d = H1d_cheb
-        return H0, H1, H0d, H1d
-
-    def contraction(self, V):
-        '''
-        Implement contraction where V is the one-form corresponding to the vector field.
-        '''
-        def C1(alpha):
-            return None
-        return C1

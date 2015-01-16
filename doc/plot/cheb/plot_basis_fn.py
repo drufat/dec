@@ -1,5 +1,5 @@
 from pylab import *
-from dec.spectral import *
+from dec.grid1 import *
 
 def fix_axis_labels():
     axis([-pi, 3 * pi, -0.5, 1.5])

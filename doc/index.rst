@@ -23,11 +23,11 @@ Operators
 Grids
 ======
 
-.. autofunction:: dec.spectral.Grid_1D_Periodic
+.. autofunction:: dec.grid1.Grid_1D_Periodic
 
-.. autofunction:: dec.spectral.Grid_1D_Chebyshev
+.. autofunction:: dec.grid1.Grid_1D_Chebyshev
 
-.. autofunction:: dec.spectral.Grid_1D_Regular
+.. autofunction:: dec.grid1.Grid_1D_Regular
 
 
 Installation

@@ -26,7 +26,7 @@ Periodic Basis Functions
 
 .. plot:: 
 
-    from dec.spectral import *
+    from dec.grid1 import *
     from matplotlib.pyplot import *
     from dec.plot import plot_bases_1d
     N = 5
@@ -64,7 +64,7 @@ symmetric bases functions for 0-forms?
 
 .. plot:: 
 
-    from dec.spectral import *
+    from dec.grid1 import *
     from matplotlib.pyplot import *
     from dec.plot import plot_bases_1d
     
@@ -93,7 +93,7 @@ Chebyshev Basis Functions
 
 .. plot:: 
 
-    from dec.spectral import *
+    from dec.grid1 import *
     from matplotlib.pyplot import *
     from dec.plot import plot_bases_1d
     N = 5

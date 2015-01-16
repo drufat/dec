@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from numpy import *
-from dec.spectral2 import Grid_2D_Periodic
+from dec.grid2 import Grid_2D_Periodic
 
 X = linspace(0, 2*pi, 30)
 Y = linspace(0, 2*pi, 30)

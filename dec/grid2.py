@@ -4,8 +4,7 @@ Spectral DEC in 2D
 '''
 from numpy import *
 from dec.helper import *
-from dec.spectral import *
-from functools import reduce
+from dec.grid1 import *
 
 def cartesian_product(X, Y):
     '''
@@ -200,7 +199,6 @@ def laplacian2(g):
     return L0, L1, L0d, L1d
 
 def _draw(plt, pnts, xytext=(10,10), color='k', fc='blue'):
-
     def average(pnts):
         Sx, Sy = [reduce(operator.add, x) for x in zip(*pnts)]
         Lx, Ly = list(map(len, list(zip(*pnts))))
