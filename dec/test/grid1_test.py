@@ -40,7 +40,7 @@ eq = assert_array_almost_equal
 
 def test_d_equivalence():
     g = Grid_1D_Periodic(10)
-    F = lambda x: exp(sin(13*x))
+    F = lambda x: sin(5*x)
 
     M = g.derivative_matrix()
     d, dd = [(lambda f: M[0]*f), (lambda f: M[1]*f)]

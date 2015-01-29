@@ -1,10 +1,10 @@
-from numpy import *
+import numpy as np
 import itertools
 
-class Form(ndarray):
+class Form(np.ndarray):
 
     def __new__(cls, input_array, grid=None, degree=None, primal=None):
-        obj = asarray(input_array).view(cls)
+        obj = np.asarray(input_array).view(cls)
         obj.grid = grid
         obj.degree = degree
         obj.primal = primal

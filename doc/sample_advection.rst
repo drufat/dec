@@ -57,10 +57,29 @@ Example 1
 
     from dec.symbolic import *
     import matplotlib.pyplot as plt
-    plot(plt, V1, p1)
+    plot(plt, V[0], p[0])
     plt.show()
 
 Example 2
+..........
+
+Is this the Rudman vortex?
+
+.. math::
+
+    \mathbf{v}(x, y) & = & \left \{ - \sin{\left (\frac{y}{2} \right )} \cos{\left (\frac{x}{2} \right )}, \quad \sin{\left (\frac{x}{2} \right )} \cos{\left (\frac{y}{2} \right )}\right \}  \\
+    \omega (x,y) & = & \cos{\left (\frac{x}{2} \right )} \cos{\left (\frac{y}{2} \right )} \\
+    p(x,y) & = & - \frac{1}{4} \cos{\left (x \right )} - \frac{1}{4} \cos{\left (y \right )} \\
+    \dot{\mathbf{v}}(x,y) & = & \left\{0 , 0\right\}
+
+.. plot::
+
+    from dec.symbolic import *
+    import matplotlib.pyplot as plt
+    plot(plt, V[1], p[1])
+    plt.show()
+
+Example 3
 ..........
 
 .. math::
@@ -74,10 +93,10 @@ Example 2
 
     from dec.symbolic import *
     import matplotlib.pyplot as plt
-    plot(plt, V2, p2)
+    plot(plt, V[2], p[2])
     plt.show()
 
-Example 3
+Example 4
 ..........
 
 .. math::
@@ -91,10 +110,10 @@ Example 3
 
     from dec.symbolic import *
     import matplotlib.pyplot as plt
-    plot(plt, V3, p3)
+    plot(plt, V[3], p[3])
     plt.show()
 
-Example 4
+Example 5
 ..........
 
 .. math::
@@ -107,7 +126,7 @@ Example 4
 
     from dec.symbolic import *
     import matplotlib.pyplot as plt
-    plot(plt, V4, p4)
+    plot(plt, V[4], p[4])
     plt.show()
 
 .. autofunction:: dec.symbolic.div

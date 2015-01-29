@@ -1,3 +1,4 @@
+from dec.spectral import *
 from dec.grid1 import *
 import matplotlib.pyplot as plt
 

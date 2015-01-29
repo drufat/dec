@@ -65,7 +65,6 @@ class Grid_2D_Cartesian:
         self.faces = faces
         self.faces_dual = faces_dual
 
-
     def projection(self):
         P0  = lambda f: f(*self.verts)
         P0d = lambda f: f(*self.verts_dual)
@@ -96,7 +95,7 @@ class Grid_2D_Cartesian:
         return B0, B1, B2, B0d, B1d, B2d
 
     def reconstruction(self):
-        R0, R1, R2, R0d, R1d, R2d = reconstruction(basis_fn())
+        R0, R1, R2, R0d, R1d, R2d = reconstruction(self.basis_fn())
         return R0, R1, R2, R0d, R1d, R2d
 
     def derivative(self):
@@ -118,6 +117,9 @@ class Grid_2D_Cartesian:
         return D0, D1, D0d, D1d
 
     def boundary_condition(self):
+        '''
+        Two types of boundaries: Vertices(0) or Edges(1). 
+        '''
 
         def BC0(f):
             ((x0, y0), (x1,y1)) = self.edges_dual[0]
@@ -182,11 +184,15 @@ class Grid_2D_Cartesian:
         def C1(f):
             alphax, alphay = f
             ax, ay = Sinvx(H1x(alphax)), Sinvy(H1y(alphay))
-            return ( ax*vx + ay*vy )
+            c = ax*vx + ay*vy
+            return real(c)
         
         def C2(f):
             o = H1x(H1y(f))
-            raise ( -o*vy, o*vx )
+            #TODO: since we are multiplying, should we not refine the grid first?
+            ax, ay = -Sinvy(o)*vy, Sinvx(o)*vx
+            cx, cy = H0dx(Sx(ax)), H0dy(Sy(ay))
+            return ( real(cx), real(cy) )
         
         return C1, C2
 

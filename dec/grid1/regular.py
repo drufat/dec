@@ -67,3 +67,66 @@ class Grid_1D_Regular:
         H1d = H1d_regular
         return H0, H1, H0d, H1d
     
+def H1d_regular(f):
+    r'''
+
+    .. math::
+        \widetilde{\mathbf{H}}^{1}=
+            \mathbf{M}_{1}^{\dagger}
+            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
+            \mathbf{M}_{1}^{+}
+            \mathbf{A}^{-1}
+    '''
+    f = f/A_diag(f.shape[0])
+    f = mirror0(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space_inv(-h/2, +h/2)(f)
+    f = unmirror0(f)
+    return f
+
+def H0_regular(f):
+    r'''
+
+    .. math::
+        \mathbf{H}^{0}=
+            \mathbf{A}
+            \mathbf{M}_{0}^{\dagger}
+            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
+            \mathbf{M}_{0}^{+}
+    '''
+    f = mirror0(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space(-h/2, h/2)(f)
+    f = unmirror0(f)
+    f = f*A_diag(f.shape[0])
+    return  f
+
+def H1_regular(f):
+    r'''
+
+    .. math::
+        \mathbf{H}^{1}=
+            \mathbf{M}_{1}^{\dagger}
+            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
+            \mathbf{M}_{1}^{+}
+    '''
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space_inv(-h/2, h/2)(f)
+    f = unmirror1(f)
+    return f
+
+def H0d_regular(f):
+    r'''
+
+    .. math::
+        \widetilde{\mathbf{H}}^{0}=
+            \mathbf{M}_{1}^{\dagger}
+            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
+            \mathbf{M}_{1}^{+}
+    '''
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = I_space(-h/2, h/2)(f)
+    f = unmirror1(f)
+    return f

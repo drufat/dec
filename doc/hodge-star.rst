@@ -12,10 +12,10 @@ where
 Regular Hodge-Star
 ----------------------------
 
-.. autofunction:: dec.spectral.H0d_regular
-.. autofunction:: dec.spectral.H1_regular
-.. autofunction:: dec.spectral.H0_regular
-.. autofunction:: dec.spectral.H1d_regular
+.. autofunction:: dec.grid1.regular.H0d_regular
+.. autofunction:: dec.grid1.regular.H1_regular
+.. autofunction:: dec.grid1.regular.H0_regular
+.. autofunction:: dec.grid1.regular.H1d_regular
 
 where 
 
@@ -26,10 +26,10 @@ Note that these correspond to the symmetric basis functions for 1-forms.
 Chebyshev Hodge-Star
 ----------------------------
 
-.. autofunction:: dec.spectral.H0d_cheb
-.. autofunction:: dec.spectral.H1_cheb
-.. autofunction:: dec.spectral.H0_cheb
-.. autofunction:: dec.spectral.H1d_cheb
+.. autofunction:: dec.grid1.chebyshev.H0d_cheb
+.. autofunction:: dec.grid1.chebyshev.H1_cheb
+.. autofunction:: dec.grid1.chebyshev.H0_cheb
+.. autofunction:: dec.grid1.chebyshev.H1d_cheb
 
 where 
 

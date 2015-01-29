@@ -2,8 +2,8 @@
 Spectral DEC
 =============
 '''
-from dec.helper import *
 from numpy import *
+from dec.helper import *
 from dec.forms import *
 from numpy.testing import assert_almost_equal
 import operator
@@ -13,7 +13,7 @@ try:
 except ImportError:
     from scipy.linalg.basic import toeplitz
 
-seterr(divide='ignore', invalid='ignore')
+np.seterr(divide='ignore', invalid='ignore')
 
 def alpha0(N, x):
     r'''
@@ -671,70 +671,6 @@ def A_diag(N):
     d = concatenate(([0.5], ones(N-2), [0.5]))
     return d
 
-def H1d_regular(f):
-    r'''
-
-    .. math::
-        \widetilde{\mathbf{H}}^{1}=
-            \mathbf{M}_{1}^{\dagger}
-            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
-            \mathbf{M}_{1}^{+}
-            \mathbf{A}^{-1}
-    '''
-    f = f/A_diag(f.shape[0])
-    f = mirror0(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, +h/2)(f)
-    f = unmirror0(f)
-    return f
-
-def H0_regular(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^{0}=
-            \mathbf{A}
-            \mathbf{M}_{0}^{\dagger}
-            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-            \mathbf{M}_{0}^{+}
-    '''
-    f = mirror0(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror0(f)
-    f = f*A_diag(f.shape[0])
-    return  f
-
-def H1_regular(f):
-    r'''
-
-    .. math::
-        \mathbf{H}^{1}=
-            \mathbf{M}_{1}^{\dagger}
-            {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
-            \mathbf{M}_{1}^{+}
-    '''
-    f = mirror1(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, h/2)(f)
-    f = unmirror1(f)
-    return f
-
-def H0d_regular(f):
-    r'''
-
-    .. math::
-        \widetilde{\mathbf{H}}^{0}=
-            \mathbf{M}_{1}^{\dagger}
-            \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
-            \mathbf{M}_{1}^{+}
-    '''
-    f = mirror1(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror1(f)
-    return f
-
 def extend(f, n):
     r'''
 
@@ -1177,87 +1113,6 @@ def unfold0(f):
     array([ 1. ,  0.5, -1. , -0.5])
     '''
     return hstack([ [f[0]], .5*f[1:-1], [-f[-1]], -.5*f[1:-1][::-1] ])
-
-def H0d_cheb(f):
-    f = mirror1(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_S(f, -h/2)
-    f = fourier_K(f, 0, h)
-    f = Finv(f)
-    f = unmirror1(f)
-    return real(f)
-
-def H1_cheb(f):
-    f = mirror1(f, -1)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K_inv(f, 0, h)
-    f = fourier_S(f, +h/2)
-    f = Finv(f)
-    f = unmirror1(f)
-    return real(f)
-
-def H0_cheb(f):
-    '''
-    
-    >>> to_matrix(H0_cheb, 2)
-    array([[ 0.75,  0.25],
-           [ 0.25,  0.75]])
-       
-    '''
-    f = mirror0(f, +1)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K(f, 0, h/2)
-    f = Finv(f)
-    f = fold0(f, -1)
-    return real(f)
-
-def H1d_cheb_new(f):
-     
-#     f=f.copy()
-#     aa, bb = f[0], f[-1]
-#     f[0], f[-1] = 0, 0
-#     f = mirror0(f, -1)
-#     N = f.shape[0]; h = 2*pi/N
-#     f = F(f)
-#     f = fourier_K_inv(f, -h/2, h/2)
-#     f = Finv(f)
-#     f = unmirror0(f)
-#     return real(f)
-    
-    f = unfold0(f)
-    N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K_inv(f, 0, h/2)
-    f = Finv(f)
-    f = unmirror0(f)
-    return real(f)
-
-def H1d_cheb(f):
-    '''
-    
-    >>> to_matrix(H1d_cheb, 2)
-    array([[ 1.5, -0.5],
-           [-0.5,  1.5]])
-    '''
-    N = f.shape[0]; h = pi/(N-1)
-    def endpoints(f):
-        f0 = mirror0(matC(f), -1)
-        aa = f - unmirror0(I_space(0, h/2)(I_space_inv(-h/2, h/2)(f0)))
-        bb = f - unmirror0(I_space(-h/2, 0)(I_space_inv(-h/2, h/2)(f0)))
-        return matB(aa) + matB1(bb)
-    def midpoints(f):
-        f = mirror0(matC(f), -1)
-        # Shift function with S, Sinv to avoid division by zero at x=0, x=pi
-        f = I_space_inv(-h/2, h/2)(f)
-        f = T_space(+h/2)(f)
-        f = f/Omega_d(f.shape[0])
-        f = T_space(-h/2)(f)
-        f = unmirror0(f)
-        return f
-    return midpoints(f) + endpoints(f)
 
 def laplacian(g):
     '''

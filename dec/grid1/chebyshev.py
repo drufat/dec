@@ -45,9 +45,9 @@ class Grid_1D_Chebyshev:
         #P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
         P1 = lambda f: integrate_chebyshev(self.verts, f)
         P0d = lambda f: f(self.verts_dual)
+        #P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         P1d = lambda f: integrate_chebyshev_dual(
                 concatenate(([-1], self.verts_dual, [+1])), f)
-        #P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
@@ -83,17 +83,106 @@ class Grid_1D_Chebyshev:
     def switch(self):
         return S_cheb, S_cheb_pinv
 
+    def wedge(self):
+        
+        def w00(a, b):
+            return a*b
+        
+        def w01(a, b):
+            raise NotImplemented
+        
+        return w00, w01
+
     def contraction(self, V):
         '''
         Implement contraction where V is the one-form corresponding to the vector field.
         '''
         S, Sinv = self.switch()
         H0, H1, H0d, H1d = self.hodge_star()
-
-        def C1(f):                
-            return Sinv(H1(V)) * Sinv(H1(f))
-        
+        def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
         return C1
+
+
+def H0d_cheb(f):
+    f = mirror1(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_S(f, -h/2)
+    f = fourier_K(f, 0, h)
+    f = Finv(f)
+    f = unmirror1(f)
+    return real(f)
+
+def H1_cheb(f):
+    f = mirror1(f, -1)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K_inv(f, 0, h)
+    f = fourier_S(f, +h/2)
+    f = Finv(f)
+    f = unmirror1(f)
+    return real(f)
+
+def H0_cheb(f):
+    '''
+    
+    >>> to_matrix(H0_cheb, 2)
+    array([[ 0.75,  0.25],
+           [ 0.25,  0.75]])
+       
+    '''
+    f = mirror0(f, +1)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K(f, 0, h/2)
+    f = Finv(f)
+    f = fold0(f, -1)
+    return real(f)
+
+def H1d_cheb_new(f):
+     
+#     f=f.copy()
+#     aa, bb = f[0], f[-1]
+#     f[0], f[-1] = 0, 0
+#     f = mirror0(f, -1)
+#     N = f.shape[0]; h = 2*pi/N
+#     f = F(f)
+#     f = fourier_K_inv(f, -h/2, h/2)
+#     f = Finv(f)
+#     f = unmirror0(f)
+#     return real(f)
+    
+    f = unfold0(f)
+    N = f.shape[0]; h = 2*pi/N
+    f = F(f)
+    f = fourier_K_inv(f, 0, h/2)
+    f = Finv(f)
+    f = unmirror0(f)
+    return real(f)
+
+def H1d_cheb(f):
+    '''
+    
+    >>> to_matrix(H1d_cheb, 2)
+    array([[ 1.5, -0.5],
+           [-0.5,  1.5]])
+    '''
+    N = f.shape[0]; h = pi/(N-1)
+    def endpoints(f):
+        f0 = mirror0(matC(f), -1)
+        aa = f - unmirror0(I_space(0, h/2)(I_space_inv(-h/2, h/2)(f0)))
+        bb = f - unmirror0(I_space(-h/2, 0)(I_space_inv(-h/2, h/2)(f0)))
+        return matB(aa) + matB1(bb)
+    def midpoints(f):
+        f = mirror0(matC(f), -1)
+        # Shift function with S, Sinv to avoid division by zero at x=0, x=pi
+        f = I_space_inv(-h/2, h/2)(f)
+        f = T_space(+h/2)(f)
+        f = f/Omega_d(f.shape[0])
+        f = T_space(-h/2)(f)
+        f = unmirror0(f)
+        return f
+    return midpoints(f) + endpoints(f)
     
 def S_cheb(f):
     '''

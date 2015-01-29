@@ -1,5 +1,6 @@
 import dec
 from dec.grid1 import *
+from dec.spectral import *
 
 def run():
     size = [int(x) for x in exp(linspace(log(3), log(50), 30))]

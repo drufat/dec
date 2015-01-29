@@ -1,21 +1,30 @@
-from sympy import *
 import numpy as np
+from sympy import (symbols, Function, diff, lambdify, simplify,
+                   sympify, 
+                   integrate, Integral, 
+                   sin, cos)
 
 x, y = symbols('x y')
 u, v = Function('u')(x,y), Function('v')(x,y)
 f, g = Function('f')(x,y), Function('g')(x,y)
 D = diff
 
-V1 = (-2*sin(y)*cos(x/2)**2,
-       2*sin(x)*cos(y/2)**2)
-V2 = (-sin(y), sin(x))
-V3 = (-sin(2*y), sin(x))
-V4 = (1, 0)
+V = [
+    (-2*sin(y)*cos(x/2)**2,
+      2*sin(x)*cos(y/2)**2), 
+    (-cos(x/2)*sin(y/2), sin(x/2)*cos(y/2)),
+    (-sin(y), sin(x)), 
+    (-sin(2*y), sin(x)), 
+    (1, 0)
+]
 
-p1 = (-cos(2*x)*(5+4*cos(y))-5*(4*cos(y)+cos(2*y))-4*cos(x)*(5+5*cos(y)+cos(2*y)))/20
-p2 = -cos(x)*cos(y)
-p3 = -4*cos(x)*cos(2*y)/5
-p4 = 0
+p  = [
+    (-cos(2*x)*(5+4*cos(y))-5*(4*cos(y)+cos(2*y))-4*cos(x)*(5+5*cos(y)+cos(2*y)))/20, 
+    -(cos(x)+cos(y))/4,
+    -cos(x)*cos(y),
+    -4*cos(x)*cos(2*y)/5,
+    0
+]
 
 def derivatives():
     '''
@@ -62,6 +71,7 @@ def contractions(X):
 
 def lie_derivatives(X):
     '''
+    >>> from sympy import expand
     >>> L0, L1, L2 = lie_derivatives((u,v))
     >>> L0(f) == u*D(f, x) + v*D(f, y)
     True
@@ -79,11 +89,11 @@ def lie_derivatives(X):
     D0, D1 = derivatives()
     C1, C2 = contractions(X)
     
-    def L0(f): return C1(D0(f))
-    def L1(f): return plus(C2(D1(f)), D0(C1(f)))
+    def l0(f): return C1(D0(f))
+    def l1(f): return plus(C2(D1(f)), D0(C1(f)))
     def L2(f): return D1(C2(f))
 
-    return L0, L1, L2
+    return l0, l1, L2
 
 def plus(a, b): return (a[0]+b[0], a[1]+b[1])
 
@@ -95,7 +105,8 @@ def laplacians():
     True
     >>> l2(f) == D(f, x, x) + D(f, y, y)
     True
-    >>> l1((f,g)) == (D(f, x, x) + D(f, y, y), D(g, x, x) + D(g, y, y))
+    >>> l1((f,g)) == (D(f, x, x) + D(f, y, y), 
+    ...               D(g, x, x) + D(g, y, y))
     True
     '''
     D0, D1 = derivatives()
@@ -139,12 +150,109 @@ def adv(V):
     >>> simplify(adv((u,v))) == (u*D(u,x)+v*D(u,y), u*D(v,x)+v*D(v,y))
     True
     '''
-    L1 = lie_derivatives(V)[1]    
-    return plus( L1(V), grad(-(V[0]**2+V[1]**2)/2) )
+    l1 = lie_derivatives(V)[1]    
+    return plus( l1(V), grad(-(V[0]**2+V[1]**2)/2) )
+
+def projections1():
+    '''
+    >>> x0, x1 = symbols('x0 x1')
+    >>> P0, P1 = projections1()
+    >>> P0(x) == x0
+    True
+    >>> P1(x) == x1**2/2 - x0**2/2
+    True
+    >>> P1(1) == x1 - x0
+    True
+    '''
+    x0, x1 = symbols('x0 x1')
+
+    def P0(f):
+        f = sympify(f)
+        return f.subs(x, x0)
+
+    def P1(f):
+        f = sympify(f)
+        iexpr = integrate(f, (x, x0, x1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+    
+    return P0, P1
+
+def projections2():
+    '''
+    >>> x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
+    >>> P0, P1, P2 = projections2()
+    >>> P0(x*y) == x0*y0
+    True
+    >>> P1((x, 0)) == x1**2/2 - x0**2/2
+    True
+    >>> P1((1, 0)) == x1 - x0
+    True
+    >>> P1((1, 1)) == y1 - y0 + x1 - x0
+    True
+    >>> from sympy import expand
+    >>> P2(1) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+    True
+    '''
+
+    x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
+     
+    def P0(f):
+        return f.subs({x:x0, y:y0})
+ 
+    def P1(f):
+        ux, uy = sympify(f[0]), sympify(f[1])
+        s = symbols('s')
+        lx, ly = x1 - x0, y1 - y0
+        subst = ((x, x0*(1-s) + x1*s),
+                 (y, y0*(1-s) + y1*s))
+        integrand = (ux.subs(subst)*lx + 
+                     uy.subs(subst)*ly)
+        iexpr = integrate(integrand,  (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+                 
+    def P2(f):
+        omega = sympify(f)
+        s, t = symbols('s t')
+        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
+        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
+                 (y, y0*(1-s-t) + y1*s + y2*t))
+        integrand = (omega.subs(subst)*A)
+        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+    
+    return P0, P1, P2
+
+def lambdify2():
+    '''
+    >>> l0, l1 = lambdify2()
+    >>> l0(x*y)(1, 2) == (lambda x, y: x*y)(1, 2)
+    True
+    >>> l1((x, y))(1, 2) == (lambda x, y: (x,y))(1, 2)
+    True
+    '''
+
+    def l0(f):
+        return lambdify((x,y), f, 'numpy')   
+
+    def l1(f):
+        def f_(x_, y_, f=f):
+            return (lambdify((x,y), f[0], 'numpy')(x_, y_), 
+                    lambdify((x,y), f[1], 'numpy')(x_, y_))
+        return f_
+ 
+    return l0, l1
 
 def plot(plt, V, p):
 
     #print(simplify( div(adv(V)) + div(grad(p)) ))
+
+    plt.figure(figsize=(8,8))
 
     scale = [-np.pi, np.pi]
     axes = [
@@ -186,3 +294,4 @@ def plot(plt, V, p):
     P = lambdify((x,y), p, 'numpy')(X, Y) + 0*X
     axes[3].contourf(X, Y, P)
     axes[3].set_title(r'$p(x,y)$')
+    
