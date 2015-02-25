@@ -118,7 +118,7 @@ class Grid_2D_Cartesian:
 
     def boundary_condition(self):
         '''
-        Two types of boundaries: Vertices(0) or Edges(1). 
+        Two types of boundaries: Vertices (0) or Edges (1). 
         '''
 
         def BC0(f):
