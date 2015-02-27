@@ -1125,3 +1125,13 @@ def laplacian(g):
     Ld = lambda x: H1(D(H1d(DD(x))))
 
     return L, Ld
+
+def contraction1(g, V):
+    '''
+    Implement contraction for a 1D grid where V is the one-form corresponding to the vector field.
+    '''
+    S, Sinv = g.switch()
+    H0, H1, H0d, H1d = g.hodge_star()
+    def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
+    return C1
+

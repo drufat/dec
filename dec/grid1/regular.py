@@ -67,6 +67,13 @@ class Grid_1D_Regular:
         H1d = H1d_regular
         return H0, H1, H0d, H1d
     
+    def contraction(self):
+        raise NotImplemented
+    
+    def wedge(self):
+        raise NotImplemented
+    
+    
 def H1d_regular(f):
     r'''
 

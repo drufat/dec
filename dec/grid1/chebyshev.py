@@ -94,14 +94,7 @@ class Grid_1D_Chebyshev:
         return w00, w01
 
     def contraction(self, V):
-        '''
-        Implement contraction where V is the one-form corresponding to the vector field.
-        '''
-        S, Sinv = self.switch()
-        H0, H1, H0d, H1d = self.hodge_star()
-        def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
-        return C1
-
+        return contraction1(self, V)
 
 def H0d_cheb(f):
     f = mirror1(f, +1)

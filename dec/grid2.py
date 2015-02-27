@@ -26,6 +26,7 @@ Grid_2D_Interface = '''
     reconstruction
     derivative
     hodge_star
+    contraction
     gx gy
 '''.split()
 
@@ -109,9 +110,9 @@ class Grid_2D_Cartesian:
         Dx, Ddx = deriv(self.gx, axis=1)
         Dy, Ddy = deriv(self.gy, axis=0)
 
-        D0 = lambda f: (Dx(f), Dy(f))
+        D0  = lambda f: (Dx(f), Dy(f))
         D0d = lambda f: (Ddx(f), Ddy(f))
-        D1 = lambda f: -Dy(f[0]) + Dx(f[1])
+        D1  = lambda f: -Dy(f[0]) + Dx(f[1])
         D1d = lambda f: -Ddy(f[0]) + Ddx(f[1])
 
         return D0, D1, D0d, D1d
@@ -189,7 +190,8 @@ class Grid_2D_Cartesian:
         
         def C2(f):
             o = H1x(H1y(f))
-            #TODO: since we are multiplying, should we not refine the grid first?
+            #TODO: since we are multiplying, we need to refine the grid first. 
+            #TODO: best to implement a wedge, and use that instead of *
             ax, ay = -Sinvy(o)*vy, Sinvx(o)*vx
             cx, cy = H0dx(Sx(ax)), H0dy(Sy(ay))
             return ( real(cx), real(cy) )

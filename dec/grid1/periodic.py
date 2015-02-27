@@ -120,8 +120,8 @@ class Grid_1D_Periodic:
         def _w01(alpha, beta):
             return S(H( alpha * Hinv(Sinv(beta)) ))
         def w01(alpha, beta):
-#            a = interweave(alpha, T(alpha, [S]))
-#            b = interweave(T(beta, [Hinv, Sinv]), T(beta, [Hinv]))
+            #a = interweave(alpha, T(alpha, [S]))
+            #b = interweave(T(beta, [Hinv, Sinv]), T(beta, [Hinv]))
             a = refine(alpha)
             b = refine(Hinv(Sinv(beta)))
             c = S(H(a * b))
@@ -136,12 +136,6 @@ class Grid_1D_Periodic:
         return S, Sinv
 
     def contraction(self, V):
-        '''
-        Return i_V. Keep only for primal forms for now.
-        '''
-        S, Sinv = self.switch()
-        H0, H1, H0d, H1d = self.hodge_star()
-        def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
-        return C1
+        return contraction1(self, V)
 
 

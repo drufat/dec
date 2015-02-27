@@ -12,5 +12,7 @@ Grid_1D_Interface = '''
     projection
     derivative
     hodge_star
+    contraction
+    wedge
 '''.split()
 

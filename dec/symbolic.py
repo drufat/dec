@@ -9,6 +9,9 @@ u, v = Function('u')(x,y), Function('v')(x,y)
 f, g = Function('f')(x,y), Function('g')(x,y)
 D = diff
 
+"""
+V represents the velocity vector field.
+"""
 V = [
     (-2*sin(y)*cos(x/2)**2,
       2*sin(x)*cos(y/2)**2), 
@@ -18,6 +21,9 @@ V = [
     (1, 0)
 ]
 
+"""
+p represents the pressure scalar field.
+"""
 p  = [
     (-cos(2*x)*(5+4*cos(y))-5*(4*cos(y)+cos(2*y))-4*cos(x)*(5+5*cos(y)+cos(2*y)))/20, 
     -(cos(x)+cos(y))/4,
@@ -95,7 +101,8 @@ def lie_derivatives(X):
 
     return l0, l1, L2
 
-def plus(a, b): return (a[0]+b[0], a[1]+b[1])
+def plus(a, b): 
+    return (a[0]+b[0], a[1]+b[1])
 
 def laplacians():
     '''
@@ -181,6 +188,9 @@ def projections1():
 
 def projections2():
     '''
+    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices, 
+    and return the result in terms of simplex coordiates. 
+    
     >>> x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
     >>> P0, P1, P2 = projections2()
     >>> P0(x*y) == x0*y0
@@ -250,7 +260,7 @@ def lambdify2():
 
 def plot(plt, V, p):
 
-    #print(simplify( div(adv(V)) + div(grad(p)) ))
+    # print(simplify( div(adv(V)) + div(grad(p)) )) # must be zero
 
     plt.figure(figsize=(8,8))
 
