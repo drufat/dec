@@ -33,7 +33,7 @@ extensions = [
           'sphinx.ext.mathjax',
           'sphinx.ext.viewcode',
           ]
-
+mathjax_path = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
 plot_include_source=False
 
 ## Add any Sphinx extension module names here, as strings. They can be extensions
