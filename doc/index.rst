@@ -8,6 +8,8 @@ Contents
 .. toctree::
    :maxdepth: 3
 
+   contraction
+   wedge
    paper
    bases
    hodge-star

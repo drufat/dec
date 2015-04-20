@@ -1,0 +1,372 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding iso8859-15
+\fontencoding default
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 0
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Wedge Product in Coordinates
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "wedge-product-in-coordinates"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Given a manifold 
+\begin_inset Formula $M$
+\end_inset
+
+, the wedge product is a map that constructs higher order forms 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\wedge:\quad\Lambda^{k}\times\Lambda^{l}\to\Lambda^{k+l}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The wedge product has the following properties: 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\alpha\wedge\beta$
+\end_inset
+
+ is 
+\series bold
+associative
+\series default
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+associative
+\end_layout
+
+\end_inset
+
+: 
+\begin_inset Formula $\alpha\wedge(\beta\wedge\gamma)=(\alpha\wedge\beta)\wedge\gamma$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\alpha\wedge\beta$
+\end_inset
+
+ is 
+\series bold
+bilinear
+\series default
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+bilinear
+\end_layout
+
+\end_inset
+
+ in 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+(a\alpha_{1}+b\alpha_{2})\wedge\beta
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\alpha\wedge(c\beta_{1}+d\beta_{2})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\alpha\wedge\beta$
+\end_inset
+
+ is 
+\series bold
+anticommutative
+\series default
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+anticommutative
+\end_layout
+
+\end_inset
+
+: 
+\begin_inset Formula $\alpha\wedge\beta=(-1)^{kl}\beta\wedge\alpha$
+\end_inset
+
+, where 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ is a 
+\begin_inset Formula $k$
+\end_inset
+
+-form and 
+\begin_inset Formula $\beta$
+\end_inset
+
+ is an 
+\begin_inset Formula $l$
+\end_inset
+
+-form.
+ 
+\end_layout
+
+\begin_layout Standard
+In the discrete setting we will only be able to preserve some of these continuou
+s properties.
+ Namely, the bilinearity and anticommutativity will be preserved exactly,
+ whereas the associativity will be satisfied only in the limit where the
+ mesh size tends to zero (
+\begin_inset Formula $h\to0$
+\end_inset
+
+) and will not be exact.
+\end_layout
+
+\begin_layout Standard
+The wedge product is a an operator that is independent of the metric, i.e.
+ it is a homomorphism under a pull-back:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\varphi^{*}(\alpha\wedge\beta)=(\varphi^{*}\alpha)\wedge(\varphi^{*}\beta)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph*
+Examples
+\end_layout
+
+\begin_layout Standard
+Consider the 
+\series bold
+2D
+\series default
+ case
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\wedge:\quad\Lambda^{0}\times\Lambda^{1}\to\Lambda^{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha\\
+\beta & =\beta_{x}dx+\beta_{y}dy\\
+\alpha\wedge\beta & =\alpha\beta_{x}dx+\alpha\beta_{y}dy
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\wedge:\quad\Lambda^{1}\times\Lambda^{1}\to\Lambda^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha_{x}dx+\alpha_{y}dy\\
+\beta & =\beta_{x}dx+\beta_{y}dy\\
+\alpha\wedge\beta & =\left(\alpha_{x}\beta_{y}-\beta_{x}\alpha_{y}\right)dx\wedge dy
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\series bold
+3D 
+\series default
+case, on the other hand, will be 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\wedge:\quad\Lambda^{0}\times\Lambda^{1}\to\Lambda^{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha\\
+\beta & =\beta_{x}dx+\beta_{y}dy+\beta_{z}dz\\
+\alpha\wedge\beta & =\alpha\beta_{x}dx+\alpha\beta_{y}dy+\alpha\beta_{z}dz
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\wedge:\quad\Lambda^{1}\times\Lambda^{1}\to\Lambda^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha= & \alpha_{x}dx+\alpha_{y}dy+\alpha_{z}dz\\
+\beta= & \beta_{x}dx+\beta_{y}dy+\beta_{z}dz\\
+\alpha\wedge\beta= & (\alpha_{x}\beta_{y}-\alpha_{y}\beta_{x})dx\wedge dy+\\
++ & (\alpha_{y}\beta_{z}-\alpha_{z}\beta_{y})dy\wedge dz+\\
++ & (\alpha_{z}\beta_{x}-\alpha_{x}\beta_{z})dz\wedge dx
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\wedge:\quad\Lambda^{1}\times\Lambda^{2}\to\Lambda^{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha_{x}dx+\alpha_{y}dy+\alpha_{z}dz\\
+\beta & =\beta_{xy}dx\wedge dy+\beta_{yz}dy\wedge dz+\beta_{zx}dz\wedge dx\\
+\alpha\wedge\beta & =(\alpha_{x}\beta_{yz}+\alpha_{y}\beta_{zx}+\alpha_{z}\beta_{xy})dx\wedge dy\wedge dz
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

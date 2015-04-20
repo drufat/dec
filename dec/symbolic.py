@@ -160,10 +160,10 @@ def adv(V):
     l1 = lie_derivatives(V)[1]    
     return plus( l1(V), grad(-(V[0]**2+V[1]**2)/2) )
 
-def projections1():
-    '''
+def projections1d():
+    '''    
     >>> x0, x1 = symbols('x0 x1')
-    >>> P0, P1 = projections1()
+    >>> P0, P1 = projections1d()
     >>> P0(x) == x0
     True
     >>> P1(x) == x1**2/2 - x0**2/2
@@ -186,13 +186,13 @@ def projections1():
     
     return P0, P1
 
-def projections2():
+def projections2d():
     '''
     Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices, 
     and return the result in terms of simplex coordiates. 
     
     >>> x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
-    >>> P0, P1, P2 = projections2()
+    >>> P0, P1, P2 = projections2d()
     >>> P0(x*y) == x0*y0
     True
     >>> P1((x, 0)) == x1**2/2 - x0**2/2

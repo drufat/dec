@@ -36,7 +36,7 @@ class Grid_2D_Cartesian:
 
         dimension = gx.dimension + gy.dimension
     
-        # For all meshgrids hence forth, first argument should have an x, second should have a y
+        # For all meshgrids hence forth, first argument should have an x, second should have an y
         verts = meshgrid(gx.verts, gy.verts)
         verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
         edges = ((meshgrid(gx.edges[0], gy.verts),

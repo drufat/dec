@@ -25,7 +25,7 @@ Primal:
 
 where `a` is Neumann b.c.
 
-Dual
+Dual:
 
 .. math::
 	\mathbf{H}^{1}

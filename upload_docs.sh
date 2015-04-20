@@ -1,21 +1,34 @@
 #!/usr/bin/env bash
 
-repo=`mktemp -d /tmp/doc.XXXXXXXXX`
+function upload_github {
 
-git clone git@github:drufat/dec.git ${repo}
-(
-    cd ${repo}
-    git checkout gh-pages
-    git rm -rf .
-)
+    repo=`mktemp -d /tmp/doc.XXXXXXXXX`
 
-sphinx-build -b html doc ${repo}
-(
-    cd ${repo}
-    touch .nojekyll
-    git add .
-    git commit -a -m "Update documents."
-    git push origin gh-pages
-)
+    git clone git@github:drufat/dec.git ${repo}
+    (
+        cd ${repo}
+        git checkout gh-pages
+        git rm -rf .
+    )
 
-rm -rf ${tmp}
+    sphinx-build -b html doc ${repo}
+    (
+        cd ${repo}
+        touch .nojekyll
+        git add .
+        git commit -a -m "Update documents."
+        git push origin gh-pages
+    )
+
+    rm -rf ${tmp}
+
+}
+
+function upload_private {
+
+    sphinx-build -b html doc build/doc
+    rsync -avz --delete build/doc/ drufat@pi.dzhelil.info:restric/dec
+    
+}
+
+upload_private

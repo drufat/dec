@@ -1,0 +1,282 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding iso8859-15
+\fontencoding default
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Contraction in Coordinates
+\end_layout
+
+\begin_layout Standard
+Given a manifold 
+\begin_inset Formula $M$
+\end_inset
+
+, the interior product is defined as the contraction of a differential form
+ with a vector field.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{i}_{X}:\quad\Lambda^{k}(M)\rightarrow\Lambda^{k-1}(M)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The contraction of a one-form 
+\begin_inset Formula $\alpha=\alpha_{i}e^{i}$
+\end_inset
+
+ with a vector field 
+\begin_inset Formula $X=X^{i}e_{i}$
+\end_inset
+
+ is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathbf{i}_{X}\alpha & =\langle X,\alpha\rangle\\
+ & =\alpha_{i}X^{j}\langle e^{i},e_{j}\rangle\\
+ & =\alpha_{i}X^{j}\delta_{j}^{i}\\
+ & =\alpha_{i}X^{i}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The contraction of a two-form 
+\begin_inset Formula $\beta=\beta_{ij}e^{i}\wedge e^{j}$
+\end_inset
+
+ with the same vector field is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathbf{i}_{X}\beta & =\beta_{ij}\mathbf{i}_{X}(e^{i}\wedge e^{j})\\
+ & =\beta_{ij}\left((\mathbf{i}_{X}e^{i})\wedge e^{j}-e^{i}\wedge(\mathbf{i}_{X}e^{j})\right)\\
+ & =\beta_{ij}\left(X^{i}e^{j}-X^{j}e^{i}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The contraction of a three-form 
+\begin_inset Formula $\gamma=\gamma{}_{ijk}e^{i}\wedge e^{j}\wedge e^{k}$
+\end_inset
+
+ is going to be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\mathbf{i}_{X}\gamma & =\gamma_{ijk}\mathbf{i}_{X}(e^{i}\wedge e^{j}\wedge e^{k})\\
+ & =\gamma_{ijk}\left(\mathbf{i}_{X}e^{i}\wedge e^{j}\wedge e^{k}-e^{i}\wedge\mathbf{i}_{X}e^{j}\wedge e^{k}+e^{i}\wedge e^{j}\wedge\mathbf{i}_{X}e^{k}\right)\\
+ & =\gamma_{ijk}\left(X^{i}e^{j}\wedge e^{k}-X^{j}e^{i}\wedge e^{k}+X^{k}e^{i}\wedge e^{j}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph*
+Examples
+\end_layout
+
+\begin_layout Standard
+In 
+\series bold
+2D
+\series default
+ the explicit formula for the contractions are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{i}:\quad\mathfrak{X}\wedge\Lambda^{1}\to\Lambda^{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha_{x}dx+\alpha_{y}dy\\
+\mathbf{i}_{X}\alpha & =X^{x}\alpha_{x}+X^{y}\alpha_{y}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{i}:\quad\mathfrak{X}\wedge\Lambda^{2}\to\Lambda^{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\beta & =\beta_{xy}\,dx\wedge dy\\
+\mathbf{i}_{X}\beta & =-\beta_{xy}X^{y}dx+\beta_{xy}X^{x}dy
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\series bold
+3D
+\series default
+, on the other hand, the contractions become
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{i}:\quad\mathfrak{X}\wedge\Lambda^{1}\to\Lambda^{0}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\alpha & =\alpha_{x}dx+\alpha_{y}dy+\alpha_{z}dz\\
+\mathbf{i}_{X}\alpha & =X^{x}\alpha_{x}+X^{y}\alpha_{y}+X^{z}\alpha_{z}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{i}:\quad\mathfrak{X}\wedge\Lambda^{2}\to\Lambda^{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\beta & =\beta_{xy}dx\wedge dy+\beta_{yz}dy\wedge dz+\beta_{zx}dz\wedge dx\\
+\mathbf{i}_{X}\beta & =\left(\beta_{zx}X^{z}-\beta_{xy}X^{y}\right)dx+\\
+ & +\left(\beta_{xy}X^{x}-\beta_{yz}X^{z}\right)dy+\\
+ & +\left(\beta_{yz}X^{y}-\beta_{zx}X^{x}\right)dz
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\mathbf{i}:\quad\mathfrak{X}\wedge\Lambda^{3}\to\Lambda^{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\gamma & =\gamma_{xyz}dx\wedge dy\wedge dz\\
+\mathbf{i}_{X}\gamma & =\gamma_{xyz}\left(X^{z}dx\wedge dy+X^{x}dy\wedge dz+X^{y}dz\wedge dx\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
