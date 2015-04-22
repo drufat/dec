@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Convert files written in LyX or Latex to Restructured Text. 
+Convert files written in LyX or Latex to Restructured Text.
 '''
 import sys
 import os
@@ -47,7 +47,7 @@ and we can refer back to the Euler Identity as Eq. :eq:`euler`.
 
 def pandoc(source, f, t):
     source = source.encode('utf-8')
-    out = subprocess.check_output(['pandoc', '-f', f, '-t', t], 
+    out = subprocess.check_output(['pandoc', '-f', f, '-t', t],
                                     input=source)
     return out.decode('utf-8')
 
@@ -58,21 +58,21 @@ def latex2json(source):
     return pandoc(source, 'rst', 'json')
 
 def latex2rst_(source):
-    '''    
+    '''
     >>> latex2rst_(sample_tex) == sample_rst
     True
     '''
     return pandoc(source, 'latex', 'rst')
 
 def latex2rst(source):
-    '''    
+    '''
     >>> latex2rst(sample_tex) == sample_rst_correct
     True
     '''
     source = fix_tabularnewline(source)
 
     out = latex2rst_(source)
-    
+
     out = fix_eq_labels(out)
     out = fix_pdf2png(out)
     out = fix_citations(out)
@@ -82,7 +82,7 @@ def lyx2latex(source):
     temp_lyx = tempfile.mktemp(suffix='.lyx')
     temp_name, _ = os.path.splitext(temp_lyx)
     temp_tex = '{}.tex'.format(temp_name)
-    
+
     source = source
     with open(temp_lyx, 'w') as f:
         f.write(source)
@@ -91,10 +91,10 @@ def lyx2latex(source):
     out = ''
     with open(temp_tex, 'r') as f:
         out += f.read()
-     
+
     os.remove(temp_lyx)
-    os.remove(temp_tex)   
-        
+    os.remove(temp_tex)
+
     return out
 
 def lyx2rst(source):
@@ -107,14 +107,14 @@ sample_tabular = r'''
 \begin{document}
 
 \begin{tabular}{|c|c|}
-\hline 
+\hline
 1 & 2\tabularnewline
-\hline 
-\hline 
+\hline
+\hline
 q & w\tabularnewline
-\hline 
+\hline
 a & s\tabularnewline
-\hline 
+\hline
 \end{tabular}
 
 \end{document}
@@ -152,7 +152,7 @@ def fix_citations(source):
     return source
 
 def fix_eq_labels(source):
-    
+
     regex = re.compile(r'\\label\{eq:(.*?)\}', re.DOTALL)
     def f(m):
         return '\n   :label: {}'.format(m.group(1))
@@ -182,7 +182,7 @@ def process_lyx(name):
         with open(o, 'w') as fout:
             fout.write(lyx2rst(fin.read()))
     print(o)
-    
+
 def write_lyx2tex(name):
     i = '{}.lyx'.format(name)
     o = '{}.tex'.format(name)

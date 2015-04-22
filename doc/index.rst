@@ -25,6 +25,10 @@ Operators
 Grids
 ======
 
+.. plot:: plot/grid/periodic.py
+
+.. plot:: plot/grid/cheb.py
+
 .. autofunction:: dec.grid1.Grid_1D_Periodic
 
 .. autofunction:: dec.grid1.Grid_1D_Chebyshev

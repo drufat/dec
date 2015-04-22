@@ -1,6 +1,5 @@
 from dec.grid1 import *
-from matplotlib.pyplot import *
-from dec.plot import plot_bases_1d
+import matplotlib.pyplot as plt
 
 N = 4
 #g = Grid_1D_Periodic(N)
@@ -19,28 +18,28 @@ H1d = linalg.inv(H0)
 #print poly_coeff(g.B0)
 #print poly_coeff(g.B1d)
 
-figure()
+plt.figure()
 
 A = linalg.inv(H0).T
 U = array([b(z) for b in B1d])
 V = dot(A, array([b(z) for b in B0]))
 
 for u, v in zip(U, V):
-    plot(z, u)
-    plot(z, v, color='k')
-    scatter(g.verts, 0*g.verts)
-    scatter(g.verts_dual, 0*g.verts_dual, color='r', marker='x')
+    plt.plot(z, u)
+    plt.plot(z, v, color='k')
+    plt.scatter(g.verts, 0*g.verts)
+    plt.scatter(g.verts_dual, 0*g.verts_dual, color='r', marker='x')
 
-figure()
+plt.figure()
 
 A = linalg.inv(H1).T
 U = array([b(z) for b in B0d])
 V = dot(A, array([b(z) for b in B1]))
 
 for u, v in zip(U, V):
-    plot(z, u)
-    plot(z, v, color='k')
-    scatter(g.verts, 0*g.verts)
-    scatter(g.verts_dual, 0*g.verts_dual, color='r', marker='x')
+    plt.plot(z, u)
+    plt.plot(z, v, color='k')
+    plt.scatter(g.verts, 0*g.verts)
+    plt.scatter(g.verts_dual, 0*g.verts_dual, color='r', marker='x')
 
-show()
+plt.show()

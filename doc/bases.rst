@@ -27,11 +27,11 @@ Periodic Basis Functions
 .. plot:: 
 
     from dec.grid1 import *
-    from matplotlib.pyplot import *
+    import matplotlib.pyplot as plt
     from dec.plot import plot_bases_1d
     N = 5
     g = Grid_1D_Periodic(N)
-    plot_bases_1d(g, g.xmin, g.xmax, "\phi")
+    plot_bases_1d(plt, g, g.xmin, g.xmax, "\phi")
 
 Regular Basis Functions
 ----------------------------
@@ -65,23 +65,23 @@ symmetric bases functions for 0-forms?
 .. plot:: 
 
     from dec.grid1 import *
-    from matplotlib.pyplot import *
+    import matplotlib.pyplot as plt
     from dec.plot import plot_bases_1d
     
     N = 2
     g = Grid_1D_Regular(N)
-    figure()
-    plot_bases_1d(g, g.xmin, g.xmax, "\kappa")
+    plt.figure()
+    plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
     
     N = 3
     g = Grid_1D_Regular(N)
-    figure()
-    plot_bases_1d(g, g.xmin, g.xmax, "\kappa")
+    plt.figure()
+    plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
     
-    figure()
-    plot_bases_1d(g, -g.xmax, g.xmax, "\kappa")
+    plt.figure()
+    plot_bases_1d(plt, g, -g.xmax, g.xmax, "\kappa")
         
-    show()
+    plt.show()
     
 Chebyshev Basis Functions
 ----------------------------
@@ -94,12 +94,15 @@ Chebyshev Basis Functions
 .. plot:: 
 
     from dec.grid1 import *
-    from matplotlib.pyplot import *
+    import matplotlib.pyplot as plt
     from dec.plot import plot_bases_1d
+    
     N = 5
     g = Grid_1D_Chebyshev(N)
-    plot_bases_1d(g, g.xmin, g.xmax, "\kappa")
-    show()
+    plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
+ 
+    plt.show()
+
 
 :math:`\psi^0` and :math:`\widetilde{\psi}^0` match the Lagrange polynomials
 
