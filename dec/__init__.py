@@ -2,7 +2,6 @@
 Discrete Exterior Calculus Module
 ==================================
 '''
-
 import os, json, numpy
 
 def get_data_dir():
@@ -31,3 +30,4 @@ def store_data(name, obj):
     filename = os.path.join(get_data_dir(), name)
     with open(filename, 'w') as f:
         json.dump(obj, f, cls=NumpyAwareJSONEncoder)
+

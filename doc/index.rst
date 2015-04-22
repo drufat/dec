@@ -25,16 +25,20 @@ Operators
 Grids
 ======
 
-.. plot:: plot/grid/periodic.py
-
-.. plot:: plot/grid/cheb.py
-
 .. autofunction:: dec.grid1.Grid_1D_Periodic
+
+.. plot:: plot/grid/periodic.py
+	:width: 400
 
 .. autofunction:: dec.grid1.Grid_1D_Chebyshev
 
+.. plot:: plot/grid/cheb.py
+	:width: 400
+
 .. autofunction:: dec.grid1.Grid_1D_Regular
 
+.. plot:: plot/grid/regular.py
+	:width: 400
 
 Installation
 =============
