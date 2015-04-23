@@ -1,8 +1,45 @@
+'''
+    Module for symbolic computations.
+    
+    Derivative
+    -----------
+    >>> D( F0(x) )
+    F1(1, 0)
+    >>> D( F0(x*y) )
+    F1(y, x)
+    >>> D( F1(-y, x) )
+    F2(2)
+    >>> D( F2(x) )
+    0
+
+    Hodge Star
+    -----------
+    >>> H(F0(x))
+    F2(x)
+    >>> H(F1(x,y))
+    F1(-y, x)
+    >>> H(F2(x))
+    F0(x)
+    
+    Contraction
+    ------------
+    >>> X = F1(u, v)
+    >>> C(X, F1(f,g)) == F0(f*u + g*v)
+    F0(True)
+    >>> C(X, F2(f)) == F1(-f*v, f*u)
+    F1(True, True)
+    
+'''
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
                    sympify, 
                    integrate, Integral, 
                    sin, cos)
+                   
+from multipledispatch import dispatch
+from functools import partial
+dispatch_namespace = dict()
+d_ = partial(dispatch, namespace=dispatch_namespace)
 
 # Coordinates
 x, y = symbols('x y')
@@ -36,37 +73,100 @@ p  = [
     0
 ]
 
-def derivatives():
-    '''
-    >>> D0, D1 = derivatives()
-    >>> D0(x)
-    (1, 0)
-    >>> D0(x*y)
-    (y, x)
-    >>> D1([-y, x])
-    2
-    '''
-    def D0(f):
-        return (diff(f, x), diff(f, y))
-    def D1(f):
-        return -diff(f[0], y) + diff(f[1], x)
-    return D0, D1
+_class_template = '''
+class {typename}(np.ndarray):
+ 
+    def __new__(cls, *args):
+        return np.asarray(args).view(cls)
+        #return tuple.__new__(cls, args)
+         
+    def __repr__(self):
+        t = tuple(self)
+        if len(t) == 1:
+            s = '(' + t[0].__repr__() + ')'
+        else:
+            s = t.__repr__()
+        return '{typename}' + s
+'''
+ 
+def formtuple(typename, verbose=False):
+ 
+    class_definition = _class_template.format(typename=typename)
+    namespace = dict(__name__='formtuple_{}'.format(typename), np=np)
+    exec(class_definition, namespace)
+    result = namespace[typename]
+    if verbose:
+        print(result._source)
+    return result
+ 
+ 
+F0 = formtuple('F0')
+F1 = formtuple('F1')
+F2 = formtuple('F2')
 
-def hodge_stars():
-    '''
-    >>> H0, H1, H2 = hodge_stars()
-    >>> H0(x)
-    x
-    >>> H1([x,y])
-    (-y, x)
-    '''
-    def H0(f): return f
-    def H1(f): return (-f[1], f[0])
-    def H2(f): return f
-    return H0, H1, H2
+@d_(F0)
+def D(f):
+    f ,= f
+    return F1(diff(f, x), diff(f, y))
+
+@d_(F1)
+def D(f):
+    fx, fy = f
+    return F2(-diff(fx, y) + diff(fy, x))
+
+@d_(F2)
+def D(f):
+    return 0
+
+@d_(object)
+def D(f):
+    assert f == 0
+    return 0
+
+################################
+    
+@d_(F0)
+def H(f):
+    f, = f
+    return F2(f)
+
+@d_(F1)
+def H(f):
+    fx, fy = f
+    return F1(-fy, fx)
+
+@d_(F2)
+def H(f):
+    f, = f
+    return F0(f)
+
+@d_(object)
+def H(f):
+    assert f == 0
+    return 0
+
+################################
+
+@d_(F1, F0)
+def C(X, f):
+    return 0
+
+@d_(F1, F1)
+def C(X, f):
+    return F0( X[0]*f[0] + X[1]*f[1] )
+
+@d_(F1, F2)
+def C(X, f):
+    return F1( -X[1]*f[0], X[0]*f[0] )
+
+@d_(F1, object)
+def C(X, f):
+    assert f == 0
+    return 0
 
 def contractions(X):    
     '''
+    Deprecated !!!
     >>> C1, C2 = contractions((u,v))
     >>> C1((f,g)) == f*u + g*v
     True
@@ -79,64 +179,54 @@ def contractions(X):
         return (-f*X[1], f*X[0])
     return C1, C2
 
-def lie_derivatives(X):
+################################
+
+def Lie(X, f):
     '''
     >>> from sympy import expand
-    >>> L0, L1, L2 = lie_derivatives((u,v))
-    >>> D = diff
-    >>> L0(f) == u*D(f, x) + v*D(f, y)
+    >>> d = diff
+    >>> l = lambda f_: Lie(F1(u,v), f_)
+    >>> l(F0(f)) == F0( u*d(f, x) + v*d(f, y) )
+    F0(True)
+    >>> l(F2(f)) == F2( expand( d(f*u,x) + d(f*v,y) ) )
+    F2(True)
+    >>> simplify(l(F1(f, g))[0]) == u*d(f,x) + v*d(f,y) + f*d(u,x) + g*d(v,x)
     True
-    >>> L2(f) == expand( D(f*u,x) + D(f*v,y) )
+    >>> simplify(l(F1(f, g))[1]) == u*d(g,x) + v*d(g,y) + f*d(u,y) + g*d(v,y)
     True
-    >>> simplify(L1((f, g))[0]) == u*D(f,x) + v*D(f,y) + f*D(u,x) + g*D(v,x)
+    >>> simplify(l(F1(u, v))[0]) == expand( d((u**2+v**2)/2, x) + u*d(u, x) + v*d(u, y) )
     True
-    >>> simplify(L1((f, g))[1]) == u*D(g,x) + v*D(g,y) + f*D(u,y) + g*D(v,y)
-    True
-    >>> simplify(L1((u, v))[0]) == expand( D((u**2+v**2)/2, x) + u*D(u, x) + v*D(u, y) )
-    True
-    >>> simplify(L1((u, v))[1]) == expand( D((u**2+v**2)/2, y) + u*D(v, x) + v*D(v, y) )
-    True
-    '''
-    D0, D1 = derivatives()
-    C1, C2 = contractions(X)
-    
-    def l0(f): return C1(D0(f))
-    def l1(f): return plus(C2(D1(f)), D0(C1(f)))
-    def L2(f): return D1(C2(f))
-
-    return l0, l1, L2
-
-def plus(a, b): 
-    return (a[0]+b[0], a[1]+b[1])
-
-def laplacians():
-    '''
-    >>> l0, l1, l2 = laplacians()
-    >>> D = diff
-    >>> f, g = Function('f')(x,y), Function('g')(x,y)
-    >>> l0(f) == D(f, x, x) + D(f, y, y)
-    True
-    >>> l2(f) == D(f, x, x) + D(f, y, y)
-    True
-    >>> l1((f,g)) == (D(f, x, x) + D(f, y, y), 
-    ...               D(g, x, x) + D(g, y, y))
+    >>> simplify(l(F1(u, v))[1]) == expand( d((u**2+v**2)/2, y) + u*d(v, x) + v*d(v, y) )
     True
     '''
-    D0, D1 = derivatives()
-    H0, H1, H2 = hodge_stars()
-    
-    def l0(f): return H2(D1(H1(D0(f))))
-    def l1(f): return plus( H1(D0(H2(D1(f)))), D0(H2(D1(H1(f)))) )
-    def l2(f): return D1(H1(D0(H2(f))))
-    
-    return l0, l1, l2
+    def c(f_):
+        return C(X, f_)
+    return c(D(f)) + D(c(f))
+
+################################
+
+def Laplacian(f):
+    '''
+    >>> l = Laplacian
+    >>> l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
+    F0(True)
+    >>> l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y), 
+    ...                  diff(g, x, x) + diff(g, y, y))
+    F1(True, True)
+    >>> l(F2(f)) == F2( diff(f, x, x) + diff(f, y, y))
+    F2(True)
+    '''
+    return H(D(H(D(f)))) + D(H(D(H(f))))
+
+################################
 
 def grad(f):
     '''
     Compute the gradient of a scalar field :math:`f(x,y)`.
+    >>> grad(f) == (diff(f, x), diff(f, y))
+    True
     '''
-    D0, D1 = derivatives()
-    return D0(f)
+    return tuple(D(F0(f)))
 
 def div(V):
     '''
@@ -144,9 +234,8 @@ def div(V):
     >>> div((u,v)) == diff(u, x) + diff(v, y)
     True
     '''
-    D0, D1 = derivatives()
-    H0, H1, H2 = hodge_stars()
-    return H2((D1(H1(V))))
+    f = F1(*V)
+    return H(D(H(f)))[0]
 
 def vort(V):
     '''
@@ -154,18 +243,16 @@ def vort(V):
     >>> vort((u,v)) == -diff(u, y) + diff(v, x)
     True
     '''
-    D0, D1 = derivatives()
-    H0, H1, H2 = hodge_stars()
-    return H2(D1(V))
+    f = F1(*V)
+    return H(D(f))[0]
     
 def adv(V):
     '''
-    >>> D = diff
-    >>> simplify(adv((u,v))) == (u*D(u,x)+v*D(u,y), u*D(v,x)+v*D(v,y))
+    >>> simplify(adv((u,v))) == (u*diff(u,x)+v*diff(u,y), u*diff(v,x)+v*diff(v,y))
     True
     '''
-    l1 = lie_derivatives(V)[1]    
-    return plus( l1(V), grad(-(V[0]**2+V[1]**2)/2) )
+    V_ = F1(*V)
+    return tuple(Lie(V_, V_) + grad(-(V[0]**2+V[1]**2)/2))
 
 def projections1d():
     '''    
