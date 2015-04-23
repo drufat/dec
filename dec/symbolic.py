@@ -1,6 +1,6 @@
 '''
     Module for symbolic computations.
-    
+
     Derivative
     -----------
     >>> D( F0(x) )
@@ -20,7 +20,7 @@
     F1(-y, x)
     >>> H(F2(x))
     F0(x)
-    
+
     Contraction
     ------------
     >>> X = F1(u, v)
@@ -28,18 +28,14 @@
     F0(True)
     >>> C(X, F2(f)) == F1(-f*v, f*u)
     F1(True, True)
-    
+
 '''
+from dec import d_
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
-                   sympify, 
-                   integrate, Integral, 
+                   sympify,
+                   integrate, Integral,
                    sin, cos)
-                   
-from multipledispatch import dispatch
-from functools import partial
-dispatch_namespace = dict()
-d_ = partial(dispatch, namespace=dispatch_namespace)
 
 # Coordinates
 x, y = symbols('x y')
@@ -55,10 +51,10 @@ V represents the velocity vector field.
 """
 V = [
     (-2*sin(y)*cos(x/2)**2,
-      2*sin(x)*cos(y/2)**2), 
+      2*sin(x)*cos(y/2)**2),
     (-cos(x/2)*sin(y/2), sin(x/2)*cos(y/2)),
-    (-sin(y), sin(x)), 
-    (-sin(2*y), sin(x)), 
+    (-sin(y), sin(x)),
+    (-sin(2*y), sin(x)),
     (1, 0)
 ]
 
@@ -66,7 +62,7 @@ V = [
 p represents the pressure scalar field.
 """
 p  = [
-    (-cos(2*x)*(5+4*cos(y))-5*(4*cos(y)+cos(2*y))-4*cos(x)*(5+5*cos(y)+cos(2*y)))/20, 
+    (-cos(2*x)*(5+4*cos(y))-5*(4*cos(y)+cos(2*y))-4*cos(x)*(5+5*cos(y)+cos(2*y)))/20,
     -(cos(x)+cos(y))/4,
     -cos(x)*cos(y),
     -4*cos(x)*cos(2*y)/5,
@@ -75,11 +71,11 @@ p  = [
 
 _class_template = '''
 class {typename}(np.ndarray):
- 
+
     def __new__(cls, *args):
         return np.asarray(args).view(cls)
         #return tuple.__new__(cls, args)
-         
+
     def __repr__(self):
         t = tuple(self)
         if len(t) == 1:
@@ -88,9 +84,9 @@ class {typename}(np.ndarray):
             s = t.__repr__()
         return '{typename}' + s
 '''
- 
+
 def formtuple(typename, verbose=False):
- 
+
     class_definition = _class_template.format(typename=typename)
     namespace = dict(__name__='formtuple_{}'.format(typename), np=np)
     exec(class_definition, namespace)
@@ -98,8 +94,8 @@ def formtuple(typename, verbose=False):
     if verbose:
         print(result._source)
     return result
- 
- 
+
+
 F0 = formtuple('F0')
 F1 = formtuple('F1')
 F2 = formtuple('F2')
@@ -124,7 +120,7 @@ def D(f):
     return 0
 
 ################################
-    
+
 @d_(F0)
 def H(f):
     f, = f
@@ -164,7 +160,7 @@ def C(X, f):
     assert f == 0
     return 0
 
-def contractions(X):    
+def contractions(X):
     '''
     Deprecated !!!
     >>> C1, C2 = contractions((u,v))
@@ -199,9 +195,7 @@ def Lie(X, f):
     >>> simplify(l(F1(u, v))[1]) == expand( d((u**2+v**2)/2, y) + u*d(v, x) + v*d(v, y) )
     True
     '''
-    def c(f_):
-        return C(X, f_)
-    return c(D(f)) + D(c(f))
+    return C(X, D(f)) + D(C(X, f))
 
 ################################
 
@@ -210,7 +204,7 @@ def Laplacian(f):
     >>> l = Laplacian
     >>> l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
     F0(True)
-    >>> l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y), 
+    >>> l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y),
     ...                  diff(g, x, x) + diff(g, y, y))
     F1(True, True)
     >>> l(F2(f)) == F2( diff(f, x, x) + diff(f, y, y))
@@ -245,7 +239,7 @@ def vort(V):
     '''
     f = F1(*V)
     return H(D(f))[0]
-    
+
 def adv(V):
     '''
     >>> simplify(adv((u,v))) == (u*diff(u,x)+v*diff(u,y), u*diff(v,x)+v*diff(v,y))
@@ -255,7 +249,7 @@ def adv(V):
     return tuple(Lie(V_, V_) + grad(-(V[0]**2+V[1]**2)/2))
 
 def projections1d():
-    '''    
+    '''
     >>> P0, P1 = projections1d()
     >>> P0(x) == x0
     True
@@ -276,14 +270,14 @@ def projections1d():
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return iexpr
-    
+
     return P0, P1
 
 def projections2d():
     '''
-    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices, 
-    and return the result in terms of simplex coordiates. 
-    
+    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
+    and return the result in terms of simplex coordiates.
+
     >>> P0, P1, P2 = projections2d()
     >>> P0(x*y) == x0*y0
     True
@@ -297,23 +291,23 @@ def projections2d():
     >>> P2(1) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
     True
     '''
-     
+
     def P0(f):
         return f.subs({x:x0, y:y0})
- 
+
     def P1(f):
         ux, uy = sympify(f[0]), sympify(f[1])
         s = symbols('s')
         lx, ly = x1 - x0, y1 - y0
         subst = ((x, x0*(1-s) + x1*s),
                  (y, y0*(1-s) + y1*s))
-        integrand = (ux.subs(subst)*lx + 
+        integrand = (ux.subs(subst)*lx +
                      uy.subs(subst)*ly)
         iexpr = integrate(integrand,  (s, 0, 1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return iexpr
-                 
+
     def P2(f):
         omega = sympify(f)
         s, t = symbols('s t')
@@ -325,7 +319,7 @@ def projections2d():
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return iexpr
-    
+
     return P0, P1, P2
 
 def lambdify2():
@@ -338,14 +332,14 @@ def lambdify2():
     '''
 
     def l0(f):
-        return lambdify((x,y), f, 'numpy')   
+        return lambdify((x,y), f, 'numpy')
 
     def l1(f):
         def f_(x_, y_, f=f):
-            return (lambdify((x,y), f[0], 'numpy')(x_, y_), 
+            return (lambdify((x,y), f[0], 'numpy')(x_, y_),
                     lambdify((x,y), f[1], 'numpy')(x_, y_))
         return f_
- 
+
     return l0, l1
 
 def plot(plt, V, p):
@@ -401,4 +395,3 @@ if __name__ == '__main__':
     for V_, p_ in zip(V, p):
         plot(plt, V_, p_)
     plt.show()
-    

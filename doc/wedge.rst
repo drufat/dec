@@ -11,12 +11,12 @@ The wedge product has the following properties:
 -  :math:`\alpha\wedge\beta` is **associative**:
    :math:`\alpha\wedge(\beta\wedge\gamma)=(\alpha\wedge\beta)\wedge\gamma`
 
--  :math:`\alpha\wedge\beta` is **bilinear** in :math:`\alpha` and
-   :math:`\beta`:
+:math:`\alpha\wedge\beta` is **bilinear** in :math:`\alpha` and
+:math:`\beta`:
 
-   .. math:: (a\alpha_{1}+b\alpha_{2})\wedge\beta
+.. math:: (a\alpha_{1}+b\alpha_{2})\wedge\beta
 
-   .. math:: \alpha\wedge(c\beta_{1}+d\beta_{2})
+.. math:: \alpha\wedge(c\beta_{1}+d\beta_{2})
 
 -  :math:`\alpha\wedge\beta` is **anticommutative**:
    :math:`\alpha\wedge\beta=(-1)^{kl}\beta\wedge\alpha`, where
