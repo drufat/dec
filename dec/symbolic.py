@@ -4,10 +4,14 @@ from sympy import (symbols, Function, diff, lambdify, simplify,
                    integrate, Integral, 
                    sin, cos)
 
+# Coordinates
 x, y = symbols('x y')
+# Vector Fields
 u, v = Function('u')(x,y), Function('v')(x,y)
+# Scalar Fields
 f, g = Function('f')(x,y), Function('g')(x,y)
-D = diff
+# Coordinates of Simplex Vertices
+x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
 
 """
 V represents the velocity vector field.
@@ -79,6 +83,7 @@ def lie_derivatives(X):
     '''
     >>> from sympy import expand
     >>> L0, L1, L2 = lie_derivatives((u,v))
+    >>> D = diff
     >>> L0(f) == u*D(f, x) + v*D(f, y)
     True
     >>> L2(f) == expand( D(f*u,x) + D(f*v,y) )
@@ -107,6 +112,7 @@ def plus(a, b):
 def laplacians():
     '''
     >>> l0, l1, l2 = laplacians()
+    >>> D = diff
     >>> f, g = Function('f')(x,y), Function('g')(x,y)
     >>> l0(f) == D(f, x, x) + D(f, y, y)
     True
@@ -135,7 +141,7 @@ def grad(f):
 def div(V):
     '''
     Compute the divergence of a vector field :math:`V(x,y)`.
-    >>> div((u,v)) == D(u, x) + D(v, y)
+    >>> div((u,v)) == diff(u, x) + diff(v, y)
     True
     '''
     D0, D1 = derivatives()
@@ -145,7 +151,7 @@ def div(V):
 def vort(V):
     '''
     Compute the vorticity of a vector field :math:`V(x,y)`.
-    >>> vort((u,v)) == -D(u, y) + D(v, x)
+    >>> vort((u,v)) == -diff(u, y) + diff(v, x)
     True
     '''
     D0, D1 = derivatives()
@@ -154,6 +160,7 @@ def vort(V):
     
 def adv(V):
     '''
+    >>> D = diff
     >>> simplify(adv((u,v))) == (u*D(u,x)+v*D(u,y), u*D(v,x)+v*D(v,y))
     True
     '''
@@ -162,7 +169,6 @@ def adv(V):
 
 def projections1d():
     '''    
-    >>> x0, x1 = symbols('x0 x1')
     >>> P0, P1 = projections1d()
     >>> P0(x) == x0
     True
@@ -191,7 +197,6 @@ def projections2d():
     Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices, 
     and return the result in terms of simplex coordiates. 
     
-    >>> x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
     >>> P0, P1, P2 = projections2d()
     >>> P0(x*y) == x0*y0
     True
@@ -205,8 +210,6 @@ def projections2d():
     >>> P2(1) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
     True
     '''
-
-    x0, y0, x1, y1, x2, y2 = symbols('x0, y0, x1, y1, x2, y2')
      
     def P0(f):
         return f.subs({x:x0, y:y0})
@@ -304,4 +307,11 @@ def plot(plt, V, p):
     P = lambdify((x,y), p, 'numpy')(X, Y) + 0*X
     axes[3].contourf(X, Y, P)
     axes[3].set_title(r'$p(x,y)$')
+
+if __name__ == '__main__':
+
+    import matplotlib.pyplot as plt
+    for V_, p_ in zip(V, p):
+        plot(plt, V_, p_)
+    plt.show()
     

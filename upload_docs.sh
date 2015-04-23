@@ -26,8 +26,8 @@ function upload_github {
 
 function upload_private {
 
-    sphinx-build -b html doc build/doc
-    rsync -avz --delete build/doc/ drufat@pi.dzhelil.info:restric/dec
+    sphinx-build -b html doc build/html
+    rsync -avz --delete build/html/ drufat@pi.dzhelil.info:restric/dec
     
 }
 

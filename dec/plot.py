@@ -1,7 +1,6 @@
 from numpy import *
 from matplotlib.collections import LineCollection    
 
-
 def plot_bases_1d(plt, g, xmin, xmax, name):
 
     N = len(g.verts)	
@@ -35,6 +34,7 @@ def plot_bases_1d(plt, g, xmin, xmax, name):
         plt.scatter(g.verts_dual, 0*g.verts_dual, color='red', marker='x')
 
 def grid_1d(ax, g):
+    
     vertices_1d(ax, g)
     edges_1d(ax, g)
     ax.get_xaxis().set_visible(False)
@@ -42,15 +42,18 @@ def grid_1d(ax, g):
     ax.axis('off')
 
 def vertices_1d(ax, g):    
+
     verts = g.verts
     ax.scatter(verts, 0*verts, color='k')
     
 def edges_1d(ax, g):
+    
     for x0, x1 in zip(*g.edges):
         ax.plot((x0, x1), (0, 0),
                 color='r', linewidth=3, zorder=0)
 
 if __name__ == '__main__':
+
     from dec.grid1 import *
     import matplotlib.pyplot as plt
     
@@ -65,6 +68,5 @@ if __name__ == '__main__':
     ax = plt.subplot(313)
     g = Grid_1D_Chebyshev(15)
     grid_1d(ax, g)
-
 
     plt.show()
