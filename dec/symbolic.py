@@ -1,6 +1,8 @@
 '''
     Module for symbolic computations.
 
+    >>> u, v, f, g = symbols('u v f g')
+    
     Derivative
     -----------
     >>> D( F0(x) )
@@ -11,6 +13,19 @@
     F2(2)
     >>> D( F2(x) )
     0
+
+    Wedge
+    -----------
+    >>> W(F0(f),F0(g))
+    F0(f*g)
+    >>> W(F0(f),F1(u,v))
+    F1(f*u, f*v)
+    >>> W(F1(u,v),F0(f))
+    F1(f*u, f*v)
+    >>> W(F1(u,v),F1(f,g))
+    F2(-f*v + g*u)
+    >>> W(F0(f),F2(g))
+    F2(f*g)
 
     Hodge Star
     -----------
@@ -24,10 +39,10 @@
     Contraction
     ------------
     >>> X = F1(u, v)
-    >>> C(X, F1(f,g)) == F0(f*u + g*v)
-    F0(True)
-    >>> C(X, F2(f)) == F1(-f*v, f*u)
-    F1(True, True)
+    >>> C(X, F1(f,g))
+    F0(f*u + g*v)
+    >>> C(X, F2(f))
+    F1(-f*v, f*u)
 
 '''
 from dec import d_
@@ -121,6 +136,36 @@ def D(f):
 
 ################################
 
+@d_(F0, F0)
+def W(α, β):
+    return α*β
+
+@d_(F0, F1)
+def W(α, β):
+    α, = α
+    βx, βy = β
+    return F1(α*βx, α*βy)
+
+@d_(F0, F2)
+def W(α, β):
+    return β*α
+
+@d_(F1, F0)
+def W(α, β):
+    return W(β, α)
+
+@d_(F1, F1)
+def W(α, β):
+    αx, αy = α
+    βx, βy = β
+    return F2(αx*βy-βx*αy)
+
+@d_(F2, F0)
+def W(α, β):
+    return W(β, α)
+
+################################
+
 @d_(F0)
 def H(f):
     f, = f
@@ -160,6 +205,7 @@ def C(X, f):
     assert f == 0
     return 0
 
+#TODO: Delete this
 def contractions(X):
     '''
     Deprecated !!!
