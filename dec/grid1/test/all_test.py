@@ -37,19 +37,19 @@ import dec.forms
 #     x = P(f, 1, True)
 #     eq( H(x), H1(x) )
 
-def test_d_equivalence():
-    g = Grid_1D_Periodic(10)
-    F = lambda x: sin(5*x)
-
-    M = g.derivative_matrix()
-    d, dd = [(lambda f: M[0]*f), (lambda f: M[1]*f)]
-    D, DD = g.derivative()
-
-    P0, P1, P0d, P1d = g.projection()
-    f = P0(F)
-    eq(D(f), d(f))
-    f = P0d(F)
-    eq(DD(f), dd(f))
+# def test_d_equivalence():
+#     g = Grid_1D_Periodic(10)
+#     F = lambda x: sin(5*x)
+# 
+#     M = g.derivative_matrix()
+#     d, dd = [(lambda f: M[0]*f), (lambda f: M[1]*f)]
+#     D, DD = g.derivative()
+# 
+#     P0, P1, P0d, P1d = g.projection()
+#     f = P0(F)
+#     eq(D(f), d(f))
+#     f = P0d(F)
+#     eq(DD(f), dd(f))
 
 def test_one_form():
 
@@ -227,7 +227,7 @@ def test_hodge():
     eq(H0(P0(F)), P1d(F))
     eq(H1(P1(F)), P0d(F))
 
-    eq(H0(P0(F)), dot(g.hodge_star_toeplitz(), P0(F)))
+    #eq(H0(P0(F)), dot(g.hodge_star_toeplitz(), P0(F)))
     eq(H0(P0(F)), P1d(F))
     eq(H1(P1(F)), P0d(F))
 

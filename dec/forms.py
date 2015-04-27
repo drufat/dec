@@ -1,6 +1,25 @@
 import numpy as np
 import itertools
 
+def discreteform(typename):
+    
+    def __new__(cls, grid, array, **kwargs):
+        obj = np.asarray(array, **kwargs).view(cls)
+        obj.grid = grid
+        return obj
+    
+    def __eq__(self, other):
+        return np.array_equal(self, other)
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    return type(typename, (np.ndarray,), {
+                '__new__':__new__,
+                '__eq__':__eq__,
+                '__ne__':__ne__,
+                })
+
 class Form(np.ndarray):
 
     def __new__(cls, input_array, grid=None, degree=None, primal=None):
@@ -67,6 +86,34 @@ def DEC(grid):
             typed3('R'),
             typed2('D'),
             typed2('H'))
+
+def operators_by_degree(n):
+    '''
+    Enumerate all the operators.
+    >>> ( operators_by_degree(1) == {
+    ... 'D': ((0, 1),),
+    ... 'H': ((0, 1), (1, 0)),
+    ... 'W': (((0, 0), 0), ((0, 1), 1)),
+    ... 'C': (((1, 1), 0),),
+    ... })
+    True
+    >>> ( operators_by_degree(2) == {
+    ... 'D': ((0, 1), (1, 2)),
+    ... 'H': ((0, 2), (1, 1), (2, 0)),
+    ... 'W': (((0, 0), 0), ((0, 1), 1), ((0, 2), 2), ((1, 1), 2)),
+    ... 'C': (((1, 1), 0), ((1, 2), 1)),
+    ... })
+    True
+    '''
+
+    # enumerate all the possible forms
+    D = tuple((k, k+1) for k in range(n))
+    H = tuple((k, n-k) for k in range(n+1))
+    W = tuple(((k,m), k+m) for (k, m) in itertools.product(range(n+1),range(n+1)) if (k<=m and k+m <= n))
+    C = tuple(((1,k), k-1) for k in range(1,n+1))
+    
+    return dict(D=D, H=H, W=W, C=C)
+
     
 def operators(n):
     '''

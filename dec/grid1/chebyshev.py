@@ -42,12 +42,12 @@ class Grid_1D_Chebyshev:
 
     def projection(self):
         P0 = lambda f: f(self.verts)
-        #P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
-        P1 = lambda f: integrate_chebyshev(self.verts, f)
+        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
+        #P1 = lambda f: integrate_chebyshev(self.verts, f)
         P0d = lambda f: f(self.verts_dual)
-        #P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
-        P1d = lambda f: integrate_chebyshev_dual(
-                concatenate(([-1], self.verts_dual, [+1])), f)
+        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
+        #P1d = lambda f: integrate_chebyshev_dual(
+        #        concatenate(([-1], self.verts_dual, [+1])), f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):

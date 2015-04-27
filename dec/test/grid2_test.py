@@ -7,17 +7,6 @@ eq = assert_array_almost_equal
 
 eq2 = lambda x, y: eq(flat(x), flat(y))
 
-# def test_basis_functions():
-#     N = 2
-#     Grids = [Grid_1D_Periodic, Grid_1D_Chebyshev]
-#     for Gx, Gy in itertools.product(Grids, Grids):
-#         gx, gy = Gx(N), Gy(N)
-#         g = Grid_2D_Cartesian(gx, gy)
-#         for P, B in zip(g.projection(), g.basis_fn()):
-#             B = flat(B)
-#             eq( vstack(flat(P(b)) for b in B),
-#                 eye(len(B)) )
- 
 def test_d():
  
     def check_d0(g, f, df):

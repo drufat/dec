@@ -73,7 +73,7 @@ r'''
     >>> P(F1(x, 0))
     -x0**2/2 + x1**2/2
     >>> P(F1(1, 0))
-    -x0 +x1
+    -x0 + x1
     >>> P(F1(1, 1))
     -x0 + x1 - y0 + y1
     >>> from sympy import expand
@@ -123,13 +123,17 @@ p  = [
     0
 ]
 
-_class_template = '''
-class {typename}(np.ndarray):
+def symbolicform(typename):
 
     def __new__(cls, *args):
         args = [sympify(a) for a in args]
         return np.asarray(args).view(cls)
-        #return tuple.__new__(cls, args)
+
+    def __eq__(self, other):
+        return np.array_equal(self, other)
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __repr__(self):
         t = tuple(self)
@@ -137,23 +141,18 @@ class {typename}(np.ndarray):
             s = '(' + t[0].__repr__() + ')'
         else:
             s = t.__repr__()
-        return '{typename}' + s
-'''
+        return typename + s
+    
+    return type(typename, (np.ndarray,), {
+                '__new__':__new__, 
+                '__eq__':__eq__,
+                '__ne__':__ne__,
+                '__repr__':__repr__,
+                })
 
-def formtuple(typename, verbose=False):
-
-    class_definition = _class_template.format(typename=typename)
-    namespace = dict(__name__='symbolicform', np=np, sympify=sympify)
-    exec(class_definition, namespace)
-    result = namespace[typename]
-    if verbose:
-        print(result._source)
-    return result
-
-
-F0 = formtuple('F0')
-F1 = formtuple('F1')
-F2 = formtuple('F2')
+F0 = symbolicform('F0')
+F1 = symbolicform('F1')
+F2 = symbolicform('F2')
 
 ################################
 # Derivative
@@ -201,7 +200,6 @@ def W(α, β):
     αx, αy = α
     βx, βy = β
     return F2(αx*βy-βx*αy)
-
 
 @d_(F1, F0)
 def W(α, β):
@@ -286,9 +284,9 @@ def Lie(X, f):
     >>> d = diff
     >>> l = lambda f_: Lie(F1(u,v), f_)
     >>> l(F0(f)) == F0( u*d(f, x) + v*d(f, y) )
-    F0(True)
+    True
     >>> l(F2(f)) == F2( expand( d(f*u,x) + d(f*v,y) ) )
-    F2(True)
+    True
     >>> simplify(l(F1(f, g))[0]) == u*d(f,x) + v*d(f,y) + f*d(u,x) + g*d(v,x)
     True
     >>> simplify(l(F1(f, g))[1]) == u*d(g,x) + v*d(g,y) + f*d(u,y) + g*d(v,y)
@@ -310,12 +308,12 @@ def Laplacian(f):
 
     >>> l = Laplacian
     >>> l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
-    F0(True)
+    True
     >>> l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y),
     ...                  diff(g, x, x) + diff(g, y, y))
-    F1(True, True)
+    True
     >>> l(F2(f)) == F2( diff(f, x, x) + diff(f, y, y))
-    F2(True)
+    True
     '''
     return H(D(H(D(f)))) + D(H(D(H(f))))
 

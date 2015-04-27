@@ -15,4 +15,3 @@ Grid_1D_Interface = '''
     contraction
     wedge
 '''.split()
-
