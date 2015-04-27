@@ -8,6 +8,7 @@ Contents
 .. toctree::
    :maxdepth: 3
 
+   symbolic
    contraction
    wedge
    paper
@@ -15,7 +16,6 @@ Contents
    hodge-star
    poisson
    sample_advection
-
 
 Operators
 ==========

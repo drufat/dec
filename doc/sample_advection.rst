@@ -128,7 +128,3 @@ Example 5
     import matplotlib.pyplot as plt
     plot(plt, V[4], p[4])
     plt.show()
-
-.. autofunction:: dec.symbolic.div
-.. autofunction:: dec.symbolic.vort
-.. autofunction:: dec.symbolic.grad

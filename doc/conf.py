@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.abspath('..'))
 extensions = [
           'matplotlib.sphinxext.plot_directive',
           'sphinx.ext.autodoc',
+          'sphinx.ext.autosummary',
           'sphinx.ext.doctest',
           'sphinx.ext.viewcode',
           'sphinx.ext.mathjax',

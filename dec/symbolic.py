@@ -1,4 +1,4 @@
-'''
+r'''
     Module for symbolic computations.
 
     >>> u, v, f, g = symbols('u v f g')
@@ -15,7 +15,7 @@
     0
 
     Wedge
-    -----------
+    ------
     >>> W(F0(f),F0(g))
     F0(f*g)
     >>> W(F0(f),F1(u,v))
@@ -25,6 +25,8 @@
     >>> W(F1(u,v),F1(f,g))
     F2(-f*v + g*u)
     >>> W(F0(f),F2(g))
+    F2(f*g)
+    >>> W(F2(g),F0(f))
     F2(f*g)
 
     Hodge Star
@@ -43,7 +45,44 @@
     F0(f*u + g*v)
     >>> C(X, F2(f))
     F1(-f*v, f*u)
+    
+    
+    Inner Product
+    --------------
+    The inner product berween forms can be expressed as 
 
+    .. math:: \alpha \wedge \star \beta = \langle \alpha, \beta \rangle \omega
+        
+    where :math:`\omega` is the volume form and :math:`\langle\cdot,\cdot\rangle`
+    represent an inner product between forms.
+    
+    >>> W(F0(f), H(F0(g)))
+    F2(f*g)
+    >>> W(F1(f,g), H(F1(u,v)))
+    F2(f*u + g*v)
+    >>> W(F2(f), H(F2(g)))
+    F2(f*g)
+
+    Projections 
+    ------------
+    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
+    and return the result in terms of simplex coordiates.
+
+    >>> P(F0(x*y))
+    x0*y0
+    >>> P(F1(x, 0))
+    -x0**2/2 + x1**2/2
+    >>> P(F1(1, 0))
+    -x0 +x1
+    >>> P(F1(1, 1))
+    -x0 + x1 - y0 + y1
+    >>> from sympy import expand
+    >>> P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+    True
+
+    Other Functions
+    ----------------
+    
 '''
 from dec import d_
 import numpy as np
@@ -88,6 +127,7 @@ _class_template = '''
 class {typename}(np.ndarray):
 
     def __new__(cls, *args):
+        args = [sympify(a) for a in args]
         return np.asarray(args).view(cls)
         #return tuple.__new__(cls, args)
 
@@ -103,7 +143,7 @@ class {typename}(np.ndarray):
 def formtuple(typename, verbose=False):
 
     class_definition = _class_template.format(typename=typename)
-    namespace = dict(__name__='formtuple_{}'.format(typename), np=np)
+    namespace = dict(__name__='symbolicform', np=np, sympify=sympify)
     exec(class_definition, namespace)
     result = namespace[typename]
     if verbose:
@@ -114,6 +154,10 @@ def formtuple(typename, verbose=False):
 F0 = formtuple('F0')
 F1 = formtuple('F1')
 F2 = formtuple('F2')
+
+################################
+# Derivative
+################################
 
 @d_(F0)
 def D(f):
@@ -135,6 +179,8 @@ def D(f):
     return 0
 
 ################################
+# Wedge Product
+################################
 
 @d_(F0, F0)
 def W(α, β):
@@ -150,20 +196,23 @@ def W(α, β):
 def W(α, β):
     return β*α
 
-@d_(F1, F0)
-def W(α, β):
-    return W(β, α)
-
 @d_(F1, F1)
 def W(α, β):
     αx, αy = α
     βx, βy = β
     return F2(αx*βy-βx*αy)
 
+
+@d_(F1, F0)
+def W(α, β):
+    return W(β, α)
+
 @d_(F2, F0)
 def W(α, β):
     return W(β, α)
 
+################################
+# Hodge Star
 ################################
 
 @d_(F0)
@@ -187,6 +236,8 @@ def H(f):
     return 0
 
 ################################
+# Contraction
+################################
 
 @d_(F1, F0)
 def C(X, f):
@@ -208,7 +259,9 @@ def C(X, f):
 #TODO: Delete this
 def contractions(X):
     '''
-    Deprecated !!!
+    .. warning::
+        Deprecated
+
     >>> C1, C2 = contractions((u,v))
     >>> C1((f,g)) == f*u + g*v
     True
@@ -222,9 +275,13 @@ def contractions(X):
     return C1, C2
 
 ################################
+# Lie Derivative
+################################
 
 def Lie(X, f):
     '''
+    Lie Derivative
+    
     >>> from sympy import expand
     >>> d = diff
     >>> l = lambda f_: Lie(F1(u,v), f_)
@@ -244,9 +301,13 @@ def Lie(X, f):
     return C(X, D(f)) + D(C(X, f))
 
 ################################
+# Laplacian
+################################
 
 def Laplacian(f):
     '''
+    Laplacian Operator
+
     >>> l = Laplacian
     >>> l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
     F0(True)
@@ -259,10 +320,50 @@ def Laplacian(f):
     return H(D(H(D(f)))) + D(H(D(H(f))))
 
 ################################
+# Projections
+################################
+
+@d_(F0)
+def P(f):
+    return f[0].subs({x:x0, y:y0})
+
+@d_(F1)
+def P(f):
+    #ux, uy = sympify(f[0]), sympify(f[1])
+    ux, uy = f
+    s = symbols('s')
+    lx, ly = x1 - x0, y1 - y0
+    subst = ((x, x0*(1-s) + x1*s),
+             (y, y0*(1-s) + y1*s))
+    integrand = (ux.subs(subst)*lx +
+                 uy.subs(subst)*ly)
+    iexpr = integrate(integrand,  (s, 0, 1))
+    if iexpr.has(Integral):
+        raise ValueError('Unable to evaluate {}.'.format(iexpr))
+    return iexpr
+
+@d_(F2)
+def P(f):
+    omega = sympify(f[0])
+    s, t = symbols('s t')
+    A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
+    subst = ((x, x0*(1-s-t) + x1*s + x2*t),
+             (y, y0*(1-s-t) + y1*s + y2*t))
+    integrand = (omega.subs(subst)*A)
+    iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
+    if iexpr.has(Integral):
+        raise ValueError('Unable to evaluate {}.'.format(iexpr))
+    return iexpr
+
+
+################################
+# Misc
+################################
 
 def grad(f):
     '''
     Compute the gradient of a scalar field :math:`f(x,y)`.
+    
     >>> grad(f) == (diff(f, x), diff(f, y))
     True
     '''
@@ -271,6 +372,7 @@ def grad(f):
 def div(V):
     '''
     Compute the divergence of a vector field :math:`V(x,y)`.
+    
     >>> div((u,v)) == diff(u, x) + diff(v, y)
     True
     '''
@@ -280,6 +382,7 @@ def div(V):
 def vort(V):
     '''
     Compute the vorticity of a vector field :math:`V(x,y)`.
+    
     >>> vort((u,v)) == -diff(u, y) + diff(v, x)
     True
     '''
@@ -318,55 +421,6 @@ def projections1d():
         return iexpr
 
     return P0, P1
-
-def projections2d():
-    '''
-    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
-    and return the result in terms of simplex coordiates.
-
-    >>> P0, P1, P2 = projections2d()
-    >>> P0(x*y) == x0*y0
-    True
-    >>> P1((x, 0)) == x1**2/2 - x0**2/2
-    True
-    >>> P1((1, 0)) == x1 - x0
-    True
-    >>> P1((1, 1)) == y1 - y0 + x1 - x0
-    True
-    >>> from sympy import expand
-    >>> P2(1) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
-    True
-    '''
-
-    def P0(f):
-        return f.subs({x:x0, y:y0})
-
-    def P1(f):
-        ux, uy = sympify(f[0]), sympify(f[1])
-        s = symbols('s')
-        lx, ly = x1 - x0, y1 - y0
-        subst = ((x, x0*(1-s) + x1*s),
-                 (y, y0*(1-s) + y1*s))
-        integrand = (ux.subs(subst)*lx +
-                     uy.subs(subst)*ly)
-        iexpr = integrate(integrand,  (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
-
-    def P2(f):
-        omega = sympify(f)
-        s, t = symbols('s t')
-        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
-        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
-                 (y, y0*(1-s-t) + y1*s + y2*t))
-        integrand = (omega.subs(subst)*A)
-        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
-
-    return P0, P1, P2
 
 def lambdify2():
     '''
@@ -435,9 +489,8 @@ def plot(plt, V, p):
     axes[3].contourf(X, Y, P)
     axes[3].set_title(r'$p(x,y)$')
 
-if __name__ == '__main__':
-
-    import matplotlib.pyplot as plt
-    for V_, p_ in zip(V, p):
-        plot(plt, V_, p_)
-    plt.show()
+# if __name__ == '__main__':
+#     import matplotlib.pyplot as plt
+#     for V_, p_ in zip(V, p):
+#         plot(plt, V_, p_)
+#     plt.show()

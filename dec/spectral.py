@@ -523,8 +523,7 @@ def fourier_K_inv(x, a, b):
     if (isclose(I[0], I[N]) or 
         isclose(I[1], I[N+1]) or 
         isclose(I[0]*I[1], I[N]*I[N+1])):
-        pass
-        #raise ValueError("Singular operator.")
+        raise ValueError("Singular operator.")
     elif N % 2 == 0:
         y[0]  = O/(1-I[0]/I[N])
         y[-1] = E/(I[N+1]/I[1]-1)
