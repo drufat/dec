@@ -123,143 +123,334 @@ p  = [
     0
 ]
 
-def symbolicform(typename):
 
-    def __new__(cls, *args):
-        args = [sympify(a) for a in args]
-        return np.asarray(args).view(cls)
+def form_factory(name):
+    '''
+    >>> form = form_factory('form')
+
+    >>> f, g, u, v = symbols('f g u v')
+
+    >>> α = form(1, (f, g))
+    >>> φ = form(1, (u, v))
+    
+    >>> -φ
+    form(1, (-u, -v))
+    >>> φ + φ
+    form(1, (2*u, 2*v))
+    >>> φ + α
+    form(1, (f + u, g + v))
+    >>> φ - α
+    form(1, (-f + u, -g + v))
+    
+    #>>> φ ^ φ
+    #form(2, (0,))
+    #>>> α ^ φ
+    #form(2, (-f*v + g*u,))
+    #>>> φ ^ α
+    #form(2, (f*v - g*u,))
+    
+    '''
+    
+    def __new__(cls, degree, components):
+        comp = tuple(sympify(_) for _ in components)
+        obj = tuple.__new__(cls, comp)
+        obj.degree = degree
+        return obj
+
+    def __repr__(self):
+        t = (self.degree, tuple(self))
+        return name + t.__repr__()
 
     def __eq__(self, other):
-        return np.array_equal(self, other)
+        return self.degree == other.degree and tuple(self) == tuple(other)
     
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    def __repr__(self):
-        t = tuple(self)
-        if len(t) == 1:
-            s = '(' + t[0].__repr__() + ')'
-        else:
-            s = t.__repr__()
-        return typename + s
     
-    return type(typename, (np.ndarray,), {
-                '__new__':__new__, 
-                '__eq__':__eq__,
-                '__ne__':__ne__,
-                '__repr__':__repr__,
-                })
+    def __rmul__(self, other):
+        if callable(other):
+            return other(self)
+        return NotImplemented
 
-F0 = symbolicform('F0')
-F1 = symbolicform('F1')
-F2 = symbolicform('F2')
+    def __xor__(self, other):
+        return W(self, other)
+        
+    def binary(name):
+        def __fname__(self, other):
+            if type(other) is type(self):
+                assert self.degree == other.degree
+                comps = tuple(getattr(s, name)(o) for s, o in zip(self, other))
+            else:    
+                comps = tuple(getattr(s, name)(other) for s in self)
+            return form(self.degree, comps)
+        return __fname__
+
+    def unary(name):
+        def __fname__(self):
+            comps = tuple(getattr(s, name)() for s in self)
+            return form(self.degree, comps)
+        return __fname__
+
+    methods = {}
+    for m in '''
+            __new__
+            __eq__
+            __ne__
+            __repr__
+            __rmul__
+            __xor__
+            '''.split():
+        methods[m] = locals()[m]
+    for m in '''
+            __add__
+            __radd__
+            __sub__
+            __rsub__
+            __div__
+            __truediv__
+            '''.split():
+        methods[m] = binary(m)
+    for m in '''
+            __neg__
+            '''.split():
+        methods[m] = unary(m)
+
+    return type(name, (tuple,), methods)
+
+form = form_factory('form')
+
+def simplified_forms(F):
+
+    class F0(F):
+        def __new__(cls, *args):  return super().__new__(cls, 0, args)
+        def __repr__(self): return 'F0(' + self[0].__repr__() + ')'
+    
+    class F1(F):
+        def __new__(cls, *args):  return super().__new__(cls, 1, args)
+        def __repr__(self): return 'F1' + tuple(self).__repr__()
+    
+    class F2(F):
+        def __new__(cls, *args):  return super().__new__(cls, 2, args)
+        def __repr__(self): return 'F2(' + self[0].__repr__() + ')'
+    
+    return F0, F1, F2
+
+F0, F1, F2 = simplified_forms(form)
+
+def multipledispatch(T):    
+    def apply_decorator(dispatch_fn):
+        __multi__ = {}
+        def _inner(*args):
+            d = tuple(f.degree     for f in args)
+            c = tuple(f.components for f in args)
+            d_ = dispatch_fn(*d)
+            c_ = __multi__[d](*c)
+            return T(d_, c_)
+        _inner.__multi__ = __multi__
+        _inner.__default__ = None
+        return _inner
+    return apply_decorator
+
+def register(dispatch_fn, *dispatch_key):
+    def apply_decorator(fn):
+        if not dispatch_key:
+            dispatch_fn.__default__ = fn
+        else:
+            dispatch_fn.__multi__[dispatch_key] = fn
+    return apply_decorator
 
 ################################
 # Derivative
 ################################
 
+# @multipledispatch(form)
+# def D(k):
+#     return k+1
+# 
+# @register(D, 0)
+# def _(f):
+#     f, = f
+#     return (diff(f, x), diff(f, y))
+#     
+# @register(D, 1)
+# def _(f):
+#     fx, fy = f
+#     return -diff(fy, x) + diff(fx, y),
+# 
+# @register(D, 2)
+# def _(f):
+#     return 0,
+ 
 @d_(F0)
 def D(f):
     f ,= f
     return F1(diff(f, x), diff(f, y))
-
+  
 @d_(F1)
 def D(f):
     fx, fy = f
     return F2(-diff(fx, y) + diff(fy, x))
-
+  
 @d_(F2)
 def D(f):
     return 0
-
+  
 @d_(object)
 def D(f):
     assert f == 0
     return 0
-
+ 
 ################################
 # Wedge Product
 ################################
 
+# @multipledispatch(form)
+# def W(k, m):
+#     return k + m
+# 
+# @register(W, 0, 0)
+# def _(a, b):
+#     a, = a
+#     b, = b
+#     return a*b,
+# 
+# @register(W, 0, 1)
+# def _(a, b):
+#     a, = a
+#     bx, by = b
+#     return a*bx, a*by
+# 
+# @register(W, 0, 2)
+# def _(a, b):
+#     a, = a
+#     b, = b
+#     return a*b
+# 
+# @register(W, 1, 1)
+# def _(a, b):
+#     ax, ay = a
+#     bx, by = b
+#     return -ax*by + ay*bx,
+
 @d_(F0, F0)
 def W(α, β):
-    return α*β
-
+    α, = α
+    β, = β
+    return F0(α*β)
+  
 @d_(F0, F1)
 def W(α, β):
     α, = α
     βx, βy = β
     return F1(α*βx, α*βy)
-
+  
 @d_(F0, F2)
 def W(α, β):
-    return β*α
-
+    α, = α
+    β, = β
+    return F2(α*β)
+  
 @d_(F1, F1)
 def W(α, β):
     αx, αy = α
     βx, βy = β
     return F2(αx*βy-βx*αy)
-
+  
 @d_(F1, F0)
 def W(α, β):
     return W(β, α)
-
+  
 @d_(F2, F0)
 def W(α, β):
     return W(β, α)
-
+ 
 ################################
 # Hodge Star
 ################################
 
+# @multipledispatch(form)
+# def H(k):
+#     return 2 - k
+# 
+# @register(H, 0)
+# def _(f):
+#     f, = f
+#     return f,
+# 
+# @register(H, 1)
+# def _(f):
+#     fx, fy = f
+#     return -fy, fx
+# 
+# @register(H, 2)
+# def _(f):
+#     f, = f
+#     return f,
+ 
 @d_(F0)
 def H(f):
     f, = f
     return F2(f)
-
+  
 @d_(F1)
 def H(f):
     fx, fy = f
     return F1(-fy, fx)
-
+  
 @d_(F2)
 def H(f):
     f, = f
     return F0(f)
-
+  
 @d_(object)
 def H(f):
     assert f == 0
     return 0
-
+ 
 ################################
 # Contraction
 ################################
 
+# @multipledispatch(form)
+# def C(k, l):
+#     assert k == 1
+#     return l - 1
+# 
+# @register(C, 1, 1)
+# def _(X, f):
+#     Xx, Xy = X
+#     fx, fy = f
+#     return Xx*fx + Xy*fy,
+# 
+# @register(C, 1, 2)
+# def _(X, f):
+#     Xx, Xy = X
+#     f, = f
+#     return -Xy*f, Xx*f
+
 @d_(F1, F0)
 def C(X, f):
     return 0
-
+  
 @d_(F1, F1)
 def C(X, f):
     return F0( X[0]*f[0] + X[1]*f[1] )
-
+  
 @d_(F1, F2)
 def C(X, f):
     return F1( -X[1]*f[0], X[0]*f[0] )
-
+  
 @d_(F1, object)
 def C(X, f):
     assert f == 0
     return 0
-
+ 
 #TODO: Delete this
 def contractions(X):
     '''
     .. warning::
         Deprecated
-
+ 
     >>> C1, C2 = contractions((u,v))
     >>> C1((f,g)) == f*u + g*v
     True
@@ -324,7 +515,7 @@ def Laplacian(f):
 @d_(F0)
 def P(f):
     return f[0].subs({x:x0, y:y0})
-
+ 
 @d_(F1)
 def P(f):
     #ux, uy = sympify(f[0]), sympify(f[1])
@@ -339,7 +530,7 @@ def P(f):
     if iexpr.has(Integral):
         raise ValueError('Unable to evaluate {}.'.format(iexpr))
     return iexpr
-
+ 
 @d_(F2)
 def P(f):
     omega = sympify(f[0])
@@ -389,11 +580,13 @@ def vort(V):
 
 def adv(V):
     '''
-    >>> simplify(adv((u,v))) == (u*diff(u,x)+v*diff(u,y), u*diff(v,x)+v*diff(v,y))
+    >>> d = diff
+    >>> simplify(adv((u,v))) == (u*d(u,x)+v*d(u,y), u*d(v,x)+v*d(v,y))
     True
     '''
-    V_ = F1(*V)
-    return tuple(Lie(V_, V_) + grad(-(V[0]**2+V[1]**2)/2))
+    G  = grad(V[0]**2 + V[1]**2)
+    V_, G_ = F1(*V), F1(*G)
+    return tuple(Lie(V_, V_) - G_/2)
 
 def projections1d():
     '''

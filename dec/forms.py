@@ -87,6 +87,20 @@ def DEC(grid):
             typed2('D'),
             typed2('H'))
 
+def operators_lambda(n):
+
+    def D( k ): 
+        return k + 1
+    def H( k ): 
+        return n - k
+    def W( k, l ): 
+        return k + k
+    def C( k, l ):
+        assert k == 1 
+        return l - 1
+    
+    return D, H, W, C
+
 def operators_by_degree(n):
     '''
     Enumerate all the operators.

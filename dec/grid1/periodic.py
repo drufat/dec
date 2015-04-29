@@ -54,11 +54,6 @@ def grid_1d_periodic(n, xmin=0, xmax=2*pi):
     
     return g
 
-# @d_(Grid1D, int)
-# def basis_fn(g, degree):
-#     return None, degree
-# 
-
 @d_(F0)
 def D(f):
     return F1(roll(f, shift=-1) - f)
@@ -67,10 +62,6 @@ def D(f):
 def D(f):
     return F1d(f - roll(f, shift=+1))
  
-# @d_(F1)
-# def H(f):
-#     pass
-
 def P0(g, f):
     return F0(g, f(g.verts))
 
