@@ -228,9 +228,9 @@ def D(f):
 
 def W(a, b):
     '''
+    Wedge Product
+    
     >>> u, v, f, g = symbols('u v f g')
-
-    Wedge
     
     >>> W(F0(f),F0(g))
     F0(f*g)

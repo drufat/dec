@@ -11,11 +11,24 @@ Contents
    symbolic
    contraction
    wedge
+   sample_advection
    paper
    bases
    hodge-star
    poisson
-   sample_advection
+
+Installation
+=============
+
+To install simply run::
+
+   pip install dec
+
+or build from source::
+
+   git clone https://github.com/drufat/dec.git
+   cd dec
+   python setup.py install
 
 Operators
 ==========
@@ -39,20 +52,6 @@ Grids
 
 .. plot:: plot/grid/regular.py
 	:width: 500
-
-Installation
-=============
-
-To install simply run::
-
-   pip install dec
-
-or build from source::
-
-   git clone https://github.com/drufat/dec.git
-   cd dec
-   python setup.py install
-
 
 Indices and tables
 ==================
