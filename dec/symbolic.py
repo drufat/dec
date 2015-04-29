@@ -1,89 +1,7 @@
-r'''
-    Module for symbolic computations.
-
-    >>> u, v, f, g = symbols('u v f g')
-    
-    Derivative
-    -----------
-    >>> D( F0(x) )
-    F1(1, 0)
-    >>> D( F0(x*y) )
-    F1(y, x)
-    >>> D( F1(-y, x) )
-    F2(2)
-    >>> D( F2(x) )
-    0
-
-    Wedge
-    ------
-    >>> W(F0(f),F0(g))
-    F0(f*g)
-    >>> W(F0(f),F1(u,v))
-    F1(f*u, f*v)
-    >>> W(F1(u,v),F0(f))
-    F1(f*u, f*v)
-    >>> W(F1(u,v),F1(f,g))
-    F2(-f*v + g*u)
-    >>> W(F0(f),F2(g))
-    F2(f*g)
-    >>> W(F2(g),F0(f))
-    F2(f*g)
-
-    Hodge Star
-    -----------
-    >>> H(F0(x))
-    F2(x)
-    >>> H(F1(x,y))
-    F1(-y, x)
-    >>> H(F2(x))
-    F0(x)
-
-    Contraction
-    ------------
-    >>> X = F1(u, v)
-    >>> C(X, F1(f,g))
-    F0(f*u + g*v)
-    >>> C(X, F2(f))
-    F1(-f*v, f*u)
-    
-    
-    Inner Product
-    --------------
-    The inner product berween forms can be expressed as 
-
-    .. math:: \alpha \wedge \star \beta = \langle \alpha, \beta \rangle \omega
-        
-    where :math:`\omega` is the volume form and :math:`\langle\cdot,\cdot\rangle`
-    represent an inner product between forms.
-    
-    >>> W(F0(f), H(F0(g)))
-    F2(f*g)
-    >>> W(F1(f,g), H(F1(u,v)))
-    F2(f*u + g*v)
-    >>> W(F2(f), H(F2(g)))
-    F2(f*g)
-
-    Projections 
-    ------------
-    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
-    and return the result in terms of simplex coordiates.
-
-    >>> P(F0(x*y))
-    x0*y0
-    >>> P(F1(x, 0))
-    -x0**2/2 + x1**2/2
-    >>> P(F1(1, 0))
-    -x0 + x1
-    >>> P(F1(1, 1))
-    -x0 + x1 - y0 + y1
-    >>> from sympy import expand
-    >>> P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
-    True
-
-    Other Functions
-    ----------------
-    
 '''
+    Module for symbolic computations.    
+'''
+
 from dec import d_
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
@@ -123,7 +41,6 @@ p  = [
     0
 ]
 
-
 def form_factory(name):
     '''
     >>> form = form_factory('form')
@@ -142,12 +59,13 @@ def form_factory(name):
     >>> φ - α
     form(1, (-f + u, -g + v))
     
-    #>>> φ ^ φ
-    #form(2, (0,))
-    #>>> α ^ φ
-    #form(2, (-f*v + g*u,))
-    #>>> φ ^ α
-    #form(2, (f*v - g*u,))
+    
+    We can use ^ as the wedge product operator.    
+
+    >>> φ ^ φ == form(2, (0,))
+    True
+    >>> α ^ φ == - φ ^ α
+    True
     
     '''
     
@@ -217,25 +135,37 @@ def form_factory(name):
 
     return type(name, (tuple,), methods)
 
-form = form_factory('form')
-
 def simplified_forms(F):
+    '''
+    >>> F0, F1, F2 = simplified_forms(form)
+    >>> F0(x   ) == form(0, (x,  ))
+    True
+    >>> F1(x, y) == form(1, (x, y))
+    True
+    >>> F2(x   ) == form(2, (x,  ))
+    True
+    '''
 
-    class F0(F):
-        def __new__(cls, *args):  return super().__new__(cls, 0, args)
-        def __repr__(self): return 'F0(' + self[0].__repr__() + ')'
+    def factory(degree):
+        name = 'F{}'.format(degree)
+        def __new__(cls, *args):  
+            return F.__new__(cls, degree, args)
+        if degree == 1:
+            def rep(self): 
+                return  '{}{}'.format(name, tuple(self))
+        else:            
+            def rep(self): 
+                return '{}({})'.format(name, self[0])
+        return type(name, (F,), {'__new__':__new__, '__repr__':rep})
     
-    class F1(F):
-        def __new__(cls, *args):  return super().__new__(cls, 1, args)
-        def __repr__(self): return 'F1' + tuple(self).__repr__()
-    
-    class F2(F):
-        def __new__(cls, *args):  return super().__new__(cls, 2, args)
-        def __repr__(self): return 'F2(' + self[0].__repr__() + ')'
-    
-    return F0, F1, F2
+    return factory(0), factory(1), factory(2)
 
+form = form_factory('form')
 F0, F1, F2 = simplified_forms(form)
+
+#################################
+# Multiple dispatch
+#################################
 
 def multipledispatch(T):    
     def apply_decorator(dispatch_fn):
@@ -259,191 +189,176 @@ def register(dispatch_fn, *dispatch_key):
             dispatch_fn.__multi__[dispatch_key] = fn
     return apply_decorator
 
+
 ################################
 # Derivative
 ################################
 
-# @multipledispatch(form)
-# def D(k):
-#     return k+1
-# 
-# @register(D, 0)
-# def _(f):
-#     f, = f
-#     return (diff(f, x), diff(f, y))
-#     
-# @register(D, 1)
-# def _(f):
-#     fx, fy = f
-#     return -diff(fy, x) + diff(fx, y),
-# 
-# @register(D, 2)
-# def _(f):
-#     return 0,
- 
-@d_(F0)
 def D(f):
-    f ,= f
-    return F1(diff(f, x), diff(f, y))
-  
-@d_(F1)
-def D(f):
-    fx, fy = f
-    return F2(-diff(fx, y) + diff(fy, x))
-  
-@d_(F2)
-def D(f):
-    return 0
-  
-@d_(object)
-def D(f):
-    assert f == 0
-    return 0
+    '''
+    Derivative
+     
+    >>> D( F0(x) )
+    F1(1, 0)
+    >>> D( F0(x*y) )
+    F1(y, x)
+    >>> D( F1(-y, x) )
+    F2(2)
+    >>> D( F2(x) )
+    0
+    '''
+
+    if f is 0:
+        return 0
+    
+    if f.degree is 0:
+        f ,= f
+        return F1(diff(f, x), diff(f, y))
+    
+    if f.degree is 1:
+        fx, fy = f
+        return F2(-diff(fx, y) + diff(fy, x))    
+    
+    if f.degree is 2:
+        return 0
  
 ################################
 # Wedge Product
 ################################
 
-# @multipledispatch(form)
-# def W(k, m):
-#     return k + m
-# 
-# @register(W, 0, 0)
-# def _(a, b):
-#     a, = a
-#     b, = b
-#     return a*b,
-# 
-# @register(W, 0, 1)
-# def _(a, b):
-#     a, = a
-#     bx, by = b
-#     return a*bx, a*by
-# 
-# @register(W, 0, 2)
-# def _(a, b):
-#     a, = a
-#     b, = b
-#     return a*b
-# 
-# @register(W, 1, 1)
-# def _(a, b):
-#     ax, ay = a
-#     bx, by = b
-#     return -ax*by + ay*bx,
+def W(a, b):
+    '''
+    >>> u, v, f, g = symbols('u v f g')
 
-@d_(F0, F0)
-def W(α, β):
-    α, = α
-    β, = β
-    return F0(α*β)
-  
-@d_(F0, F1)
-def W(α, β):
-    α, = α
-    βx, βy = β
-    return F1(α*βx, α*βy)
-  
-@d_(F0, F2)
-def W(α, β):
-    α, = α
-    β, = β
-    return F2(α*β)
-  
-@d_(F1, F1)
-def W(α, β):
-    αx, αy = α
-    βx, βy = β
-    return F2(αx*βy-βx*αy)
-  
-@d_(F1, F0)
-def W(α, β):
-    return W(β, α)
-  
-@d_(F2, F0)
-def W(α, β):
-    return W(β, α)
+    Wedge
+    
+    >>> W(F0(f),F0(g))
+    F0(f*g)
+    >>> W(F0(f),F1(u,v))
+    F1(f*u, f*v)
+    >>> W(F1(u,v),F0(f))
+    F1(f*u, f*v)
+    >>> W(F1(u,v),F1(f,g))
+    F2(-f*v + g*u)
+    >>> W(F0(f),F2(g))
+    F2(f*g)
+    >>> W(F2(g),F0(f))
+    F2(f*g)
+    '''
+    
+    deg = (a.degree, b.degree)
+    
+    if deg == (0, 0):
+        a, = a
+        b, = b
+        return F0(a*b)
+
+    if deg == (0, 1):
+        a, = a
+        bx, by = b
+        return F1(a*bx, a*by)
+     
+    if deg == (0, 2):
+        a, = a
+        b, = b
+        return F2(a*b)
+     
+    if deg == (1, 1):
+        ax, ay = a
+        bx, by = b
+        return F2(ax*by - ay*bx)
+
+    if deg == (1, 0):
+        return W(b, a)
+
+    if deg == (2, 0):
+        return W(b, a)
  
 ################################
 # Hodge Star
 ################################
 
-# @multipledispatch(form)
-# def H(k):
-#     return 2 - k
-# 
-# @register(H, 0)
-# def _(f):
-#     f, = f
-#     return f,
-# 
-# @register(H, 1)
-# def _(f):
-#     fx, fy = f
-#     return -fy, fx
-# 
-# @register(H, 2)
-# def _(f):
-#     f, = f
-#     return f,
+def H(f):
+    '''
+    Hodge Star
+
+    >>> H(F0(x))
+    F2(x)
+    >>> H(F1(x,y))
+    F1(-y, x)
+    >>> H(F2(x))
+    F0(x)
+    '''
+
+    if f is 0:
+        return 0
  
-@d_(F0)
-def H(f):
-    f, = f
-    return F2(f)
-  
-@d_(F1)
-def H(f):
-    fx, fy = f
-    return F1(-fy, fx)
-  
-@d_(F2)
-def H(f):
-    f, = f
-    return F0(f)
-  
-@d_(object)
-def H(f):
-    assert f == 0
-    return 0
+    if f.degree is 0:
+        f, = f
+        return F2(f)
+      
+    if f.degree is 1:
+        fx, fy = f
+        return F1(-fy, fx)
+      
+    if f.degree is 2:
+        f, = f
+        return F0(f)
+
+################################
+# Inner Product
+################################
+
+def Dot(a, b):
+    '''
+    Inner Product
+    
+    The inner product berween forms can be expressed as 
+
+    .. math:: \langle \alpha, \beta \rangle = \star ( \alpha \wedge \star \beta )
+    
+    >>> Dot(F0(f), F0(g)) == F0(f*g) == Dot(F0(g), F0(f))
+    True
+    >>> Dot(F1(f,g), F1(u,v)) == F0(f*u + g*v) == Dot(F1(u,v), F1(f,g))
+    True
+    >>> Dot(F2(f), F2(g)) == F0(f*g) == Dot(F2(g), F2(f))
+    True
+    '''
+    return H(W(a, H(b)))
  
 ################################
 # Contraction
 ################################
 
-# @multipledispatch(form)
-# def C(k, l):
-#     assert k == 1
-#     return l - 1
-# 
-# @register(C, 1, 1)
-# def _(X, f):
-#     Xx, Xy = X
-#     fx, fy = f
-#     return Xx*fx + Xy*fy,
-# 
-# @register(C, 1, 2)
-# def _(X, f):
-#     Xx, Xy = X
-#     f, = f
-#     return -Xy*f, Xx*f
+def C(X, f):
+    r'''
+    Contraction
+    
+    >>> u, v, f, g = symbols('u v f g')
 
-@d_(F1, F0)
-def C(X, f):
-    return 0
-  
-@d_(F1, F1)
-def C(X, f):
-    return F0( X[0]*f[0] + X[1]*f[1] )
-  
-@d_(F1, F2)
-def C(X, f):
-    return F1( -X[1]*f[0], X[0]*f[0] )
-  
-@d_(F1, object)
-def C(X, f):
-    assert f == 0
-    return 0
+    >>> X = F1(u, v)
+    >>> C(X, F1(f,g))
+    F0(f*u + g*v)
+    >>> C(X, F2(f))
+    F1(-f*v, f*u)
+    '''
+
+    assert X.degree is 1
+    Xx, Xy = X
+
+    if f is 0:
+        return 0
+
+    if f.degree is 0:
+        return 0
+
+    if f.degree is 1:
+        fx, fy = f
+        return F0(Xx*fx + Xy*fy)
+      
+    if f.degree is 2:
+        f, = f
+        return F1(-Xy*f, Xx*f )
  
 #TODO: Delete this
 def contractions(X):
@@ -512,12 +427,10 @@ def Laplacian(f):
 # Projections
 ################################
 
-@d_(F0)
-def P(f):
+def P0(f):
     return f[0].subs({x:x0, y:y0})
  
-@d_(F1)
-def P(f):
+def P1(f):
     #ux, uy = sympify(f[0]), sympify(f[1])
     ux, uy = f
     s = symbols('s')
@@ -531,8 +444,7 @@ def P(f):
         raise ValueError('Unable to evaluate {}.'.format(iexpr))
     return iexpr
  
-@d_(F2)
-def P(f):
+def P2(f):
     omega = sympify(f[0])
     s, t = symbols('s t')
     A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
@@ -544,6 +456,28 @@ def P(f):
         raise ValueError('Unable to evaluate {}.'.format(iexpr))
     return iexpr
 
+def P(f):
+    '''
+    Projections 
+
+    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
+    and return the result in terms of simplex coordiates.
+
+    >>> P(F0(x*y))
+    x0*y0
+    >>> P(F1(x, 0))
+    -x0**2/2 + x1**2/2
+    >>> P(F1(1, 0))
+    -x0 + x1
+    >>> P(F1(1, 1))
+    -x0 + x1 - y0 + y1
+    >>> from sympy import expand
+    >>> P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+    True
+    '''
+    return {0: P0, 
+            1: P1, 
+            2: P2}[f.degree](f)
 
 ################################
 # Misc
