@@ -1,55 +1,9 @@
 from dec.spectral import *
 from dec.grid1 import *
 from numpy.testing import assert_array_almost_equal as eq
+import pytest
 import dec.forms
-
-
-# def test_DEC():
-#     g = Grid_1D_Periodic(11)
-#
-#     P, R, D, H = dec.forms.DEC(g)
-#
-#     P0, P1, P0d, P1d = g.projection()
-#     R0, R1, R0d, R1d = g.reconstruction()
-#     H0, H1, H0d, H1d = g.hodge_star()
-#     D0, D0d = g.derivative()
-#
-#     f = lambda x: sin(sin(x))
-#
-#     eq( P(f, 0, True ), P0(f)  )
-#     eq( P(f, 1, True ), P1(f)  )
-#     eq( P(f, 0, False), P0d(f) )
-#     eq( P(f, 1, False), P1d(f) )
-#
-#     x = linspace(0, 2*pi, 100)
-#     eq( R(P(f, 0, True ))(x), R0(P0(f))(x) )
-#     eq( R(P(f, 1, True ))(x), R1(P1(f))(x)  )
-#     eq( R(P(f, 0, False))(x), R0d(P0d(f))(x) )
-#     eq( R(P(f, 1, False))(x), R1d(P1d(f))(x) )
-#
-#     x = P(f, 0, True)
-#     eq( D(x), D0(x) )
-#     x = P(f, 0, False)
-#     eq( D(x), D0d(x) )
-#
-#     x = P(f, 0, True)
-#     eq( H(x), H0(x) )
-#     x = P(f, 1, True)
-#     eq( H(x), H1(x) )
-
-# def test_d_equivalence():
-#     g = Grid_1D_Periodic(10)
-#     F = lambda x: sin(5*x)
-# 
-#     M = g.derivative_matrix()
-#     d, dd = [(lambda f: M[0]*f), (lambda f: M[1]*f)]
-#     D, DD = g.derivative()
-# 
-#     P0, P1, P0d, P1d = g.projection()
-#     f = P0(F)
-#     eq(D(f), d(f))
-#     f = P0d(F)
-#     eq(DD(f), dd(f))
+random.seed(seed=1)
 
 def test_one_form():
 
@@ -107,9 +61,7 @@ def test_basis_functions():
         check_grid(Grid_1D_Chebyshev(n, -1, +1))
 
 def test_projection_reconstruction():
-    
-    random.seed(seed=1)
-    
+        
     def check_grid(g):
         for P, R, B in zip(g.projection(), g.reconstruction(), g.basis_fn()):
             y = random.rand(len(B))
@@ -254,7 +206,7 @@ def test_wedge():
 
 def test_leibniz():
 
-    N = 13
+    N = 7
     g = Grid_1D_Periodic(N)
     D, DD = g.derivative()
     P0, P1, P0d, P1d = g.projection()
@@ -267,29 +219,30 @@ def test_leibniz():
     rhs = W01(a0, D(b0)) + W01(b0, D(a0))
     eq(lhs, rhs)
 
-#def test_associativity_exact():
-#    ''' Associativity satisfied by exact forms. '''
-#
-#    N = 5
-#    g = Grid_1D_Periodic(N)
-#    W00, W01, _W01 = g.wedge()
-#    D, _ = g.derivative()
-#
-#    a0 = random.random_sample(N)
-#    b0 = random.random_sample(N)
-#    c1 = D(random.random_sample(N))
-#
-#    eq1 = W01(a0, W01(b0, c1))
-#    eq2 = W01(b0, W01(a0, c1))
-#    eq3 = W01(W00(a0, b0), c1)
-#
-#    eq(eq1, eq3)
-#    eq(eq2, eq3)
+@pytest.mark.xfail
+def test_associativity_exact():
+    ''' Associativity satisfied by exact forms. '''
+
+    N = 5
+    g = Grid_1D_Periodic(N)
+    W00, W01, _W01 = g.wedge()
+    D, _ = g.derivative()
+
+    a0 = random.random_sample(N)
+    b0 = random.random_sample(N)
+    c1 = D(random.random_sample(N))
+
+    eq1 = W01(a0, W01(b0, c1))
+    eq2 = W01(b0, W01(a0, c1))
+    eq3 = W01(W00(a0, b0), c1)
+
+    eq(eq1, eq3)
+    eq(eq2, eq3)
 
 def test_associativity_old():
     ''' Associativity satisfied only by wedge with no refinement.'''
 
-    N = 13
+    N = 7
     g = Grid_1D_Periodic(N)
     W00, W01, _W01 = g.wedge()
 

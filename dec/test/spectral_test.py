@@ -1,9 +1,9 @@
 from dec.spectral import *
 from numpy.testing import assert_array_almost_equal as eq
+random.seed(1)
 
 def test_transforms():
     x = random.random(11)
-
     eq( x,          Sinv(S(x)) )
     eq( Hinv(x),    S(Hinv(Sinv(x))) )
     eq( H(S(x)),    S(H(x)) )
@@ -26,7 +26,6 @@ def test_transforms():
     eq( Sinv( f(x)), f(x-h/2) )
 
 def test_linearity():
-    random.seed(1)
     for N in range(4, 10):
         h = 2*pi/N
         fk = lambda x: fourier_K(x, 0, h/2)
@@ -57,6 +56,7 @@ def test_fourier_K_inv():
         assert allclose(K.dot(a), fk(a))
         assert allclose(Kinv.dot(a), fk_inv(a))
         assert allclose(linalg.matrix_rank(Kinv, 1e-5), N)
-        
         assert allclose(linalg.inv(K), Kinv)
         assert allclose(linalg.inv(Kinv), K)
+
+

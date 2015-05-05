@@ -1,8 +1,6 @@
 '''
     Module for symbolic computations.    
 '''
-
-from dec import d_
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
                    sympify,
@@ -69,18 +67,19 @@ def form_factory(name):
     
     '''
     
-    def __new__(cls, degree, components):
+    F = type(name, (object,), {})
+    
+    def __init__(self, degree, components):
         comp = tuple(sympify(_) for _ in components)
-        obj = tuple.__new__(cls, comp)
-        obj.degree = degree
-        return obj
+        self.components = comp
+        self.degree = degree
 
     def __repr__(self):
-        t = (self.degree, tuple(self))
+        t = (self.degree, self.components)
         return name + t.__repr__()
 
     def __eq__(self, other):
-        return self.degree == other.degree and tuple(self) == tuple(other)
+        return self.degree == other.degree and self.components == other.components
     
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -88,37 +87,41 @@ def form_factory(name):
     def __rmul__(self, other):
         if callable(other):
             return other(self)
-        return NotImplemented
+        else:
+            return type(self)(self.degree, (c.__rmul__(other) for c in self.components))
 
     def __xor__(self, other):
         return W(self, other)
+    
+    def __getitem__(self, k):
+        return self.components[k]
         
     def binary(name):
         def __fname__(self, other):
             if type(other) is type(self):
                 assert self.degree == other.degree
-                comps = tuple(getattr(s, name)(o) for s, o in zip(self, other))
+                comps = tuple(getattr(s, name)(o) for s, o in zip(self.components, other.components))
             else:    
                 comps = tuple(getattr(s, name)(other) for s in self)
-            return form(self.degree, comps)
+            return F(self.degree, comps)
         return __fname__
 
     def unary(name):
         def __fname__(self):
-            comps = tuple(getattr(s, name)() for s in self)
-            return form(self.degree, comps)
+            comps = tuple(getattr(s, name)() for s in self.components)
+            return F(self.degree, comps)
         return __fname__
 
-    methods = {}
     for m in '''
-            __new__
+            __init__
             __eq__
             __ne__
             __repr__
             __rmul__
             __xor__
+            __getitem__
             '''.split():
-        methods[m] = locals()[m]
+        setattr(F, m, locals()[m])
     for m in '''
             __add__
             __radd__
@@ -127,13 +130,13 @@ def form_factory(name):
             __div__
             __truediv__
             '''.split():
-        methods[m] = binary(m)
+        setattr(F, m, binary(m))
     for m in '''
             __neg__
             '''.split():
-        methods[m] = unary(m)
+        setattr(F, m, unary(m))
 
-    return type(name, (tuple,), methods)
+    return F
 
 def simplified_forms(F):
     '''
@@ -148,15 +151,15 @@ def simplified_forms(F):
 
     def factory(degree):
         name = 'F{}'.format(degree)
-        def __new__(cls, *args):  
-            return F.__new__(cls, degree, args)
+        def __init__(self, *args):  
+            F.__init__(self, degree, args)
         if degree == 1:
             def rep(self): 
                 return  '{}{}'.format(name, tuple(self))
         else:            
             def rep(self): 
                 return '{}({})'.format(name, self[0])
-        return type(name, (F,), {'__new__':__new__, '__repr__':rep})
+        return type(name, (F,), {'__init__':__init__, '__repr__':rep})
     
     return factory(0), factory(1), factory(2)
 
@@ -188,7 +191,6 @@ def register(dispatch_fn, *dispatch_key):
         else:
             dispatch_fn.__multi__[dispatch_key] = fn
     return apply_decorator
-
 
 ################################
 # Derivative

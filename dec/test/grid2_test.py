@@ -1,10 +1,7 @@
 from dec.grid2 import *
 import itertools
 import collections
-from numpy.testing import assert_array_almost_equal
-
-eq = assert_array_almost_equal
-
+from numpy.testing import assert_array_almost_equal as eq
 eq2 = lambda x, y: eq(flat(x), flat(y))
 
 def test_d():

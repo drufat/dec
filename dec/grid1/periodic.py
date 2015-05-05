@@ -1,99 +1,120 @@
-from numpy import *
+import numpy as np
 import dec.spectral as sp
-from dec import d_
-from dec.forms import discreteform
-from collections import namedtuple
+import dec.grid1.common as cm
 
-Grid1D = namedtuple('Grid1D', 'n xmin xmax pnts delta verts edges dual')
-
-F0 = discreteform('F0')
-F1 = discreteform('F1')
-
-F0d = discreteform('F0d')
-F1d = discreteform('F1d')
-
-def grid_1d_periodic(n, xmin=0, xmax=2*pi):
-
-    pnts = linspace(xmin, xmax, num=(n+1))
-    lenx = abs(xmax - xmin)
-    delta = diff(pnts)
-
-    verts = pnts[:-1]
-    edges = (pnts[:-1], pnts[1:])
-
-    verts_dual = verts + 0.5*delta
-    edges_dual = (roll(verts_dual,shift=1), verts_dual)
-    edges_dual[0][0] -= lenx
-    delta_dual = delta
-
-    V = verts
-    S0 = arange(len(V))
-    S1 = (S0[:-1], S0[1:])
-
-    Vd = verts_dual
-    S0d = arange(len(Vd))
-    S1d = (S0d[:-1], S0d[1:])
+class Grid_1D_Periodic_(object):
     
-    d = Grid1D(n=n,
-               xmin=xmin,
-               xmax=xmax,
-               pnts=pnts,
-               delta=delta_dual, 
-               verts=verts_dual,
-               edges=edges_dual,
-               dual=None)
+    def __init__(self, n, xmin, xmax, pnts, delta, N, simp, dec, dual):
+        self.dimension = 1
+        self.n = n
+        self.xmin = xmin
+        self.xmax = xmax
+        self.pnts = pnts
+        self.delta = delta
+        self.N = N
+        self.simp = simp
+        self.dual = dual
+        self.dec = dec
+        
+    def __repr__(self):
+        return 'Grid_1D_Periodic_.make{}'.format((self.n, self.xmin, self.xmax))
     
-    g = Grid1D(n=n,
-               xmin=xmin, 
-               xmax=xmax,
-               pnts=pnts, 
-               delta=delta, 
-               verts=verts, 
-               edges=edges, 
-               dual=d)
+    @classmethod
+    def make(cls, n, xmin=0, xmax=2*np.pi):
     
-    return g
+        pnts = np.linspace(xmin, xmax, num=(n+1))
+        lenx = abs(xmax - xmin)
+        delta = np.diff(pnts)
+    
+        verts = pnts[:-1]
+        edges = (pnts[:-1], pnts[1:])
+    
+        verts_dual = verts + 0.5*delta
+        edges_dual = (np.roll(verts_dual,shift=1), verts_dual)
+        edges_dual[0][0] -= lenx
+        delta_dual = delta
+    
+        V = verts
+        S0 = np.arange(len(V))
+        S1 = (S0[:-1], S0[1:])
+    
+        Vd = verts_dual
+        S0d = np.arange(len(Vd))
+        S1d = (S0d[:-1], S0d[1:])
+    
+        B0  = lambda i, x: sp.phi0(n, i, x)
+        B1  = lambda i, x: sp.phi1(n, i, x)
+        B0d = lambda i, x: sp.phid0(n, i, x)
+        B1d = lambda i, x: sp.phid1(n, i, x)
+        
+        P0,  P1  = cm.projections((verts, edges))
+        P0d, P1d = cm.projections((verts_dual, edges_dual))
+        
+        D0  = lambda f: np.roll(f, shift=-1) - f
+        D1  = lambda f: 0 
+        D0d = lambda f: np.roll(D0(f), shift=+1)
+        D1d = lambda f: 0 
 
-@d_(F0)
-def D(f):
-    return F1(roll(f, shift=-1) - f)
-
-@d_(F0d)
-def D(f):
-    return F1d(f - roll(f, shift=+1))
- 
-def P0(g, f):
-    return F0(g, f(g.verts))
-
-def P1(g, f):
-    f_ = sp.slow_integration(g.edges[0], g.edges[1], f)
-    return F1(g, f_)
+        H0 = lambda x: np.real(sp.H(x))
+        H1 = lambda x: np.real(sp.Hinv(x))
+        H0d = H0
+        H1d = H1
+        
+        d = cls(n=n,
+                xmin=xmin,
+                xmax=xmax,
+                pnts=pnts,
+                delta=delta_dual, 
+                N = (n, n),
+                simp=(verts_dual, edges_dual),
+                dec=cm.dec_operators(P=(P0d, P1d),
+                                     B=(B0d, B1d),
+                                     D=(D0d, D1d),
+                                     H=(H0d, H1d)),
+                dual=None)
+        
+        g = cls(n=n,
+                xmin=xmin, 
+                xmax=xmax,
+                pnts=pnts, 
+                delta=delta,
+                N = (n, n),
+                simp=(verts, edges),
+                dec=cm.dec_operators(P=(P0, P1),
+                                     B=(B0, B1),
+                                     D=(D0, D1),
+                                     H=(H0, H1)),
+                dual=None)  
+    
+        g.dual, d.dual = d, g
+    
+        return g
 
 class Grid_1D_Periodic:
 
-    def __init__(self, n, xmin=0, xmax=2*pi):
+    def __init__(self, n, xmin=0, xmax=2*np.pi):
         assert xmax > xmin
 
         dimension = 1
 
-        pnts = linspace(xmin, xmax, num=(n+1))
+        pnts = np.linspace(xmin, xmax, num=(n+1))
         lenx = abs(xmax - xmin)
-        delta = diff(pnts)
+        delta = np.diff(pnts)
 
         verts = pnts[:-1]
         edges = (pnts[:-1], pnts[1:])
 
         verts_dual = verts + 0.5*delta
-        edges_dual = (roll(verts_dual,shift=1), verts_dual)
+        edges_dual = (np.roll(verts_dual,shift=1), verts_dual)
         edges_dual[0][0] -= lenx
         delta_dual = delta
 
         V = verts
-        S0 = arange(len(V))
+        S0 = np.arange(len(V))
         S1 = (S0[:-1], S0[1:])
 
         Vd = verts_dual
-        S0d = arange(len(Vd))
+        S0d = np.arange(len(Vd))
         S1d = (S0d[:-1], S0d[1:])
 
         self.dimension = dimension
@@ -132,13 +153,13 @@ class Grid_1D_Periodic:
         return R0, R1, R0d, R1d
 
     def derivative(self):
-        D0  = lambda f: roll(f, shift=-1) - f
-        D0d = lambda f: roll(D0(f), shift=+1)
+        D0  = lambda f: np.roll(f, shift=-1) - f
+        D0d = lambda f: np.roll(D0(f), shift=+1)
         return D0, D0d
 
     def hodge_star(self):
-        H0 = lambda x: real(sp.H(x))
-        H1 = lambda x: real(sp.Hinv(x))
+        H0 = lambda x: np.real(sp.H(x))
+        H1 = lambda x: np.real(sp.Hinv(x))
         H0d = H0
         H1d = H1
         return H0, H1, H0d, H1d
@@ -170,30 +191,29 @@ class Grid_1D_Periodic:
     def contraction(self, V):
         return sp.contraction1(self, V)
 
-
 def derivative_matrix(n):
-    rng = arange(n)
-    ons = ones(n)
-    d = row_stack((
-               column_stack((
+    rng = np.arange(n)
+    ons = np.ones(n)
+    d = np.row_stack((
+               np.column_stack((
                  rng,
-                 roll(rng, shift= -1),
+                 np.roll(rng, shift= -1),
                  +ons)),
-               column_stack((
+               np.column_stack((
                  rng,
                  rng,
                  -ons))
                ))
-    D = sparse_matrix(d, n, n)
+    D = np.sparse_matrix(d, n, n)
     return D, -D.T
 
 def differentiation_toeplitz(n):
     raise NotImplemented
     #TODO: fix this implementation
-    h = 2*pi/n
+    h = 2*np.pi/n
     assert n % 2 == 0
-    column = concatenate(( [ 0 ], (-1)**arange(1,n) / tan(arange(1,n)*h/2)  ))
-    row = concatenate(( column[:1], column[1:][::-1] ))
+    column = np.concatenate(( [ 0 ], (-1)**np.arange(1,n) / np.tan(np.arange(1,n)*h/2)  ))
+    row = np.concatenate(( column[:1], column[1:][::-1] ))
     D = toeplitz(column, row)
     return D
 
@@ -202,7 +222,7 @@ def hodge_star_toeplitz(g):
     The Hodge-Star using a Toeplitz matrix.
     '''
     P0, P1, P0d, P1d = g.projection()
-    column = P1d(lambda x: alpha0(g.n, x))
-    row = concatenate((column[:1], column[1:][::-1]))
+    column = P1d(lambda x: sp.alpha0(g.n, x))
+    row = np.concatenate((column[:1], column[1:][::-1]))
     return toeplitz(column, row)
 

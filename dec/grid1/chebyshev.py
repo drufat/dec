@@ -4,7 +4,6 @@ class Grid_1D_Chebyshev:
     
     def __init__(self, n, xmin=-1, xmax=+1):
 
-        N = n
         dimension = 1
     
         # 2n-1 points: n primal, n-1 dual

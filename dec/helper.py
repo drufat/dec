@@ -322,7 +322,7 @@ def integrate_2form(face, f):
 
     return integral, error
 
-def check(g, interface):
+def check(o, interface):
     '''
     Check whether an object satisfies an interface.
 
@@ -337,5 +337,5 @@ def check(g, interface):
     '''
     rslt = True
     for i in interface:
-        rslt = (rslt and hasattr(g, i))
+        rslt = (rslt and hasattr(o, i))
     return rslt

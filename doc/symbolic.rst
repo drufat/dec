@@ -16,7 +16,6 @@ Symbolic
 
 .. autofunction:: dec.symbolic.P
 
-
 Operators in Coordinates
 --------------------------
 .. autofunction:: dec.symbolic.grad
@@ -24,4 +23,11 @@ Operators in Coordinates
 .. autofunction:: dec.symbolic.vort
 .. autofunction:: dec.symbolic.adv
 
+Other operators
+----------------
 
+**♭**
+^^^^^^
+
+**♯**
+^^^^^^

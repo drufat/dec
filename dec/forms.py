@@ -1,91 +1,76 @@
 import numpy as np
 import itertools
 
-def discreteform(typename):
+def discreteform_factory(name):
     
-    def __new__(cls, grid, array, **kwargs):
-        obj = np.asarray(array, **kwargs).view(cls)
-        obj.grid = grid
-        return obj
+    F = type(name, (object,), {})
+    def __init__(self, degree, grid, array):
+        self.array = np.asarray(array, dtype=np.float32)
+        self.degree = degree
+        self.grid = grid
+    
+    def __repr__(self):
+        t = (self.degree, self.grid, self.array)
+        return name + t.__repr__()
     
     def __eq__(self, other):
-        return np.array_equal(self, other)
+        return (self.degree == other.degree and 
+                self.grid is other.grid and 
+                np.allclose(self.array, other.array))
     
     def __ne__(self, other):
         return not self.__eq__(other)
     
-    return type(typename, (np.ndarray,), {
-                '__new__':__new__,
-                '__eq__':__eq__,
-                '__ne__':__ne__,
-                })
-
-class Form(np.ndarray):
-
-    def __new__(cls, input_array, grid=None, degree=None, primal=None):
-        obj = np.asarray(input_array).view(cls)
-        obj.grid = grid
-        obj.degree = degree
-        obj.primal = primal
-        return obj
-
-    def __array_finalize__(self, obj):
-        if obj is None: return
-        self.grid = getattr(obj, 'grid', None)
-        self.degree = getattr(obj, 'degree', None)
-        self.primal = getattr(obj, 'primal', None)
-
-def DEC(grid):
-    '''
+    @classmethod
+    def P(cls, deg, grid, func):
+        '''
+        Projection
+        '''
+        return cls(deg, grid, grid.dec.P[deg](func))
     
-    P, R, D, H = DEC(g)
+    @property
+    def R(self):
+        '''
+        Reconstruction
+        '''
+        d, g, a = self.degree, self.grid, self.array
+        def func(*x):
+            return sum(a[i]*g.bases[d](i, *x) for i in range(g.N[d]))
+        return func
+    
+    @property
+    def D(self):
+        '''
+        Derivative
+        '''
+        d, g, a = self.degree, self.grid, self.array
+        a = g.dec.D[d](a)
+        if a is 0: return 0
+        return F(d+1, g, a)
+    
+    @property
+    def H(self):
+        '''
+        Hodge Star
+        '''
+        d, g, a = self.degree, self.grid, self.array
+        k = g.dimension
+        a = g.dec.H[d](a)
+        return F(k-d, g, a)
 
-    this function returns the usual dec operators which then select the appropriate
-    specialization of the operator for the given form based on its order and whether
-    it is primal or dual.
-    '''
+    methods = {}
+    for m in '''
+        __init__
+        __repr__
+        __eq__
+        __ne__
+        P R D H
+        '''.split():
+        setattr(F, m, locals()[m])
+        
+    return F
 
-    ops_1D = operators(1)
-
-    def typed1(op):
-        by_codomain = {}
-        for tup in ops_1D[op]:
-            _, _, codomain = tup
-            by_codomain[codomain] = tup
-        def O(*arg):
-            codomain = arg[-2:]
-            f, _, _ = by_codomain[codomain]
-            return Form(getattr(grid, f)(arg[0]), grid, *codomain)
-        return O
-
-    def typed2(op):
-        by_domain = {}
-        for tup in ops_1D[op]:
-            _, domain, _ = tup
-            by_domain[domain] = tup
-        def O(form):
-            " Select appropriate operator for form"
-            assert grid == form.grid
-            f, _, codomain = by_domain[(form.degree, form.primal)]
-            return Form(getattr(grid, f)(form), grid, *codomain)
-        return O
-
-    def typed3(op):
-        by_domain = {}
-        for tup in ops_1D[op]:
-            _, domain, _ = tup
-            by_domain[domain] = tup
-        def O(form):
-            " Select appropriate operator for form"
-            assert grid == form.grid
-            f, _, _ = by_domain[(form.degree, form.primal)]
-            return getattr(grid, f)(form)
-        return O
-
-    return (typed1('P'),
-            typed3('R'),
-            typed2('D'),
-            typed2('H'))
+decform = discreteform_factory('decform')
 
 def operators_lambda(n):
 
