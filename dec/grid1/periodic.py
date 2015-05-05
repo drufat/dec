@@ -1,6 +1,5 @@
 import numpy as np
 import dec.spectral as sp
-import dec.grid1.common as cm
 
 class Grid_1D_Periodic_(object):
     
@@ -21,6 +20,7 @@ class Grid_1D_Periodic_(object):
     
     @classmethod
     def make(cls, n, xmin=0, xmax=2*np.pi):
+        import dec.grid1.common as cm #mutual imports?
     
         pnts = np.linspace(xmin, xmax, num=(n+1))
         lenx = abs(xmax - xmin)
@@ -33,14 +33,6 @@ class Grid_1D_Periodic_(object):
         edges_dual = (np.roll(verts_dual,shift=1), verts_dual)
         edges_dual[0][0] -= lenx
         delta_dual = delta
-    
-        V = verts
-        S0 = np.arange(len(V))
-        S1 = (S0[:-1], S0[1:])
-    
-        Vd = verts_dual
-        S0d = np.arange(len(Vd))
-        S1d = (S0d[:-1], S0d[1:])
     
         B0  = lambda i, x: sp.phi0(n, i, x)
         B1  = lambda i, x: sp.phi1(n, i, x)
@@ -108,14 +100,6 @@ class Grid_1D_Periodic:
         edges_dual = (np.roll(verts_dual,shift=1), verts_dual)
         edges_dual[0][0] -= lenx
         delta_dual = delta
-
-        V = verts
-        S0 = np.arange(len(V))
-        S1 = (S0[:-1], S0[1:])
-
-        Vd = verts_dual
-        S0d = np.arange(len(Vd))
-        S1d = (S0d[:-1], S0d[1:])
 
         self.dimension = dimension
         self.n = n

@@ -19,14 +19,6 @@ class Grid_1D_Chebyshev:
         delta_dual = diff(tmp)
         edges_dual = (tmp[:-1], tmp[1:])
     
-        V = verts
-        S0 = arange(len(V))
-        S1 = (S0[:-1], S0[1:])
-    
-        Vd = verts_dual
-        S0d = arange(len(Vd))
-        S1d = (S0d[:-1], S0d[1:])
-
         self.dimension = dimension
         self.n = n
         self.xmin = xmin
