@@ -8,7 +8,7 @@ random.seed(seed=1)
 def test_one_form():
 
     N = 10; h = 2*pi/N
-    g = Grid_1D_Periodic(N)
+    g = Grid_1D.periodic(N)
     P0, P1, P0d, P1d = g.projection()
     eq(P1(sin),
        P1d(lambda x: sin(x+.5*h)))
@@ -24,7 +24,7 @@ def test_integrals():
     
     for N in (10, 11, 12, 13):
 
-        g = Grid_1D_Periodic(N, 0, 2*pi)
+        g = Grid_1D.periodic(N, 0, 2*pi)
         for f in (sin,
                   cos):
             reference = slow_integration(g.edges[0], g.edges[1], f)
@@ -32,7 +32,7 @@ def test_integrals():
             eq( integrate_spectral_coarse(g.pnts, f), reference )
             eq( integrate_spectral(g.pnts, f), reference )
 
-        g = Grid_1D_Chebyshev(N, -1, +1)
+        g = Grid_1D.chebyshev(N, -1, +1)
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
@@ -40,7 +40,7 @@ def test_integrals():
             eq( integrate_boole1(g.verts, f), reference )
             eq( integrate_chebyshev(g.verts, f), reference )
 
-        g = Grid_1D_Chebyshev(N, -1, +1)
+        g = Grid_1D.chebyshev(N, -1, +1)
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
@@ -56,9 +56,9 @@ def test_basis_functions():
             eq( vstack(P(b) for b in B), eye(len(B)) )
 
     for n in range(3, 6):
-        check_grid(Grid_1D_Periodic(n, 0, 2*pi))
-        check_grid(Grid_1D_Regular(n, 0, pi))
-        check_grid(Grid_1D_Chebyshev(n, -1, +1))
+        check_grid(Grid_1D.periodic(n, 0, 2*pi))
+        check_grid(Grid_1D.chebyshev(n, -1, +1))
+        check_grid(Grid_1D.regular(n, 0, pi))
 
 def test_projection_reconstruction():
         
@@ -68,14 +68,14 @@ def test_projection_reconstruction():
             eq( P(R(y)), y )
 
     for n in (2, 3, 4):
-        check_grid(Grid_1D_Periodic(n, 0, 2*pi))
-        check_grid(Grid_1D_Regular(n, 0, pi))
-        check_grid(Grid_1D_Chebyshev(n, -1, 1))
+        check_grid(Grid_1D.periodic(n, 0, 2*pi))
+        check_grid(Grid_1D.regular(n, 0, pi))
+        check_grid(Grid_1D.chebyshev(n, -1, 1))
 
 def test_hodge_star_basis_fn():
 
     for n in range(2,4):
-        g = Grid_1D_Periodic(n)
+        g = Grid_1D.periodic(n)
         H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
         h0, h1, h0d, h1d = g.hodge_star()
 
@@ -86,7 +86,7 @@ def test_hodge_star_basis_fn():
         eq(H1d, to_matrix(h1d, n))
 
     for n in range(2,5):
-        g = Grid_1D_Regular(n, 0, pi)
+        g = Grid_1D.regular(n, 0, pi)
         H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
         h0, h1, h0d, h1d = g.hodge_star()
    
@@ -97,7 +97,7 @@ def test_hodge_star_basis_fn():
         eq(H1d, to_matrix(h1d, n))
 
     for n in range(2,4):
-        g = Grid_1D_Chebyshev(n, -1, +1)
+        g = Grid_1D.chebyshev(n, -1, +1)
         H0, H1, H0d, H1d = hodge_star_matrix(g.projection(), g.basis_fn())
         h0, h1, h0d, h1d = g.hodge_star()
  
@@ -119,9 +119,9 @@ def test_hodge_star_inv():
         eq( H0d, linalg.inv(H1) )
 
     for n in range(3,7):
-        check_equal(Grid_1D_Periodic(n))
-        check_equal(Grid_1D_Regular(n))
-        check_equal(Grid_1D_Chebyshev(n))
+        check_equal(Grid_1D.periodic(n))
+        check_equal(Grid_1D.regular(n))
+        check_equal(Grid_1D.chebyshev(n))
 
 def test_compare_chebyshev_and_lagrange_polynomials():
     '''
@@ -131,7 +131,7 @@ def test_compare_chebyshev_and_lagrange_polynomials():
 
     for n in (10, 11, 12, 13):
 
-        g = Grid_1D_Chebyshev(n, -1, +1)
+        g = Grid_1D.chebyshev(n, -1, +1)
 
         x = linspace(g.xmin, g.xmax, 100)
 
@@ -152,9 +152,9 @@ def test_d():
         #dd = g.differentiation_toeplitz()
         #eq( dd*P0(f), P0(f_prime) )
 
-    check_d( Grid_1D_Periodic(10), sin, cos )
-    check_d( Grid_1D_Periodic(11), sin, cos )
-    check_d( Grid_1D_Periodic(10), cos, (lambda x: -sin(x)) )
+    check_d( Grid_1D.periodic(10), sin, cos )
+    check_d( Grid_1D.periodic(11), sin, cos )
+    check_d( Grid_1D.periodic(10), cos, (lambda x: -sin(x)) )
 
 
     def check_d_bnd(g, f, f_prime):
@@ -164,15 +164,15 @@ def test_d():
         bc = g.boundary_condition(f)
         eq( DD(P0d(f))+bc, P1d(f_prime) )
 
-    check_d_bnd( Grid_1D_Chebyshev(10), (lambda x: 2*x), (lambda x: 2+0*x) )
-    check_d_bnd( Grid_1D_Chebyshev(11), (lambda x: 2*x), (lambda x: 2+0*x) )
-    check_d_bnd( Grid_1D_Chebyshev(10), (lambda x: x**3), (lambda x: 3*x**2) )
-    check_d_bnd( Grid_1D_Chebyshev(11), (lambda x: x**3), (lambda x: 3*x**2) )
+    check_d_bnd( Grid_1D.chebyshev(10), (lambda x: 2*x), (lambda x: 2+0*x) )
+    check_d_bnd( Grid_1D.chebyshev(11), (lambda x: 2*x), (lambda x: 2+0*x) )
+    check_d_bnd( Grid_1D.chebyshev(10), (lambda x: x**3), (lambda x: 3*x**2) )
+    check_d_bnd( Grid_1D.chebyshev(11), (lambda x: x**3), (lambda x: 3*x**2) )
 
 def test_hodge():
 
     F = lambda x: sin(4 * x)
-    g = Grid_1D_Periodic(10)
+    g = Grid_1D.periodic(10)
     H0, H1, _, _ = g.hodge_star()
     P0, P1, P0d, P1d = g.projection()
 
@@ -189,7 +189,7 @@ def test_wedge():
     def beta(x): return cos(4 * x)
     def gamma(x): return sin(4 * x) * cos(4 * x)
 
-    g = Grid_1D_Periodic(13)
+    g = Grid_1D.periodic(13)
     P0, P1, P0d, P1d = g.projection()
     W00, W01, _W01 = g.wedge()
 
@@ -207,7 +207,7 @@ def test_wedge():
 def test_leibniz():
 
     N = 7
-    g = Grid_1D_Periodic(N)
+    g = Grid_1D.periodic(N)
     D, DD = g.derivative()
     P0, P1, P0d, P1d = g.projection()
     W00, W01, _W01 = g.wedge()
@@ -224,7 +224,7 @@ def test_associativity_exact():
     ''' Associativity satisfied by exact forms. '''
 
     N = 5
-    g = Grid_1D_Periodic(N)
+    g = Grid_1D.periodic(N)
     W00, W01, _W01 = g.wedge()
     D, _ = g.derivative()
 
@@ -243,7 +243,7 @@ def test_associativity_old():
     ''' Associativity satisfied only by wedge with no refinement.'''
 
     N = 7
-    g = Grid_1D_Periodic(N)
+    g = Grid_1D.periodic(N)
     W00, W01, _W01 = g.wedge()
 
     W01 = _W01 #Use old wedge

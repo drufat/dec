@@ -12,6 +12,7 @@ try:
     from scipy.linalg.special_matrices import toeplitz
 except ImportError:
     from scipy.linalg.basic import toeplitz
+from dec.helper import slow_integration
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -650,10 +651,6 @@ def reconstruction(basis_fn):
         return r
     return [(lambda a, B=B: R(a, B)) for B in basis_fn]
 
-def slow_integration(a, b, f):
-    from scipy.integrate import quad
-    return array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
-
 def A_diag(N):
     r'''
     
@@ -1133,15 +1130,3 @@ def contraction1(g, V):
     H0, H1, H0d, H1d = g.hodge_star()
     def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
     return C1
-
-def projections(simp):
-
-    def P0(f):
-        return f(simp[0])
-    
-    def P1(f):
-        return sp.slow_integration(simp[1][0], simp[1][1], f)
-        #return sp.split_args(sp.integrate_spectral)(grid.simp[1][0], grid.simp[1][1])
-        
-    return P0, P1
-

@@ -1,6 +1,15 @@
 import numpy as np
 import itertools
 
+class dec_operators:
+    
+    def __init__(self, P, B, D, H):
+
+        self.P = P
+        self.B = B
+        self.D = D
+        self.H = H
+
 def discreteform_factory(name):
     
     F = type(name, (object,), {})
@@ -57,6 +66,13 @@ def discreteform_factory(name):
         k = g.dimension
         a = g.dec.H[d](a)
         return F(k-d, g, a)
+    
+    def W(self, other):
+        pass
+
+    def C(self, other):
+        assert self.degree == 1
+        pass
 
     methods = {}
     for m in '''
@@ -73,13 +89,24 @@ def discreteform_factory(name):
 decform = discreteform_factory('decform')
 
 def operators_lambda(n):
+    '''
+    >>> D, H, W, C = operators_lambda(2)
+    >>> D(0), D(1), D(2)
+    (1, 2, 3)
+    >>> H(0), H(1), H(2)
+    (2, 1, 0)
+    >>> W(0, 0), W(0, 1), W(1, 1), W(0, 2)
+    (0, 1, 2, 2)
+    >>> C(1, 1), C(1, 2)
+    (0, 1)
+    '''
 
     def D( k ): 
         return k + 1
     def H( k ): 
         return n - k
     def W( k, l ): 
-        return k + k
+        return k + l
     def C( k, l ):
         assert k == 1 
         return l - 1

@@ -325,17 +325,13 @@ def integrate_2form(face, f):
 def check(o, interface):
     '''
     Check whether an object satisfies an interface.
-
-    >>> from dec.grid1 import *
-    >>> check(Grid_1D_Periodic(4), Grid_1D_Interface)
-    True
-    >>> check(Grid_1D_Chebyshev(4), Grid_1D_Interface)
-    True
-    >>> check(Grid_1D_Regular(4), Grid_1D_Interface)
-    True
-
     '''
     rslt = True
     for i in interface:
         rslt = (rslt and hasattr(o, i))
     return rslt
+
+def slow_integration(a, b, f):
+    from scipy.integrate import quad
+    return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
+

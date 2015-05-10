@@ -4,7 +4,7 @@ from numpy.testing import assert_array_almost_equal as eq
 
 def test_contraction_periodic():
 
-    g = Grid_1D_Periodic(14)
+    g = Grid_1D.periodic(14)
     P0, P1, P0d, P1d = g.projection()
 
     def v(x): return sin(4 * x)
@@ -20,7 +20,7 @@ def test_contraction_periodic():
 
 def test_contraction_chebyshev():
  
-    g = Grid_1D_Chebyshev(14)
+    g = Grid_1D.chebyshev(14)
     P0, P1, P0d, P1d = g.projection()
  
     def v(x): return x**2

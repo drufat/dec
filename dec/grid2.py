@@ -202,13 +202,10 @@ def apply_operators(H, axis):
     return [lambda arr, h=h: apply_along_axis(h, axis, arr) for h in H]
 
 def Grid_2D_Periodic(N, M):
-    return Grid_2D_Cartesian(Grid_1D_Periodic(N), Grid_1D_Periodic(M))
+    return Grid_2D_Cartesian(Grid_1D.periodic(N), Grid_1D.periodic(M))
 
 def Grid_2D_Chebyshev(N, M):
-    return Grid_2D_Cartesian(Grid_1D_Chebyshev(N), Grid_1D_Chebyshev(M))
-
-def Grid_2D_Regular(N, M):
-    return Grid_2D_Cartesian(Grid_1D_Regular(N), Grid_1D_Regular(M))
+    return Grid_2D_Cartesian(Grid_1D.chebyshev(N), Grid_1D.chebyshev(M))
 
 def laplacian2(g):
     '''
