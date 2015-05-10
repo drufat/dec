@@ -1,6 +1,5 @@
 import numpy as np
 import dec.spectral as sp
-from dec.grid1 import projections, dec_operators
 from collections import namedtuple
 
 dec_operators = namedtuple('dec_operators', 'P B D H')
@@ -24,8 +23,8 @@ def periodic_fn(cls, n, xmin=0, xmax=2*np.pi):
     B0d = lambda i, x: sp.phid0(n, i, x)
     B1d = lambda i, x: sp.phid1(n, i, x)
     
-    P0,  P1  = projections((verts, edges))
-    P0d, P1d = projections((verts_dual, edges_dual))
+    P0,  P1  = sp.projections((verts, edges))
+    P0d, P1d = sp.projections((verts_dual, edges_dual))
     
     D0  = lambda f: np.roll(f, shift=-1) - f
     D1  = lambda f: 0 
@@ -45,10 +44,10 @@ def periodic_fn(cls, n, xmin=0, xmax=2*np.pi):
             N = (n, n),
             simp=(verts_dual, edges_dual),
             dec=dec_operators(P=(P0d, P1d),
-                                 B=(B0d, B1d),
-                                 D=(D0d, D1d),
-                                 H=(H0d, H1d)),
-            dual=None)
+                              B=(B0d, B1d),
+                              D=(D0d, D1d),
+                              H=(H0d, H1d)),
+            dual=None)    
     g = cls(n=n,
             xmin=xmin, 
             xmax=xmax,
@@ -57,57 +56,12 @@ def periodic_fn(cls, n, xmin=0, xmax=2*np.pi):
             N = (n, n),
             simp=(verts, edges),
             dec=dec_operators(P=(P0, P1),
-                                 B=(B0, B1),
-                                 D=(D0, D1),
-                                 H=(H0, H1)),
+                              B=(B0, B1),
+                              D=(D0, D1),
+                              H=(H0, H1)),
             dual=None)  
     g.dual, d.dual = d, g
     return g
-
-def projections(simp):
-
-    def P0(f):
-        return f(simp[0])
-    
-    def P1(f):
-        return sp.slow_integration(simp[1][0], simp[1][1], f)
-        #return sp.split_args(sp.integrate_spectral)(grid.simp[1][0], grid.simp[1][1])
-        
-    return P0, P1
-
-def derivatives(grid):
-    D0 = grid.dec.D[0]
-    D0d = grid.dual.dec.D[0]
-    return D0, D0d
-
-def hodge_star(grid):
-    H0 = grid.dec.H[0]
-    H1 = grid.dec.H[1]
-    H0d = grid.dual.dec.H[0]
-    H1d = grid.dual.dec.H[1]
-    return H0, H1, H0d, H1d
-
-class Grid_1D(object):
-    '''
-    >>> g = Grid_1D.periodic(5)
-    '''
-    
-    def __init__(self, n, xmin, xmax, pnts, delta, N, simp, dec, dual):
-        self.dimension = 1
-        self.n = n
-        self.xmin = xmin
-        self.xmax = xmax
-        self.pnts = pnts
-        self.delta = delta
-        self.N = N
-        self.simp = simp
-        self.dual = dual
-        self.dec = dec
-        
-    def __repr__(self):
-        return 'Grid_1D{}'.format((self.n, self.xmin, self.xmax))
-    
-Grid_1D.periodic = classmethod(periodic_fn)
 
 class Grid_1D_Periodic:
 
@@ -203,6 +157,7 @@ class Grid_1D_Periodic:
         return sp.contraction1(self, V)
 
 def derivative_matrix(n):
+    import dec.helper
     rng = np.arange(n)
     ons = np.ones(n)
     d = np.row_stack((
@@ -215,25 +170,27 @@ def derivative_matrix(n):
                  rng,
                  -ons))
                ))
-    D = np.sparse_matrix(d, n, n)
+    D = dec.helper.sparse_matrix(d, n, n)
     return D, -D.T
 
 def differentiation_toeplitz(n):
     raise NotImplemented
     #TODO: fix this implementation
+    import scipy.linalg
     h = 2*np.pi/n
     assert n % 2 == 0
     column = np.concatenate(( [ 0 ], (-1)**np.arange(1,n) / np.tan(np.arange(1,n)*h/2)  ))
     row = np.concatenate(( column[:1], column[1:][::-1] ))
-    D = toeplitz(column, row)
+    D = scipy.linalg.toeplitz(column, row)
     return D
 
 def hodge_star_toeplitz(g):
     '''
     The Hodge-Star using a Toeplitz matrix.
     '''
+    import scipy.linalg
     P0, P1, P0d, P1d = g.projection()
     column = P1d(lambda x: sp.alpha0(g.n, x))
     row = np.concatenate((column[:1], column[1:][::-1]))
-    return toeplitz(column, row)
+    return scipy.linalg.toeplitz(column, row)
 

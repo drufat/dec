@@ -1,4 +1,5 @@
-from dec.spectral import *
+from numpy import *
+import dec.spectral as sp
 '''
 Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
 the correct ones. 
@@ -38,21 +39,21 @@ class Grid_1D_Regular:
         
     def projection(self):
         P0 = lambda f: f(self.verts)
-        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
+        P1 = lambda f: sp.slow_integration(self.edges[0], self.edges[1], f)
         P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
+        P1d = lambda f: sp.slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
         n = self.n
-        B0 = [lambda x, i=i: kappa0(n, i, x) for i in range(n)]
-        B1 = [lambda x, i=i: kappa1_symm(n, i, x) for i in range(n-1)]
-        B0d = [lambda x, i=i: kappad0(n, i, x) for i in range(n-1)]
-        B1d = [lambda x, i=i: kappad1_symm(n, i, x) for i in range(n)]
+        B0 = [lambda x, i=i: sp.kappa0(n, i, x) for i in range(n)]
+        B1 = [lambda x, i=i: sp.kappa1_symm(n, i, x) for i in range(n-1)]
+        B0d = [lambda x, i=i: sp.kappad0(n, i, x) for i in range(n-1)]
+        B1d = [lambda x, i=i: sp.kappad1_symm(n, i, x) for i in range(n)]
         return B0, B1, B0d, B1d
 
     def reconstruction(self):
-        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
+        R0, R1, R0d, R1d = sp.reconstruction(self.basis_fn())
         return R0, R1, R0d, R1d
 
     def derivative(self):
@@ -84,11 +85,11 @@ def H1d_regular(f):
             \mathbf{M}_{1}^{+}
             \mathbf{A}^{-1}
     '''
-    f = f/A_diag(f.shape[0])
-    f = mirror0(f, +1)
+    f = f/sp.A_diag(f.shape[0])
+    f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, +h/2)(f)
-    f = unmirror0(f)
+    f = sp.I_space_inv(-h/2, +h/2)(f)
+    f = sp.unmirror0(f)
     return f
 
 def H0_regular(f):
@@ -101,11 +102,11 @@ def H0_regular(f):
             \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
             \mathbf{M}_{0}^{+}
     '''
-    f = mirror0(f, +1)
+    f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror0(f)
-    f = f*A_diag(f.shape[0])
+    f = sp.I_space(-h/2, h/2)(f)
+    f = sp.unmirror0(f)
+    f = f*sp.A_diag(f.shape[0])
     return  f
 
 def H1_regular(f):
@@ -117,10 +118,10 @@ def H1_regular(f):
             {\mathbf{I}^{-\frac{h}{2},\frac{h}{2}}}^{-1}
             \mathbf{M}_{1}^{+}
     '''
-    f = mirror1(f, +1)
+    f = sp.mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = I_space_inv(-h/2, h/2)(f)
-    f = unmirror1(f)
+    f = sp.I_space_inv(-h/2, h/2)(f)
+    f = sp.unmirror1(f)
     return f
 
 def H0d_regular(f):
@@ -132,8 +133,8 @@ def H0d_regular(f):
             \mathbf{I}^{-\frac{h}{2},\frac{h}{2}}
             \mathbf{M}_{1}^{+}
     '''
-    f = mirror1(f, +1)
+    f = sp.mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = I_space(-h/2, h/2)(f)
-    f = unmirror1(f)
+    f = sp.I_space(-h/2, h/2)(f)
+    f = sp.unmirror1(f)
     return f

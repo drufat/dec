@@ -1,4 +1,5 @@
-from dec.spectral import *
+from numpy import *
+import dec.spectral as sp
 
 class Grid_1D_Chebyshev:
     
@@ -33,24 +34,24 @@ class Grid_1D_Chebyshev:
 
     def projection(self):
         P0 = lambda f: f(self.verts)
-        P1 = lambda f: slow_integration(self.edges[0], self.edges[1], f)
+        P1 = lambda f: sp.slow_integration(self.edges[0], self.edges[1], f)
         #P1 = lambda f: integrate_chebyshev(self.verts, f)
         P0d = lambda f: f(self.verts_dual)
-        P1d = lambda f: slow_integration(self.edges_dual[0], self.edges_dual[1], f)
+        P1d = lambda f: sp.slow_integration(self.edges_dual[0], self.edges_dual[1], f)
         #P1d = lambda f: integrate_chebyshev_dual(
         #        concatenate(([-1], self.verts_dual, [+1])), f)
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
         n = self.n
-        B0  = [lambda x, i=i:  psi0(n, i, x) for i in range(n)]
-        B1  = [lambda x, i=i:  psi1(n, i, x) for i in range(n-1)]
-        B0d = [lambda x, i=i: psid0(n, i, x) for i in range(n-1)]
-        B1d = [lambda x, i=i: psid1(n, i, x) for i in range(n)]
+        B0  = [lambda x, i=i:  sp.psi0(n, i, x) for i in range(n)]
+        B1  = [lambda x, i=i:  sp.psi1(n, i, x) for i in range(n-1)]
+        B0d = [lambda x, i=i:  sp.psid0(n, i, x) for i in range(n-1)]
+        B1d = [lambda x, i=i:  sp.psid1(n, i, x) for i in range(n)]
         return B0, B1, B0d, B1d
 
     def reconstruction(self):
-        R0, R1, R0d, R1d = reconstruction(self.basis_fn())
+        R0, R1, R0d, R1d = sp.reconstruction(self.basis_fn())
         return R0, R1, R0d, R1d
 
     def boundary_condition(self, f):
@@ -85,42 +86,42 @@ class Grid_1D_Chebyshev:
         return w00, w01
 
     def contraction(self, V):
-        return contraction1(self, V)
+        return sp.contraction1(self, V)
 
 def H0d_cheb(f):
-    f = mirror1(f, +1)
+    f = sp.mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_S(f, -h/2)
-    f = fourier_K(f, 0, h)
-    f = Finv(f)
-    f = unmirror1(f)
+    f = sp.F(f)
+    f = sp.fourier_S(f, -h/2)
+    f = sp.fourier_K(f, 0, h)
+    f = sp.Finv(f)
+    f = sp.unmirror1(f)
     return real(f)
 
 def H1_cheb(f):
-    f = mirror1(f, -1)
+    f = sp.mirror1(f, -1)
     N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K_inv(f, 0, h)
-    f = fourier_S(f, +h/2)
-    f = Finv(f)
-    f = unmirror1(f)
+    f = sp.F(f)
+    f = sp.fourier_K_inv(f, 0, h)
+    f = sp.fourier_S(f, +h/2)
+    f = sp.Finv(f)
+    f = sp.unmirror1(f)
     return real(f)
 
 def H0_cheb(f):
     '''
     
-    >>> to_matrix(H0_cheb, 2)
+    >>> sp.to_matrix(H0_cheb, 2)
     array([[ 0.75,  0.25],
            [ 0.25,  0.75]])
        
     '''
-    f = mirror0(f, +1)
+    f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K(f, 0, h/2)
-    f = Finv(f)
-    f = fold0(f, -1)
+    f = sp.F(f)
+    f = sp.fourier_K(f, 0, h/2)
+    f = sp.Finv(f)
+    f = sp.fold0(f, -1)
     return real(f)
 
 def H1d_cheb_new(f):
@@ -136,35 +137,35 @@ def H1d_cheb_new(f):
 #     f = unmirror0(f)
 #     return real(f)
     
-    f = unfold0(f)
+    f = sp.unfold0(f)
     N = f.shape[0]; h = 2*pi/N
-    f = F(f)
-    f = fourier_K_inv(f, 0, h/2)
-    f = Finv(f)
-    f = unmirror0(f)
+    f = sp.F(f)
+    f = sp.fourier_K_inv(f, 0, h/2)
+    f = sp.Finv(f)
+    f = sp.unmirror0(f)
     return real(f)
 
 def H1d_cheb(f):
     '''
     
-    >>> to_matrix(H1d_cheb, 2)
+    >>> sp.to_matrix(H1d_cheb, 2)
     array([[ 1.5, -0.5],
            [-0.5,  1.5]])
     '''
     N = f.shape[0]; h = pi/(N-1)
     def endpoints(f):
-        f0 = mirror0(matC(f), -1)
-        aa = f - unmirror0(I_space(0, h/2)(I_space_inv(-h/2, h/2)(f0)))
-        bb = f - unmirror0(I_space(-h/2, 0)(I_space_inv(-h/2, h/2)(f0)))
-        return matB(aa) + matB1(bb)
+        f0 = sp.mirror0(sp.matC(f), -1)
+        aa = f - sp.unmirror0(sp.I_space(0, h/2)(sp.I_space_inv(-h/2, h/2)(f0)))
+        bb = f - sp.unmirror0(sp.I_space(-h/2, 0)(sp.I_space_inv(-h/2, h/2)(f0)))
+        return sp.matB(aa) + sp.matB1(bb)
     def midpoints(f):
-        f = mirror0(matC(f), -1)
+        f = sp.mirror0(sp.matC(f), -1)
         # Shift function with S, Sinv to avoid division by zero at x=0, x=pi
-        f = I_space_inv(-h/2, h/2)(f)
-        f = T_space(+h/2)(f)
-        f = f/Omega_d(f.shape[0])
-        f = T_space(-h/2)(f)
-        f = unmirror0(f)
+        f = sp.I_space_inv(-h/2, h/2)(f)
+        f = sp.T_space(+h/2)(f)
+        f = f/sp.Omega_d(f.shape[0])
+        f = sp.T_space(-h/2)(f)
+        f = sp.unmirror0(f)
         return f
     return midpoints(f) + endpoints(f)
     
@@ -176,10 +177,10 @@ def S_cheb(f):
     >>> S_cheb(array([1, 0, -1]))
     array([ 0.70710678, -0.70710678])
     '''
-    f = mirror0(f, +1)
+    f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = Finv(F(f)*S_diag(N, h/2))
-    f = unmirror1(f)
+    f = sp.Finv(sp.F(f)*sp.S_diag(N, h/2))
+    f = sp.unmirror1(f)
     return real(f)
 
 def S_cheb_pinv(f):
@@ -192,8 +193,8 @@ def S_cheb_pinv(f):
     ...            array([ 1, 0, -1]))
     True
     '''
-    f = mirror1(f, +1)
+    f = sp.mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N
-    f = Finv(F(f)*S_diag(N, -h/2))
-    f = unmirror0(f)
+    f = sp.Finv(sp.F(f)*sp.S_diag(N, -h/2))
+    f = sp.unmirror0(f)
     return real(f)

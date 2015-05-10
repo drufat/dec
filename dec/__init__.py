@@ -3,11 +3,7 @@ Discrete Exterior Calculus Module
 ==================================
 '''
 import os, json, numpy
-from multipledispatch import dispatch
 from functools import partial
-dispatch_namespace = dict()
-
-d_ = partial(dispatch, namespace=dispatch_namespace)
 
 def get_data_dir():
     root = os.path.abspath(os.path.dirname(__file__))

@@ -1134,3 +1134,14 @@ def contraction1(g, V):
     def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
     return C1
 
+def projections(simp):
+
+    def P0(f):
+        return f(simp[0])
+    
+    def P1(f):
+        return sp.slow_integration(simp[1][0], simp[1][1], f)
+        #return sp.split_args(sp.integrate_spectral)(grid.simp[1][0], grid.simp[1][1])
+        
+    return P0, P1
+
