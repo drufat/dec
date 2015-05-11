@@ -39,6 +39,99 @@ p  = [
     0
 ]
 
+def derivative():    
+    '''
+    >>> D = derivative()
+    >>> D[0]( (x,) )
+    (1, 0)
+    >>> D[0]( (x*y,) )
+    (y, x)
+    >>> D[1]( (-y, x) )
+    (2,)
+    >>> D[2]( (x,) )
+    0
+    '''
+    D0 = lambda f: (diff(f[0], x), 
+                    diff(f[0], y))
+    D1 = lambda f: (-diff(f[0], y) + diff(f[1], x), )
+    D2 = lambda f: 0
+    return D0, D1, D2
+
+def hodge_star():
+    '''
+    >>> H = hodge_star()
+    >>> H[0]((x,))
+    (x,)
+    >>> H[1]((x,y))
+    (-y, x)
+    >>> H[2]((x,))
+    (x,)
+    '''
+    H0 = lambda f: f
+    H1 = lambda f: (-f[1], 
+                     f[0])
+    H2 = lambda f: f
+    return H0, H1, H2
+
+def antisymmetrize_wedge(W):
+    r'''
+    :math:`\alpha\wedge\beta` is **anticommutative**:
+    :math:`\alpha\wedge\beta=(-1)^{kl}\beta\wedge\alpha`, where
+    :math:`\alpha` is a :math:`k`-form and :math:`\beta` is an
+    :math:`l`-form.
+    '''
+    keys = [key for key in W]
+    for k, l in keys:
+        if k == l: continue
+        W[l, k] = (lambda k, l:
+                    lambda a, b: 
+                        tuple( c * (-1)**(k*l) for c in W[k, l](b, a)) 
+                    )(k, l)
+
+def wedge():
+    '''
+    >>> u, v, f, g = symbols('u v f g')
+    >>> W = wedge()
+    >>> W[0,0]((f,),(g,))
+    (f*g,)
+    >>> W[0,1]((f,),(u,v))
+    (f*u, f*v)
+    >>> W[1,0]((u,v),(f,))
+    (f*u, f*v)
+    >>> W[1,1]((u,v),(f,g))
+    (-f*v + g*u,)
+    >>> W[0,2]((f,),(g,))
+    (f*g,)
+    >>> W[2,0]((g,),(f,))
+    (f*g,)
+    '''
+    W = {}
+    W[0,0] = lambda a, b: (a[0]*b[0], )
+    W[0,1] = lambda a, b: (a[0]*b[0], a[0]*b[1])
+    W[0,2] = lambda a, b: (a[0]*b[0],)
+    W[1,1] = lambda a, b: (a[0]*b[1]-a[1]*b[0],)    
+    antisymmetrize_wedge(W)
+    return W
+    
+def contraction():
+    '''
+    Contraction
+    >>> C = contraction()
+    >>> u, v, f, g = symbols('u v f g')
+    >>> X = (u, v)
+    >>> C[0](X, (f,))
+    0
+    >>> C[1](X, (f,g))
+    (f*u + g*v,)
+    >>> C[2](X, (f,))
+    (-f*v, f*u)
+    '''
+    C0 = lambda X, f: 0
+    C1 = lambda X, f: ( X[0]*f[0]+X[1]*f[1], )
+    C2 = lambda X, f: (-X[1]*f[0],
+                        X[0]*f[0],)
+    return C0, C1, C2
+
 def form_factory(name):
     '''
     >>> form = form_factory('form')
@@ -91,7 +184,7 @@ def form_factory(name):
             return type(self)(self.degree, (c.__rmul__(other) for c in self.components))
 
     def __xor__(self, other):
-        return W(self, other)
+        return self.W(other)
     
     def __getitem__(self, k):
         return self.components[k]
@@ -111,7 +204,36 @@ def form_factory(name):
             comps = tuple(getattr(s, name)() for s in self.components)
             return F(self.degree, comps)
         return __fname__
+    
+    D_, H_, W_, C_ = derivative(), hodge_star(), wedge(), contraction()
 
+    @property
+    def D(self):
+        c, d = self.components, self.degree
+        c = D_[d](c)
+        if c is 0: return 0
+        return F(d+1, c)
+
+    @property
+    def H(self):
+        c, d = self.components, self.degree
+        c = H_[d](c)
+        if c is 0: return 0
+        return F(2-d, c)
+
+    def W(self, other):
+        c1, d1 = self.components, self.degree
+        c2, d2 = other.components, other.degree
+        return F(d1+d2, W_[d1, d2](c1, c2))
+
+    def C(self, other):
+        c1, d1 = self.components, self.degree
+        assert d1 == 1 and len(c1) == 2
+        c2, d2 = other.components, other.degree
+        c = C_[d2](c1, c2)
+        if c == 0: return 0
+        return F(d2-1, c)
+    
     for m in '''
             __init__
             __eq__
@@ -120,6 +242,7 @@ def form_factory(name):
             __rmul__
             __xor__
             __getitem__
+            D H W C
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -140,6 +263,7 @@ def form_factory(name):
 
 def simplified_forms(F):
     '''
+    Helper functions to make constructing forms easier.
     >>> F0, F1, F2 = simplified_forms(form)
     >>> F0(x   ) == form(0, (x,  ))
     True
@@ -148,49 +272,13 @@ def simplified_forms(F):
     >>> F2(x   ) == form(2, (x,  ))
     True
     '''
-
-    def factory(degree):
-        name = 'F{}'.format(degree)
-        def __init__(self, *args):  
-            F.__init__(self, degree, args)
-        if degree == 1:
-            def rep(self): 
-                return  '{}{}'.format(name, tuple(self))
-        else:            
-            def rep(self): 
-                return '{}({})'.format(name, self[0])
-        return type(name, (F,), {'__init__':__init__, '__repr__':rep})
+    F0 = lambda f:   form(0, (f,))
+    F1 = lambda f,g: form(1, (f,g))
+    F2 = lambda f:   form(2, (f,))
+    return F0, F1, F2
     
-    return factory(0), factory(1), factory(2)
-
 form = form_factory('form')
 F0, F1, F2 = simplified_forms(form)
-
-#################################
-# Multiple dispatch
-#################################
-
-def multipledispatch(T):    
-    def apply_decorator(dispatch_fn):
-        __multi__ = {}
-        def _inner(*args):
-            d = tuple(f.degree     for f in args)
-            c = tuple(f.components for f in args)
-            d_ = dispatch_fn(*d)
-            c_ = __multi__[d](*c)
-            return T(d_, c_)
-        _inner.__multi__ = __multi__
-        _inner.__default__ = None
-        return _inner
-    return apply_decorator
-
-def register(dispatch_fn, *dispatch_key):
-    def apply_decorator(fn):
-        if not dispatch_key:
-            dispatch_fn.__default__ = fn
-        else:
-            dispatch_fn.__multi__[dispatch_key] = fn
-    return apply_decorator
 
 ################################
 # Derivative
@@ -198,32 +286,31 @@ def register(dispatch_fn, *dispatch_key):
 
 def D(f):
     '''
-    Derivative
-     
-    >>> D( F0(x) )
-    F1(1, 0)
-    >>> D( F0(x*y) )
-    F1(y, x)
-    >>> D( F1(-y, x) )
-    F2(2)
-    >>> D( F2(x) )
-    0
+    Derivative     
+    >>> assert  D( F0(x) ) == F1(1, 0)
+    >>> assert D( F0(x*y) ) == F1(y, x)
+    >>> assert D( F1(-y, x) ) == F2(2)
+    >>> assert D( F2(x) ) == 0
     '''
+    if f is 0: return 0
+    return f.D
+ 
+################################
+# Hodge Star
+################################
 
+def H(f):
+    '''
+    Hodge Star
+
+    >>> assert H(F0(x)) == F2(x)
+    >>> assert H(F1(x,y)) == F1(-y, x)
+    >>> assert H(F2(x)) == F0(x)
+    '''
     if f is 0:
         return 0
-    
-    if f.degree is 0:
-        f ,= f
-        return F1(diff(f, x), diff(f, y))
-    
-    if f.degree is 1:
-        fx, fy = f
-        return F2(-diff(fx, y) + diff(fy, x))    
-    
-    if f.degree is 2:
-        return 0
- 
+    return f.H
+
 ################################
 # Wedge Product
 ################################
@@ -234,79 +321,15 @@ def W(a, b):
     
     >>> u, v, f, g = symbols('u v f g')
     
-    >>> W(F0(f),F0(g))
-    F0(f*g)
-    >>> W(F0(f),F1(u,v))
-    F1(f*u, f*v)
-    >>> W(F1(u,v),F0(f))
-    F1(f*u, f*v)
-    >>> W(F1(u,v),F1(f,g))
-    F2(-f*v + g*u)
-    >>> W(F0(f),F2(g))
-    F2(f*g)
-    >>> W(F2(g),F0(f))
-    F2(f*g)
-    '''
+    >>> assert W(F0(f),F0(g)) == F0(f*g)
+    >>> assert W(F0(f),F1(u,v)) == F1(f*u, f*v)
+    >>> assert W(F1(u,v),F0(f)) == F1(f*u, f*v)
+    >>> assert W(F1(u,v),F1(f,g)) == F2(-f*v + g*u)
+    >>> assert W(F0(f),F2(g)) == F2(f*g)
+    >>> assert W(F2(g),F0(f)) == F2(f*g)
+    '''    
+    return a.W(b)
     
-    deg = (a.degree, b.degree)
-    
-    if deg == (0, 0):
-        a, = a
-        b, = b
-        return F0(a*b)
-
-    if deg == (0, 1):
-        a, = a
-        bx, by = b
-        return F1(a*bx, a*by)
-     
-    if deg == (0, 2):
-        a, = a
-        b, = b
-        return F2(a*b)
-     
-    if deg == (1, 1):
-        ax, ay = a
-        bx, by = b
-        return F2(ax*by - ay*bx)
-
-    if deg == (1, 0):
-        return W(b, a)
-
-    if deg == (2, 0):
-        return W(b, a)
- 
-################################
-# Hodge Star
-################################
-
-def H(f):
-    '''
-    Hodge Star
-
-    >>> H(F0(x))
-    F2(x)
-    >>> H(F1(x,y))
-    F1(-y, x)
-    >>> H(F2(x))
-    F0(x)
-    '''
-
-    if f is 0:
-        return 0
- 
-    if f.degree is 0:
-        f, = f
-        return F2(f)
-      
-    if f.degree is 1:
-        fx, fy = f
-        return F1(-fy, fx)
-      
-    if f.degree is 2:
-        f, = f
-        return F0(f)
-
 ################################
 # Inner Product
 ################################
@@ -333,53 +356,21 @@ def Dot(a, b):
 ################################
 
 def C(X, f):
-    r'''
+    '''
     Contraction
     
     >>> u, v, f, g = symbols('u v f g')
 
     >>> X = F1(u, v)
-    >>> C(X, F1(f,g))
-    F0(f*u + g*v)
-    >>> C(X, F2(f))
-    F1(-f*v, f*u)
-    '''
-
-    assert X.degree is 1
-    Xx, Xy = X
-
-    if f is 0:
-        return 0
-
-    if f.degree is 0:
-        return 0
-
-    if f.degree is 1:
-        fx, fy = f
-        return F0(Xx*fx + Xy*fy)
-      
-    if f.degree is 2:
-        f, = f
-        return F1(-Xy*f, Xx*f )
- 
-#TODO: Delete this
-def contractions(X):
-    '''
-    .. warning::
-        Deprecated
- 
-    >>> C1, C2 = contractions((u,v))
-    >>> C1((f,g)) == f*u + g*v
+    >>> C(X, F1(f,g)) == F0(f*u + g*v)
     True
-    >>> C2(f) == (-f*v, f*u)
+    >>> C(X, F2(f)) == F1(-f*v, f*u)
     True
     '''
-    def C1(f):
-        return X[0]*f[0] + X[1]*f[1]
-    def C2(f):
-        return (-f*X[1], f*X[0])
-    return C1, C2
-
+    if X is 0 or f is 0: 
+        return 0
+    return X.C(f)
+ 
 ################################
 # Lie Derivative
 ################################

@@ -1,6 +1,6 @@
 from numpy import *
 import dec.spectral as sp
-from dec.forms import dec_operators
+from dec.forms import form_operators
 
 def make(proj, cls, n, xmin=-1, xmax=+1):
 
@@ -52,12 +52,12 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
     H0d = H0d_cheb
     H1d = H1d_cheb
     
-    g.dec = dec_operators(P=proj(g),
+    g.dec = form_operators(P=proj(g),
                           B=(B0, B1),
                           D=(D0, D1),
                           H=(H0, H1))
     
-    d.dec = dec_operators(P=proj(d),
+    d.dec = form_operators(P=proj(d),
                           D=(D0d, D1d),
                           B=(B0d, B1d),
                           H=(H0d, H1d))
@@ -104,11 +104,9 @@ def H1_cheb(f):
 
 def H0_cheb(f):
     '''
-    
     >>> sp.to_matrix(H0_cheb, 2)
     array([[ 0.75,  0.25],
            [ 0.25,  0.75]])
-       
     '''
     f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
@@ -141,7 +139,6 @@ def H1d_cheb_new(f):
 
 def H1d_cheb(f):
     '''
-    
     >>> sp.to_matrix(H1d_cheb, 2)
     array([[ 1.5, -0.5],
            [-0.5,  1.5]])
@@ -165,11 +162,14 @@ def H1d_cheb(f):
     
 def S_cheb(f):
     '''
-    Shift from primal to dual 0-forms.
+    Interpolate from primal to dual vertices.
     >>> S_cheb(array([-1, 0, 1]))
     array([-0.70710678,  0.70710678])
     >>> S_cheb(array([1, 0, -1]))
     array([ 0.70710678, -0.70710678])
+    >>> sp.to_matrix(S_cheb, 3).round(3)
+    array([[ 0.604,  0.5  , -0.104],
+           [-0.104,  0.5  ,  0.604]])
     '''
     f = sp.mirror0(f, +1)
     N = f.shape[0]; h = 2*pi/N
@@ -179,13 +179,20 @@ def S_cheb(f):
 
 def S_cheb_pinv(f):
     '''
-    This is a pseudo inverse of S_cheb.     
+    Interpolate from dual to primal vertices.
+    Since there are smaller number of dual vertices, 
+    this is only a pseudo inverse of S_cheb, and not an 
+    exact inverse.
     >>> allclose(  S_cheb_pinv(array([ -1/sqrt(2),  1/sqrt(2)])), 
     ...            array([ -1, 0, 1]))
     True
     >>> allclose(  S_cheb_pinv(array([ 1/sqrt(2),  -1/sqrt(2)])), 
     ...            array([ 1, 0, -1]))
     True
+    >>> sp.to_matrix(S_cheb_pinv, 2).round(3)
+    array([[ 1.207, -0.207],
+           [ 0.5  ,  0.5  ],
+           [-0.207,  1.207]])
     '''
     f = sp.mirror1(f, +1)
     N = f.shape[0]; h = 2*pi/N

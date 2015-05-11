@@ -335,3 +335,28 @@ def slow_integration(a, b, f):
     from scipy.integrate import quad
     return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
 
+#################################
+# Multiple dispatch
+#################################
+
+def multipledispatch(T):    
+    def apply_decorator(dispatch_fn):
+        __multi__ = {}
+        def _inner(*args):
+            d = tuple(f.degree     for f in args)
+            c = tuple(f.components for f in args)
+            d_ = dispatch_fn(*d)
+            c_ = __multi__[d](*c)
+            return T(d_, c_)
+        _inner.__multi__ = __multi__
+        _inner.__default__ = None
+        return _inner
+    return apply_decorator
+
+def register(dispatch_fn, *dispatch_key):
+    def apply_decorator(fn):
+        if not dispatch_key:
+            dispatch_fn.__default__ = fn
+        else:
+            dispatch_fn.__multi__[dispatch_key] = fn
+    return apply_decorator

@@ -1,7 +1,7 @@
 import numpy as np
 import itertools
 
-class dec_operators:
+class form_operators:
     
     def __init__(self, P, B, D, H):
 
@@ -13,6 +13,7 @@ class dec_operators:
 def discreteform_factory(name):
     
     F = type(name, (object,), {})
+    
     def __init__(self, degree, grid, array):
         self.array = np.asarray(array, dtype=np.float32)
         self.degree = degree

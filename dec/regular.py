@@ -1,6 +1,6 @@
 from numpy import *
 import dec.spectral as sp
-from dec.forms import dec_operators
+from dec.forms import form_operators
 '''
 Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
 the correct ones. 
@@ -58,12 +58,12 @@ def make(proj, cls, n, xmin=0, xmax=pi):
     H0d = H0d_regular
     H1d = H1d_regular
     
-    g.dec = dec_operators(P=proj(g),
+    g.dec = form_operators(P=proj(g),
                           B=(B0, B1),
                           D=(D0, D1),
                           H=(H0, H1))
     
-    d.dec = dec_operators(P=proj(d),
+    d.dec = form_operators(P=proj(d),
                           D=(D0d, D1d),
                           B=(B0d, B1d),
                           H=(H0d, H1d)) 

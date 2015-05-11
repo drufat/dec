@@ -96,27 +96,27 @@ def test_hodge():
     test0(g, f)
     test1(g, u, v)
  
-def test_contraction():
-    from dec.symbolic import (x, y, contractions, lambdify2, sin, cos)
- 
-#     X = (0*x + 1, 0*x + 1)
+# def test_contraction():
+#     from dec.symbolic import (x, y, contractions, lambdify2, sin, cos)
+#  
+# #     X = (0*x + 1, 0*x + 1)
+# #     alpha = (sin(x)*sin(y), cos(y))
+# #     Omega = 0*x + 1
+#  
+# #     X = (sin(x)*sin(y), cos(x))
+# #     alpha = (sin(x)*sin(y), cos(y))
+# #     Omega = sin(y)
+#  
+#     X = (sin(x), 0*x)
 #     alpha = (sin(x)*sin(y), cos(y))
 #     Omega = 0*x + 1
- 
-#     X = (sin(x)*sin(y), cos(x))
-#     alpha = (sin(x)*sin(y), cos(y))
-#     Omega = sin(y)
- 
-    X = (sin(x), 0*x)
-    alpha = (sin(x)*sin(y), cos(y))
-    Omega = 0*x + 1
-     
-    l0, l1 = lambdify2()
-    c1, c2 = contractions(X)
- 
-    G = Grid_2D_Periodic(6, 6)
-    P0, P1, P2, P0d, P1d, P2d = G.projection()
-    C1, C2 = G.contraction(P1(l1(X)))
-     
-    eq2(C1(P1(l1(alpha))), P0(l0(c1(alpha))))
-    eq2(C2(P2(l0(Omega))), P1(l1(c2(Omega))))
+#      
+#     l0, l1 = lambdify2()
+#     c1, c2 = contractions(X)
+#  
+#     G = Grid_2D_Periodic(6, 6)
+#     P0, P1, P2, P0d, P1d, P2d = G.projection()
+#     C1, C2 = G.contraction(P1(l1(X)))
+#      
+#     eq2(C1(P1(l1(alpha))), P0(l0(c1(alpha))))
+#     eq2(C2(P2(l0(Omega))), P1(l1(c2(Omega))))

@@ -66,6 +66,15 @@ class Grid_1D(object):
     def edges_dual(self):
         return self.dual.simp[1]
 
+    @property
+    def points(self):
+        vp = self.verts
+        vd = self.verts_dual
+        p = np.zeros(vp.shape[0]+vd.shape[0])
+        p[0::2] = vp
+        p[1::2] = vd
+        return p
+
     def boundary_condition(self, f):
         bc = np.zeros((self.n, ))
         bc[ 0] = -f(self.xmin)
