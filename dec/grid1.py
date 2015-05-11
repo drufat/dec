@@ -111,7 +111,6 @@ class Grid_1D(object):
         return H0, H1, H0d, H1d
     
     # the operators below are products - they will require refinements
-
 #     def wedge(self):
 #         W00 = self.dec.W[0, 0]
 #         W01 = self.dec.W[0, 1]

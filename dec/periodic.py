@@ -66,7 +66,7 @@ def make(proj, cls, n, xmin=0, xmax=2*pi):
     import types
     g.wedge = types.MethodType(wedge, g)
     g.switch = types.MethodType(switch, g)
-    
+   
     return g
 
 def wedge(self):

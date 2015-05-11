@@ -68,11 +68,11 @@ def discreteform_factory(name):
         return F(k-d, g, a)
     
     def W(self, other):
-        pass
+        raise NotImplementedError
 
     def C(self, other):
         assert self.degree == 1
-        pass
+        raise NotImplementedError
 
     methods = {}
     for m in '''
@@ -80,7 +80,7 @@ def discreteform_factory(name):
         __repr__
         __eq__
         __ne__
-        P R D H
+        P R D H W C
         '''.split():
         setattr(F, m, locals()[m])
         

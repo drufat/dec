@@ -3,8 +3,8 @@ from dec.grid1 import *
 from dec.spectral import *
 
 
-#G = Grid_1D_Periodic; s = pi; b = phi1
-G = Grid_1D_Chebyshev; s = 1; b = psi1
+#G = Grid_1D.periodic; s = pi; b = phi1
+G = Grid_1D.chebyshev; s = 1; b = psi1
 
 x = linspace(-1.5 * s, 1.5 * s, 1000)
 

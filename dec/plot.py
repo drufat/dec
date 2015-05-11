@@ -24,14 +24,14 @@ def plot_bases_1d(plt, g, xmin, xmax, name):
     for i, b in enumerate(B0d):
         plt.plot(z, b(z), label=str(i))
         plt.scatter(g.verts, 0*g.verts)
-        plt.scatter(g.verts_dual, 0*g.verts_dual, color='red', marker='x')
+        plt.scatter(g.dual.verts, 0*g.dual.verts, color='red', marker='x')
     
     plt.subplot(224)
     plt.title("$\widetilde{{%s}}^1_{%d,n}$" % (name,N))
     for i, b in enumerate(B1d):
-        plt.plot(z, b(z)*g.delta_dual[i], label=str(i))
+        plt.plot(z, b(z)*g.dual.delta[i], label=str(i))
         plt.scatter(g.verts, 0*g.verts)
-        plt.scatter(g.verts_dual, 0*g.verts_dual, color='red', marker='x')
+        plt.scatter(g.dual.verts, 0*g.dual.verts, color='red', marker='x')
 
 def grid_1d(ax, g):
     

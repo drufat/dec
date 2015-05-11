@@ -22,7 +22,7 @@ def make(proj, cls, n, xmin=0, xmax=pi):
     tmp = concatenate(([xmin], verts_dual, [xmax]))
     delta_dual = diff(tmp)
     edges_dual = (tmp[:-1], tmp[1:])
-    
+
     g = cls(n=n,
             xmin=xmin, 
             xmax=xmax,

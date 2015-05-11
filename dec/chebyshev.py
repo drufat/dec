@@ -6,21 +6,21 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
 
     # 2n-1 points: n primal, n-1 dual
     x = sin(linspace(-pi/2, pi/2, 2*n-1))
-    p = 0.5*(xmin*(1-x) + xmax*(1+x))
+    pnts = 0.5*(xmin*(1-x) + xmax*(1+x))
 
-    verts = p[::2]
+    verts = pnts[::2]
     delta = diff(verts)
     edges = (verts[:-1], verts[1:])
 
-    verts_dual = p[1::2]
-    tmp = concatenate(([p[0]], verts_dual, [p[-1]]))
+    verts_dual = pnts[1::2]
+    tmp = concatenate(([pnts[0]], verts_dual, [pnts[-1]]))
     delta_dual = diff(tmp)
     edges_dual = (tmp[:-1], tmp[1:])
 
     g = cls(n=n,
             xmin=xmin, 
             xmax=xmax,
-            pnts=p, 
+            pnts=pnts, 
             delta=delta,
             N = (n, n-1),
             simp=(verts, edges),
@@ -30,13 +30,13 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
     d = cls(n=n-1,
             xmin=xmin,
             xmax=xmax,
-            pnts=p,
+            pnts=pnts,
             delta=delta_dual, 
             N = (n-1, n),
             simp=(verts_dual, edges_dual),
             dec=None,
             dual=None)
-        
+
     g.dual, d.dual = d, g
 
     B0  = lambda i, x: sp.psi0(n, i, x)
@@ -62,7 +62,7 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
     d.dec = dec_operators(P=proj(d),
                           D=(D0d, D1d),
                           B=(B0d, B1d),
-                          H=(H0d, H1d)) 
+                          H=(H0d, H1d))
     
     import types
     g.wedge = types.MethodType(wedge, g)

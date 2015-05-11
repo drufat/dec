@@ -38,17 +38,17 @@ Operators
 Grids
 ======
 
-.. autofunction:: dec.grid1.Grid_1D_Periodic
+.. automethod:: dec.grid1.Grid_1D.periodic
 
 .. plot:: plot/grid/periodic.py
 	:width: 500
 
-.. autofunction:: dec.grid1.Grid_1D_Chebyshev
+.. automethod:: dec.grid1.Grid_1D.chebyshev
 
 .. plot:: plot/grid/cheb.py
 	:width: 500
 
-.. autofunction:: dec.grid1.Grid_1D_Regular
+.. automethod:: dec.grid1.Grid_1D.regular
 
 .. plot:: plot/grid/regular.py
 	:width: 500

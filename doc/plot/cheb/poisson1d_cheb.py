@@ -19,7 +19,7 @@ def run():
     L = [[], []]
     for N in size:
 
-        g = Grid_1D_Chebyshev(N, -1, 1)
+        g = Grid_1D.chebyshev(N, -1, 1)
         laplace, laplace_d = laplacian(g)
 
         # Dirichlet boundary conditions

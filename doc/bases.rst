@@ -30,7 +30,7 @@ Periodic Basis Functions
     import matplotlib.pyplot as plt
     from dec.plot import plot_bases_1d
     N = 5
-    g = Grid_1D_Periodic(N)
+    g = Grid_1D.periodic(N)
     plot_bases_1d(plt, g, g.xmin, g.xmax, "\phi")
 
 Regular Basis Functions
@@ -69,12 +69,12 @@ symmetric bases functions for 0-forms?
     from dec.plot import plot_bases_1d
     
     N = 2
-    g = Grid_1D_Regular(N)
+    g = Grid_1D.regular(N)
     plt.figure()
     plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
     
     N = 3
-    g = Grid_1D_Regular(N)
+    g = Grid_1D.regular(N)
     plt.figure()
     plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
     
@@ -98,7 +98,7 @@ Chebyshev Basis Functions
     from dec.plot import plot_bases_1d
     
     N = 5
-    g = Grid_1D_Chebyshev(N)
+    g = Grid_1D.chebyshev(N)
     plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
  
     plt.show()

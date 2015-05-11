@@ -2,9 +2,9 @@ from dec.grid1 import *
 import matplotlib.pyplot as plt
 
 N = 4
-#g = Grid_1D_Periodic(N)
-g = Grid_1D_Regular(N)
-#g = Grid_1D_Chebyshev(N)
+#g = Grid_1D.periodic(N)
+g = Grid_1D.regular(N)
+#g = Grid_1D.chebyshev(N)
 
 z = linspace(g.xmin, g.xmax, 100) #+ 1e-16
 B0, B1, B0d, B1d = g.basis_fn()

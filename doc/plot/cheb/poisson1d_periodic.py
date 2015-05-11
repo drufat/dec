@@ -11,7 +11,7 @@ def run():
     L = [[], []]
     for N in size:
 
-        g = Grid_1D_Periodic(N)
+        g = Grid_1D.periodic(N)
         laplace, laplace_d = laplacian(g)
 
         #################
