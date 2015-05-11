@@ -302,7 +302,6 @@ def D(f):
 def H(f):
     '''
     Hodge Star
-
     >>> assert H(F0(x)) == F2(x)
     >>> assert H(F1(x,y)) == F1(-y, x)
     >>> assert H(F2(x)) == F0(x)
@@ -318,9 +317,7 @@ def H(f):
 def W(a, b):
     '''
     Wedge Product
-    
     >>> u, v, f, g = symbols('u v f g')
-    
     >>> assert W(F0(f),F0(g)) == F0(f*g)
     >>> assert W(F0(f),F1(u,v)) == F1(f*u, f*v)
     >>> assert W(F1(u,v),F0(f)) == F1(f*u, f*v)

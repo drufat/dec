@@ -69,10 +69,15 @@ def discreteform_factory(name):
         return F(k-d, g, a)
     
     def W(self, other):
+        d1, g1, a1 = self.degree, self.grid, self.array
+        d2, g2, a2 = other.degree, other.grid, other.array
+        assert g1 is g2
         raise NotImplementedError
 
     def C(self, other):
-        assert self.degree == 1
+        d1, g1, a1 = self.degree, self.grid, self.array
+        d2, g2, a2 = other.degree, other.grid, other.array
+        assert g1 is g2 and d1 == 1
         raise NotImplementedError
 
     methods = {}
