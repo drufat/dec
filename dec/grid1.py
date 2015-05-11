@@ -1,8 +1,9 @@
+import numpy as np
 import dec.helper
 import dec.periodic
 import dec.chebyshev
+import dec.regular
 import dec.spectral
-import numpy as np
 
 def projections(grid):
 
@@ -35,12 +36,11 @@ class Grid_1D(object):
     chebyshev = classmethod(lambda *args: dec.chebyshev.make(projections, *args))
     regular = classmethod(lambda *args: dec.regular.make(projections, *args))
 
-    def __init__(self, n, xmin, xmax, pnts, delta, N, simp, dec, dual):
+    def __init__(self, n, xmin, xmax, delta, N, simp, dec, dual):
         self.dimension = 1
         self.n = n
         self.xmin = xmin
         self.xmax = xmax
-        self.pnts = pnts
         self.delta = delta
         self.N = N
         self.simp = simp

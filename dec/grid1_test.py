@@ -25,12 +25,13 @@ def test_integrals():
     for N in (10, 11, 12, 13):
 
         g = Grid_1D.periodic(N, 0, 2*pi)
+        pnts = concatenate([g.verts, [g.xmax]])
         for f in (sin,
                   cos):
             reference = slow_integration(g.edges[0], g.edges[1], f)
-            eq( integrate_boole1(g.pnts, f), reference )
-            eq( integrate_spectral_coarse(g.pnts, f), reference )
-            eq( integrate_spectral(g.pnts, f), reference )
+            eq( integrate_boole1(pnts, f), reference )
+            eq( integrate_spectral_coarse(pnts, f), reference )
+            eq( integrate_spectral(pnts, f), reference )
 
         g = Grid_1D.chebyshev(N, -1, +1)
         for f in ((lambda x: x),
