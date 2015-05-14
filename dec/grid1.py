@@ -108,16 +108,12 @@ class Grid_1D(object):
         return R0, R1, R0d, R1d
 
     def derivative(self):
-        D0 = self.dec.D[0]
-        D0d = self.dual.dec.D[0]
-        return D0, D0d
+        D, Dd = self.dec.D, self.dual.dec.D
+        return D[0], Dd[0]
     
     def hodge_star(self):
-        H0 = self.dec.H[0]
-        H1 = self.dec.H[1]
-        H0d = self.dual.dec.H[0]
-        H1d = self.dual.dec.H[1]
-        return H0, H1, H0d, H1d
+        H, Hd = self.dec.H, self.dual.dec.H
+        return H[0], H[1], Hd[0], Hd[1]
     
     # the operators below are products - they will require refinements
 #     def wedge(self):

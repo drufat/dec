@@ -3,8 +3,6 @@ Spectral DEC
 =============
 '''
 from numpy import *
-from dec.helper import *
-from dec.forms import *
 from numpy.testing import assert_almost_equal
 import operator
 from functools import reduce
@@ -12,9 +10,10 @@ try:
     from scipy.linalg.special_matrices import toeplitz
 except ImportError:
     from scipy.linalg.basic import toeplitz
-from dec.helper import slow_integration
+from dec.helper import *
+from dec.forms import *
 
-np.seterr(divide='ignore', invalid='ignore')
+#np.seterr(divide='ignore', invalid='ignore')
 
 def alpha0(N, x):
     r'''

@@ -3,12 +3,14 @@ import itertools
 
 class form_operators:
     
-    def __init__(self, P, B, D, H):
+    def __init__(self, P, B, D, H, W=None, C=None):
 
         self.P = P
         self.B = B
         self.D = D
         self.H = H
+        self.W = W
+        self.C = C
 
 def discreteform_factory(name):
     
@@ -64,21 +66,24 @@ def discreteform_factory(name):
         Hodge Star
         '''
         d, g, a = self.degree, self.grid, self.array
-        k = g.dimension
+        n = g.dimension
         a = g.dec.H[d](a)
-        return F(k-d, g, a)
+        return F(n-d, g, a)
     
     def W(self, other):
         d1, g1, a1 = self.degree, self.grid, self.array
         d2, g2, a2 = other.degree, other.grid, other.array
         assert g1 is g2
-        raise NotImplementedError
+        a = g1.dec.W[d1, d2](a1, a2)
+        return F(d1+d2, g1, a)
 
     def C(self, other):
         d1, g1, a1 = self.degree, self.grid, self.array
         d2, g2, a2 = other.degree, other.grid, other.array
         assert g1 is g2 and d1 == 1
-        raise NotImplementedError
+        a = g1.dec.C[d2](a1, a2)
+        if a == 0: return 0
+        return F(d2-1, g1, a)
 
     methods = {}
     for m in '''

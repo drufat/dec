@@ -67,6 +67,37 @@ def make(proj, cls, n, xmin=0, xmax=2*pi):
    
     return g
 
+def to_refine():
+    '''
+    >>> T0, T1, T0d, T1d = to_refine()
+    >>> U0, U1, U0d, U1d = from_refine()
+    >>> for f in (random.rand(8), random.rand(9), arange(10)):
+    ...    assert allclose(f, U0(T0(f)))
+    ...    assert allclose(f, U1(T1(f)))
+    ...    assert allclose(f, U0d(T0d(f)))
+    ...    assert allclose(f, U1d(T1d(f)))    
+    '''
+    def T0(f):
+        return sp.interweave(f, sp.S(f)) 
+    def T0d(f):
+        return sp.interweave(sp.Sinv(f), f) 
+    def T1(f):
+        return T0d(sp.Hinv(f))
+    def T1d(f):
+        return T0(sp.Hinv(f))
+    return T0, T1, T0d, T1d
+
+def from_refine():
+    def U0(f):  return f[0::2]
+    def U0d(f): return f[1::2]
+    def U1(f):
+        f = sp.S(sp.H(f))
+        return f[0::2] + f[1::2]
+    def U1d(f):
+        f = sp.Sinv(sp.H(f))
+        return f[0::2] + f[1::2]
+    return U0, U1, U0d, U1d
+
 def wedge(self):
     '''
     Return \alpha ^ \beta. Keep only for primal forms for now.
@@ -74,8 +105,10 @@ def wedge(self):
     def w00(alpha, beta):
         return alpha * beta
     def _w01(alpha, beta):
+        ''' This is the associative implementation. '''
         return sp.S(sp.H( alpha * sp.Hinv(sp.Sinv(beta)) ))
     def w01(alpha, beta):
+        ''' This is the non-associative implementation. '''
         #a = interweave(alpha, T(alpha, [S]))
         #b = interweave(T(beta, [Hinv, Sinv]), T(beta, [Hinv]))
         a = sp.refine(alpha)

@@ -163,8 +163,7 @@ def form_factory(name):
     F = type(name, (object,), {})
     
     def __init__(self, degree, components):
-        comp = tuple(sympify(_) for _ in components)
-        self.components = comp
+        self.components = tuple(sympify(_) for _ in components)
         self.degree = degree
 
     def __repr__(self):
@@ -172,7 +171,8 @@ def form_factory(name):
         return name + t.__repr__()
 
     def __eq__(self, other):
-        return self.degree == other.degree and self.components == other.components
+        return (self.degree == other.degree and 
+                self.components == other.components)
     
     def __ne__(self, other):
         return not self.__eq__(other)

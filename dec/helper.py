@@ -171,6 +171,8 @@ def interweave(a, b, axis=-1):
     ''' Interweave two arrays.
     >>> interweave([0, 1, 2], [3, 4, 5])
     array([0, 3, 1, 4, 2, 5])
+    >>> interweave([0, 1, 2], [3, 4])
+    array([0, 3, 1, 4, 2])
     >>> interweave([[0,1],[2,3]],[[4,5],[6,7]])
     array([[0, 4, 1, 5],
            [2, 6, 3, 7]])
@@ -182,7 +184,6 @@ def interweave(a, b, axis=-1):
     '''
     a = np.asarray(a)
     b = np.asarray(b)
-    assert(a.shape == b.shape)
 
     a = np.rollaxis(a, axis, len(a.shape))
     b = np.rollaxis(b, axis, len(b.shape))

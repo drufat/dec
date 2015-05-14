@@ -68,6 +68,39 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
    
     return g
 
+def to_refine():
+    '''
+    >>> T0, T1, T0d, T1d = to_refine()
+    >>> U0, U1, U0d, U1d = from_refine()
+    >>> for f in (random.rand(8), random.rand(9), arange(10)):
+    ...    assert allclose(f, U0(T0(f)))
+    ...    assert allclose(f, U1(T1(f)))
+    ...    assert allclose(f, U0d(T0d(f)))
+    ...    assert allclose(f, U1d(T1d(f)))    
+    '''
+    def T0(f):
+        return sp.interweave(f, S_cheb(f)) 
+    def T0d(f):
+        return sp.interweave(S_cheb_pinv(f), f) 
+    def T1(f):
+        return T0d(H1_cheb(f))
+    def T1d(f):
+        return T0(H1d_cheb(f))
+    return T0, T1, T0d, T1d
+
+
+def from_refine():
+    def U0(f):  return f[0::2]
+    def U0d(f): return f[1::2]
+    def U1(f):
+        f = H0d_cheb(S_cheb(f))
+        return f[0::2] + f[1::2]
+    def U1d(f):
+        f = H0d_cheb(S_cheb(f))
+        m = f[1:-1]
+        return concatenate([[f[0]], m[0::2] + m[1::2], [f[-1]]])
+    return U0, U1, U0d, U1d
+
 def wedge(self):
     
     def w00(a, b):
