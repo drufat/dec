@@ -1,6 +1,7 @@
 from numpy import *
 import dec.spectral as sp
-from dec.helper import bunch, slow_integration
+import dec.common
+from dec.helper import bunch
 
 def make(cls, n, xmin=-1, xmax=+1):
 
@@ -30,13 +31,6 @@ def make(cls, n, xmin=-1, xmax=+1):
             (0, False) : verts_dual,
             (1, False) : edges_dual,}
 
-    P={(0, True)  : lambda f: f(simp[0, True]), 
-       (1, True)  : lambda f: slow_integration(simp[1, True][0],
-                                               simp[1, True][1], f),
-       (0, False) : lambda f: f(simp[0, False]),
-       (1, False) : lambda f: slow_integration(simp[1, False][0],
-                                               simp[1, False][1], f),} 
-
     B={(0, True)  : lambda i, x: sp.psi0(n, i, x), 
        (1, True)  : lambda i, x: sp.psi1(n, i, x),
        (0, False) : lambda i, x: sp.psid0(n, i, x),
@@ -51,30 +45,22 @@ def make(cls, n, xmin=-1, xmax=+1):
        (1, True)  : H1_cheb,
        (0, False) : H0d_cheb,
        (1, False) : H1d_cheb,}
-    
-    T0, T1, T0d, T1d = to_refine()
-    U0, U1, U0d, U1d = from_refine()    
-    T = {(0, True):  T0, 
-         (1, True):  T1, 
-         (0, False): T0d, 
-         (1, False): T1d,}
-    U = {(0, True):  U0, 
-         (1, True):  U1, 
-         (0, False): U0d, 
-         (1, False): U1d,}
 
+    refine=dec.common.wrap_refine(to_refine, from_refine)
+   
     return cls(n=n,
                xmin=xmin, 
                xmax=xmax,
                delta=Delta,
                N = N,
                simp=simp,
-               dec=bunch(P=P,
+               dec=bunch(P=dec.common.projection(simp),
                          B=B,
                          D=D,
-                         H=H,),
-               refine=bunch(T=T, 
-                            U=U))  
+                         H=H,
+                         W=dec.common.wedge(refine),
+                         C=dec.common.contraction(refine)),
+               refine=refine)  
 
 def to_refine():
     '''

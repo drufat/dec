@@ -1,10 +1,7 @@
 from numpy import *
 import dec.spectral as sp
-from dec.helper import bunch, slow_integration
-'''
-Keep symmetric bases functions for 1-forms, so that the hodge star operators below are actually
-the correct ones. 
-'''
+import dec.common
+from dec.helper import bunch
 
 def make(cls, n, xmin=0, xmax=pi):
 
@@ -36,13 +33,6 @@ def make(cls, n, xmin=0, xmax=pi):
             (0, False) : verts_dual,
             (1, False) : edges_dual,}
 
-    P={(0, True)  : lambda f: f(simp[0, True]), 
-       (1, True)  : lambda f: slow_integration(simp[1, True][0],
-                                               simp[1, True][1], f),
-       (0, False) : lambda f: f(simp[0, False]),
-       (1, False) : lambda f: slow_integration(simp[1, False][0],
-                                               simp[1, False][1], f),} 
-
     B={(0, True)  : lambda i, x: sp.kappa0(n, i, x), 
        (1, True)  : lambda i, x: sp.kappa1_symm(n, i, x),
        (0, False) : lambda i, x: sp.kappad0(n, i, x),
@@ -64,10 +54,12 @@ def make(cls, n, xmin=0, xmax=pi):
                delta=Delta,
                N = N,
                simp=simp,
-               dec=bunch(P=P,
+               dec=bunch(P=dec.common.projection(simp),
                          B=B,
                          D=D,
-                         H=H,),
+                         H=H,
+			 W=None,
+			 C=None),
                refine=None)  
     
 def H1d_regular(f):

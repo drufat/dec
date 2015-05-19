@@ -1,13 +1,8 @@
 import numpy as np
-import dec.helper
 import dec.periodic
 import dec.chebyshev
 import dec.regular
-import itertools
-import dec.symbolic
 import dec.spectral
-
-Π = lambda *x: tuple(itertools.product(*x))
 
 class Grid_1D(object):
     '''
@@ -108,49 +103,8 @@ class Grid_1D(object):
         return H0, H1, H0d, H1d
     
     def wedge(self):
-        T, U = self.refine.T, self.refine.U
-        p = Π((0, 1), (True, False))
-        
-        Ws = dec.symbolic.wedge_1d()
-        W = {}    
-        
-        def get_w(d0, p0, d1, p1, p2):
-            def w(a, b):
-                a = T[d0, p0](a)
-                b = T[d1, p1](b)
-                (c,) = Ws[d0, d1]((a,), (b,))
-                return U[d0+d1, p2](c)
-            return w
-    
-        for ((d0, p0), (d1, p1), p2) in Π(p, p,(True, False)):
-            if d0 + d1 > 1: continue
-            if p0==p1==p2 and d0==d1==0:
-                #no refinement necessary, just multiply directly
-                W[(d0, p0), (d1, p1), p2] = lambda a, b: a*b
-                continue
-            W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)    
-    
-        return W
-    
+        return self.dec.W
+
     def contraction(self):
-        T, U = self.refine.T, self.refine.U        
-        p = Π((0, 1), (True, False))
-        
-        Cs = dec.symbolic.contraction_1d()        
-        C = {}
-        
-        def get_c(p0, d1, p1, p2):
-            def c(a, b):
-                a = T[1, p0](a)
-                b = T[d1, p1](b)
-                (c,) = Cs[d1]((a,), (b,))
-                return U[d1-1, p2](c)
-            return c
-    
-        for (p0, (d1, p1), p2) in Π((True, False), p, (True, False)):
-            if d1-1 < 0: continue
-            C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
-    
-        return C
-      
+        return self.dec.C
     

@@ -29,7 +29,7 @@ def discreteform_factory(name):
         '''
         Projection
         '''
-        return cls(deg, grid, grid.dec.P[deg, isprimal](func))
+        return cls(deg, isprimal, grid, grid.dec.P[deg, isprimal](func))
     
     @property
     def R(self):
@@ -46,7 +46,7 @@ def discreteform_factory(name):
         '''
         Derivative
         '''
-        d, p, g, a = self.degree, self.grid, self.array
+        d, p, g, a = self.degree, self.isprimal, self.grid, self.array
         a = g.dec.D[d, p](a)
         if a is 0: return 0
         return F(d+1, p, g, a)
