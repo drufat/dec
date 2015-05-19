@@ -1,17 +1,6 @@
 import numpy as np
 import itertools
 
-class form_operators:
-    
-    def __init__(self, P, B, D, H, W=None, C=None):
-
-        self.P = P
-        self.B = B
-        self.D = D
-        self.H = H
-        self.W = W
-        self.C = C
-
 def discreteform_factory(name):
     
     F = type(name, (object,), {})
@@ -68,9 +57,12 @@ def discreteform_factory(name):
         d, g, a = self.degree, self.grid, self.array
         n = g.dimension
         a = g.dec.H[d](a)
-        return F(n-d, g, a)
+        return F(n-d, g.dual, a)
     
     def W(self, other):
+        '''
+        Wedge Product
+        '''
         d1, g1, a1 = self.degree, self.grid, self.array
         d2, g2, a2 = other.degree, other.grid, other.array
         assert g1 is g2
@@ -78,6 +70,9 @@ def discreteform_factory(name):
         return F(d1+d2, g1, a)
 
     def C(self, other):
+        '''
+        Contraction
+        '''
         d1, g1, a1 = self.degree, self.grid, self.array
         d2, g2, a2 = other.degree, other.grid, other.array
         assert g1 is g2 and d1 == 1
@@ -111,7 +106,6 @@ def operators_lambda(n):
     >>> C(1, 1), C(1, 2)
     (0, 1)
     '''
-
     def D( k ): 
         return k + 1
     def H( k ): 
@@ -121,7 +115,6 @@ def operators_lambda(n):
     def C( k, l ):
         assert k == 1 
         return l - 1
-    
     return D, H, W, C
 
 def operators_by_degree(n):
@@ -142,13 +135,11 @@ def operators_by_degree(n):
     ... })
     True
     '''
-
     # enumerate all the possible forms
     D = tuple((k, k+1) for k in range(n))
     H = tuple((k, n-k) for k in range(n+1))
     W = tuple(((k,m), k+m) for (k, m) in itertools.product(range(n+1),range(n+1)) if (k<=m and k+m <= n))
     C = tuple(((1,k), k-1) for k in range(1,n+1))
-    
     return dict(D=D, H=H, W=W, C=C)
 
     
@@ -186,4 +177,3 @@ def operators(n):
                 R=[R(f) for f in forms],
                 D=[D(f) for f in forms if f[0]<n],
                 H=[H(f) for f in forms])
-

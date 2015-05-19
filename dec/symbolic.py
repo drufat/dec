@@ -88,6 +88,23 @@ def antisymmetrize_wedge(W):
                         tuple( c * (-1)**(k*l) for c in W[k, l](b, a)) 
                     )(k, l)
 
+def wedge_1d():
+    '''
+    >>> u, v, f, g = symbols('u v f g')
+    >>> W = wedge_1d()
+    >>> W[0,0]((f,),(g,))
+    (f*g,)
+    >>> W[0,1]((f,),(u,))
+    (f*u,)
+    >>> W[1,0]((u,),(f,))
+    (f*u,)
+    '''
+    W = {}
+    W[0,0] = lambda a, b: (a[0]*b[0], )
+    W[0,1] = lambda a, b: (a[0]*b[0], )
+    antisymmetrize_wedge(W)
+    return W
+
 def wedge():
     '''
     >>> u, v, f, g = symbols('u v f g')
@@ -112,6 +129,21 @@ def wedge():
     W[1,1] = lambda a, b: (a[0]*b[1]-a[1]*b[0],)    
     antisymmetrize_wedge(W)
     return W
+
+def contraction_1d():
+    '''
+    Contraction
+    >>> C = contraction_1d()
+    >>> u, v, f, g = symbols('u v f g')
+    >>> X = (u,)
+    >>> C[0](X, (f,))
+    0
+    >>> C[1](X, (f,))
+    (f*u,)
+    '''
+    C0 = lambda X, f: 0
+    C1 = lambda X, f: ( X[0]*f[0], )
+    return C0, C1
     
 def contraction():
     '''

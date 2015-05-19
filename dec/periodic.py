@@ -1,6 +1,6 @@
 from numpy import *
 import dec.spectral as sp
-from dec.forms import form_operators
+from dec.helper import bunch
 
 def make(proj, cls, n, xmin=0, xmax=2*pi):
 
@@ -51,15 +51,17 @@ def make(proj, cls, n, xmin=0, xmax=2*pi):
     H0d = H0
     H1d = H1
     
-    g.dec = form_operators(P=proj(g),
-                          B=(B0, B1),
-                          D=(D0, D1),
-                          H=(H0, H1))
-    
-    d.dec = form_operators(P=proj(d),
-                          D=(D0d, D1d),
-                          B=(B0d, B1d),
-                          H=(H0d, H1d))
+    g.dec = bunch(P=proj(g),
+                  B=(B0, B1),
+                  D=(D0, D1),
+                  H=(H0, H1),
+                  W=None, 
+                  C=None)
+
+    d.dec = bunch(P=proj(d),
+                  D=(D0d, D1d),
+                  B=(B0d, B1d),
+                  H=(H0d, H1d))
     
     import types
     g.wedge = types.MethodType(wedge, g)
@@ -98,6 +100,60 @@ def from_refine():
         return f[0::2] + f[1::2]
     return U0, U1, U0d, U1d
 
+import itertools
+import dec.symbolic
+
+def binary_operators():
+
+    T0, T1, T0d, T1d = to_refine()
+    U0, U1, U0d, U1d = from_refine()
+    P = lambda *x: tuple(itertools.product(*x))
+    
+    T = {(0, True):  T0, 
+         (1, True):  T1, 
+         (0, False): T0d, 
+         (1, False): T1d,}
+    U = {(0, True):  U0, 
+         (1, True):  U1, 
+         (0, False): U0d, 
+         (1, False): U1d,}
+
+    p = P((0, 1), (True, False))
+    
+    Ws = dec.symbolic.wedge_1d()
+    Cs = dec.symbolic.contraction_1d()
+    
+    W, C = {}, {}
+    
+    def get_w(d0, p0, d1, p1, p2):
+        def w(a, b):
+            a = T[d0, p0](a)
+            b = T[d1, p1](b)
+            (c,) = Ws[d0, d1]((a,), (b,))
+            return U[d0+d1, p2](c)
+        return w
+
+    def get_c(p0, d1, p1, p2):
+        def c(a, b):
+            a = T[1, p0](a)
+            b = T[d1, p1](b)
+            (c,) = Cs[d1]((a,), (b,))
+            return U[d1-1, p2](c)
+        return c
+
+    for ((d0, p0), (d1, p1), p2) in P(p, p,(True, False)):
+        if d0 + d1 > 1: continue
+        if p0==p1==p2 and d0==d1==0:
+            W[(d0, p0), (d1, p1), p2] = lambda a, b: a*b
+            continue
+        W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)    
+
+    for (p0, (d1, p1), p2) in P((True, False), p, (True, False)):
+        if d1-1 < 0: continue
+        C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
+
+    return W, C
+        
 def wedge(self):
     '''
     Return \alpha ^ \beta. Keep only for primal forms for now.

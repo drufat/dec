@@ -1,6 +1,6 @@
 from numpy import *
 import dec.spectral as sp
-from dec.forms import form_operators
+from dec.helper import bunch
 
 def make(proj, cls, n, xmin=-1, xmax=+1):
 
@@ -52,15 +52,15 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
     H0d = H0d_cheb
     H1d = H1d_cheb
     
-    g.dec = form_operators(P=proj(g),
-                          B=(B0, B1),
-                          D=(D0, D1),
-                          H=(H0, H1))
+    g.dec = bunch(P=proj(g),
+                  B=(B0, B1),
+                  D=(D0, D1),
+                  H=(H0, H1))
     
-    d.dec = form_operators(P=proj(d),
-                          D=(D0d, D1d),
-                          B=(B0d, B1d),
-                          H=(H0d, H1d))
+    d.dec = bunch(P=proj(d),
+                  D=(D0d, D1d),
+                  B=(B0d, B1d),
+                  H=(H0d, H1d))
     
     import types
     g.wedge = types.MethodType(wedge, g)
@@ -87,7 +87,6 @@ def to_refine():
     def T1d(f):
         return T0(H1d_cheb(f))
     return T0, T1, T0d, T1d
-
 
 def from_refine():
     def U0(f):  return f[0::2]
