@@ -5,17 +5,19 @@ def discreteform_factory(name):
     
     F = type(name, (object,), {})
     
-    def __init__(self, degree, grid, array):
+    def __init__(self, degree, isprimal, grid, array):
         self.array = np.asarray(array, dtype=np.float32)
         self.degree = degree
+        self.isprimal = isprimal
         self.grid = grid
     
     def __repr__(self):
-        t = (self.degree, self.grid, self.array)
+        t = (self.degree, self.isprimal, self.grid, self.array)
         return name + t.__repr__()
     
     def __eq__(self, other):
         return (self.degree == other.degree and 
+                self.isprimal == other.isprimal and
                 self.grid is other.grid and 
                 np.allclose(self.array, other.array))
     
@@ -23,20 +25,20 @@ def discreteform_factory(name):
         return not self.__eq__(other)
     
     @classmethod
-    def P(cls, deg, grid, func):
+    def P(cls, deg, isprimal, grid, func):
         '''
         Projection
         '''
-        return cls(deg, grid, grid.dec.P[deg](func))
+        return cls(deg, grid, grid.dec.P[deg, isprimal](func))
     
     @property
     def R(self):
         '''
         Reconstruction
         '''
-        d, g, a = self.degree, self.grid, self.array
+        d, p, g, a = self.degree, self.isprimal, self.grid, self.array
         def func(*x):
-            return sum(a[i]*g.bases[d](i, *x) for i in range(g.N[d]))
+            return sum(a[i]*g.dec.B[d, p](i, *x) for i in range(g.dec.N[d, p]))
         return func
     
     @property
@@ -44,41 +46,41 @@ def discreteform_factory(name):
         '''
         Derivative
         '''
-        d, g, a = self.degree, self.grid, self.array
-        a = g.dec.D[d](a)
+        d, p, g, a = self.degree, self.grid, self.array
+        a = g.dec.D[d, p](a)
         if a is 0: return 0
-        return F(d+1, g, a)
+        return F(d+1, p, g, a)
     
     @property
     def H(self):
         '''
         Hodge Star
         '''
-        d, g, a = self.degree, self.grid, self.array
+        d, p, g, a = self.degree, self.isprimal, self.grid, self.array
         n = g.dimension
-        a = g.dec.H[d](a)
-        return F(n-d, g.dual, a)
+        a = g.dec.H[d, p](a)
+        return F(n-d, not p, g, a)
     
-    def W(self, other):
+    def W(self, other, toprimal=True):
         '''
         Wedge Product
         '''
-        d1, g1, a1 = self.degree, self.grid, self.array
-        d2, g2, a2 = other.degree, other.grid, other.array
+        d1, p1, g1, a1 = self.degree, self.isprimal, self.grid, self.array
+        d2, p2, g2, a2 = other.degree, self.isprimal, other.grid, other.array
         assert g1 is g2
-        a = g1.dec.W[d1, d2](a1, a2)
-        return F(d1+d2, g1, a)
+        a = g1.dec.W[(d1, p1), (d2, p2), toprimal](a1, a2)
+        return F(d1+d2, toprimal, g1, a)
 
-    def C(self, other):
+    def C(self, other, toprimal=True):
         '''
         Contraction
         '''
-        d1, g1, a1 = self.degree, self.grid, self.array
-        d2, g2, a2 = other.degree, other.grid, other.array
+        d1, p1, g1, a1 = self.degree, self.isprimal, self.grid, self.array
+        d2, p2, g2, a2 = other.degree, self.isprimal, other.grid, other.array
         assert g1 is g2 and d1 == 1
-        a = g1.dec.C[d2](a1, a2)
+        a = g1.dec.C[p1, (d2, p2), toprimal](a1, a2)
         if a == 0: return 0
-        return F(d2-1, g1, a)
+        return F(d2-1, toprimal, g1, a)
 
     methods = {}
     for m in '''

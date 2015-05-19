@@ -1,8 +1,8 @@
 from numpy import *
 import dec.spectral as sp
-from dec.helper import bunch
+from dec.helper import bunch, slow_integration
 
-def make(proj, cls, n, xmin=-1, xmax=+1):
+def make(cls, n, xmin=-1, xmax=+1):
 
     # 2n-1 points: n primal, n-1 dual
     x = sin(linspace(-pi/2, pi/2, 2*n-1))
@@ -17,50 +17,40 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
     delta_dual = diff(tmp)
     edges_dual = (tmp[:-1], tmp[1:])
 
-    g = cls(n=n,
-            xmin=xmin, 
-            xmax=xmax,
-            delta=delta,
-            N = (n, n-1),
-            simp=(verts, edges),
-            dec=None,
-            dual=None)  
+    N = {(0, True)  : n, 
+         (1, True)  : n-1,
+         (0, False) : n-1,
+         (1, False) : n}
 
-    d = cls(n=n-1,
-            xmin=xmin,
-            xmax=xmax,
-            delta=delta_dual, 
-            N = (n-1, n),
-            simp=(verts_dual, edges_dual),
-            dec=None,
-            dual=None)
-
-    g.dual, d.dual = d, g
-
-    B0  = lambda i, x: sp.psi0(n, i, x)
-    B1  = lambda i, x: sp.psi1(n, i, x)
-    B0d = lambda i, x: sp.psid0(n, i, x)
-    B1d = lambda i, x: sp.psid1(n, i, x)
-        
-    D0  = lambda f: diff(f)
-    D0d = lambda f: diff(concatenate(([0], f, [0])))
-    D1  = lambda f: 0
-    D1d = lambda f: 0 
-
-    H0 = H0_cheb
-    H1 = H1_cheb
-    H0d = H0d_cheb
-    H1d = H1d_cheb
+    Delta = {True  : delta,
+             False : delta_dual}
     
-    g.dec = bunch(P=proj(g),
-                  B=(B0, B1),
-                  D=(D0, D1),
-                  H=(H0, H1))
+    simp = {(0, True)  : verts, 
+            (1, True)  : edges,
+            (0, False) : verts_dual,
+            (1, False) : edges_dual,}
+
+    P={(0, True)  : lambda f: f(simp[0, True]), 
+       (1, True)  : lambda f: slow_integration(simp[1, True][0],
+                                               simp[1, True][1], f),
+       (0, False) : lambda f: f(simp[0, False]),
+       (1, False) : lambda f: slow_integration(simp[1, False][0],
+                                               simp[1, False][1], f),} 
+
+    B={(0, True)  : lambda i, x: sp.psi0(n, i, x), 
+       (1, True)  : lambda i, x: sp.psi1(n, i, x),
+       (0, False) : lambda i, x: sp.psid0(n, i, x),
+       (1, False) : lambda i, x: sp.psid1(n, i, x),}
+
+    D={(0, True)  : lambda f: diff(f), 
+       (1, True)  : lambda f: 0,
+       (0, False) : lambda f: diff(concatenate(([0], f, [0]))),
+       (1, False) : lambda f: 0,}
     
-    d.dec = bunch(P=proj(d),
-                  D=(D0d, D1d),
-                  B=(B0d, B1d),
-                  H=(H0d, H1d))
+    H={(0, True)  : H0_cheb, 
+       (1, True)  : H1_cheb,
+       (0, False) : H0d_cheb,
+       (1, False) : H1d_cheb,}
     
     T0, T1, T0d, T1d = to_refine()
     U0, U1, U0d, U1d = from_refine()    
@@ -72,9 +62,19 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
          (1, True):  U1, 
          (0, False): U0d, 
          (1, False): U1d,}
-    g.refine = bunch(T=T, U=U)
 
-    return g
+    return cls(n=n,
+               xmin=xmin, 
+               xmax=xmax,
+               delta=Delta,
+               N = N,
+               simp=simp,
+               dec=bunch(P=P,
+                         B=B,
+                         D=D,
+                         H=H,),
+               refine=bunch(T=T, 
+                            U=U))  
 
 def to_refine():
     '''
