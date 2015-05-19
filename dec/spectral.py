@@ -13,7 +13,7 @@ except ImportError:
 from dec.helper import *
 from dec.forms import *
 
-#np.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide='ignore', invalid='ignore')
 
 def alpha0(N, x):
     r'''
