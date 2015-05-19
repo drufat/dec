@@ -63,10 +63,18 @@ def make(proj, cls, n, xmin=0, xmax=2*pi):
                   B=(B0d, B1d),
                   H=(H0d, H1d))
     
-    import types
-    g.wedge = types.MethodType(wedge, g)
-    g.switch = types.MethodType(switch, g)
-   
+    T0, T1, T0d, T1d = to_refine()
+    U0, U1, U0d, U1d = from_refine()    
+    T = {(0, True):  T0, 
+         (1, True):  T1, 
+         (0, False): T0d, 
+         (1, False): T1d,}
+    U = {(0, True):  U0, 
+         (1, True):  U1, 
+         (0, False): U0d, 
+         (1, False): U1d,}
+    g.refine = bunch(T=T, U=U)
+
     return g
 
 def to_refine():
@@ -93,68 +101,21 @@ def from_refine():
     def U0(f):  return f[0::2]
     def U0d(f): return f[1::2]
     def U1(f):
-        f = sp.S(sp.H(f))
+        f = sp.H(sp.S(f))
         return f[0::2] + f[1::2]
     def U1d(f):
-        f = sp.Sinv(sp.H(f))
+        f = sp.H(sp.Sinv(f))
         return f[0::2] + f[1::2]
     return U0, U1, U0d, U1d
 
-import itertools
-import dec.symbolic
+def switch():
+    '''
+    Switch between primal and dual 0-forms. The operator is only invertible 
+    if they have the same size.
+    '''
+    return sp.S, sp.Sinv
 
-def binary_operators():
-
-    T0, T1, T0d, T1d = to_refine()
-    U0, U1, U0d, U1d = from_refine()
-    P = lambda *x: tuple(itertools.product(*x))
-    
-    T = {(0, True):  T0, 
-         (1, True):  T1, 
-         (0, False): T0d, 
-         (1, False): T1d,}
-    U = {(0, True):  U0, 
-         (1, True):  U1, 
-         (0, False): U0d, 
-         (1, False): U1d,}
-
-    p = P((0, 1), (True, False))
-    
-    Ws = dec.symbolic.wedge_1d()
-    Cs = dec.symbolic.contraction_1d()
-    
-    W, C = {}, {}
-    
-    def get_w(d0, p0, d1, p1, p2):
-        def w(a, b):
-            a = T[d0, p0](a)
-            b = T[d1, p1](b)
-            (c,) = Ws[d0, d1]((a,), (b,))
-            return U[d0+d1, p2](c)
-        return w
-
-    def get_c(p0, d1, p1, p2):
-        def c(a, b):
-            a = T[1, p0](a)
-            b = T[d1, p1](b)
-            (c,) = Cs[d1]((a,), (b,))
-            return U[d1-1, p2](c)
-        return c
-
-    for ((d0, p0), (d1, p1), p2) in P(p, p,(True, False)):
-        if d0 + d1 > 1: continue
-        if p0==p1==p2 and d0==d1==0:
-            W[(d0, p0), (d1, p1), p2] = lambda a, b: a*b
-            continue
-        W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)    
-
-    for (p0, (d1, p1), p2) in P((True, False), p, (True, False)):
-        if d1-1 < 0: continue
-        C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
-
-    return W, C
-        
-def wedge(self):
+def wedge_explicit():
     '''
     Return \alpha ^ \beta. Keep only for primal forms for now.
     '''
@@ -172,13 +133,6 @@ def wedge(self):
         c = sp.S(sp.H(a * b))
         return c[0::2] + c[1::2]
     return w00, w01, _w01
-
-def switch(self):
-    '''
-    Switch between primal and dual 0-forms. The operator is only invertible 
-    if they have the same size.
-    '''
-    return sp.S, sp.Sinv
 
 def derivative_matrix(n):
     import dec.helper

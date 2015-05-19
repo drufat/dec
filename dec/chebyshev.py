@@ -62,10 +62,18 @@ def make(proj, cls, n, xmin=-1, xmax=+1):
                   B=(B0d, B1d),
                   H=(H0d, H1d))
     
-    import types
-    g.wedge = types.MethodType(wedge, g)
-    g.switch = types.MethodType(switch, g)
-   
+    T0, T1, T0d, T1d = to_refine()
+    U0, U1, U0d, U1d = from_refine()    
+    T = {(0, True):  T0, 
+         (1, True):  T1, 
+         (0, False): T0d, 
+         (1, False): T1d,}
+    U = {(0, True):  U0, 
+         (1, True):  U1, 
+         (0, False): U0d, 
+         (1, False): U1d,}
+    g.refine = bunch(T=T, U=U)
+
     return g
 
 def to_refine():
@@ -100,19 +108,8 @@ def from_refine():
         return concatenate([[f[0]], m[0::2] + m[1::2], [f[-1]]])
     return U0, U1, U0d, U1d
 
-def wedge(self):
-    
-    def w00(a, b):
-        return a*b
-    
-    def w01(a, b):
-        raise NotImplemented
-    
-    return w00, w01
-
-def switch(self):
+def switch():
     return S_cheb, S_cheb_pinv
-
 
 def H0d_cheb(f):
     f = sp.mirror1(f, +1)

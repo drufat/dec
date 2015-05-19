@@ -186,24 +186,47 @@ def test_hodge():
 
 def test_wedge():
 
-    def alpha(x): return sin(4 * x)
-    def beta(x): return cos(4 * x)
-    def gamma(x): return sin(4 * x) * cos(4 * x)
+    def α(x): return sin(4 * x)
+    def β(x): return cos(4 * x)
+    def γ(x): return sin(4 * x) * cos(4 * x)
 
     g = Grid_1D.periodic(13)
     P0, P1, P0d, P1d = g.projection()
-    W00, W01, _W01 = g.wedge()
+    W = g.wedge()
+    W00 = W[(0,True),(0,True), True]
+    W01 = W[(0,True),(1,True), True]
 
-    a0 = P0(alpha)
-    b0 = P0(beta)
-    c0 = P0(gamma)
+    a0 = P0(α)
+    b0 = P0(β)
+    c0 = P0(γ)
     eq(W00(a0, b0), c0)
 
-    a0 = P0(alpha)
-    b1 = P1(beta)
-    c1 = P1(gamma)
+    a0 = P0(α)
+    b1 = P1(β)
+    c1 = P1(γ)
     eq(W01(a0, b1), c1)
-    #eq(_w01(alpha0, beta1), gamma1)
+
+def test_wedge_chebyshev():
+
+    def α(x): return x**2
+    def β(x): return (x+1/2)**3
+    def γ(x): return x**2 * (x+1/2)**3
+
+    g = Grid_1D.chebyshev(13)
+    P0, P1, P0d, P1d = g.projection()
+    W = g.wedge()
+    W00 = W[(0,True),(0,True), True]
+    W01 = W[(0,True),(1,True), True]
+
+    a0 = P0(α)
+    b0 = P0(β)
+    c0 = P0(γ)
+    eq(W00(a0, b0), c0)
+
+    a0 = P0(α)
+    b1 = P1(β)
+    c1 = P1(γ)
+    eq(W01(a0, b1), c1)
 
 def test_leibniz():
 
@@ -211,7 +234,9 @@ def test_leibniz():
     g = Grid_1D.periodic(N)
     D, DD = g.derivative()
     P0, P1, P0d, P1d = g.projection()
-    W00, W01, _W01 = g.wedge()
+    W = g.wedge()
+    W00 = W[(0,True),(0,True), True]
+    W01 = W[(0,True),(1,True), True]
 
     a0 = random.random_sample(N)
     b0 = random.random_sample(N)
@@ -226,7 +251,9 @@ def test_associativity_exact():
 
     N = 5
     g = Grid_1D.periodic(N)
-    W00, W01, _W01 = g.wedge()
+    W = g.wedge()
+    W00 = W[(0,True),(0,True), True]
+    W01 = W[(0,True),(1,True), True]
     D, _ = g.derivative()
 
     a0 = random.random_sample(N)
@@ -238,24 +265,4 @@ def test_associativity_exact():
     eq3 = W01(W00(a0, b0), c1)
 
     eq(eq1, eq3)
-    eq(eq2, eq3)
-
-def test_associativity_old():
-    ''' Associativity satisfied only by wedge with no refinement.'''
-
-    N = 7
-    g = Grid_1D.periodic(N)
-    W00, W01, _W01 = g.wedge()
-
-    W01 = _W01 #Use old wedge
-
-    a0 = random.random_sample(N)
-    b0 = random.random_sample(N)
-    c1 = random.random_sample(N)
-
-    eq1 = W01(a0, W01(b0, c1))
-    eq2 = W01(b0, W01(a0, c1))
-    eq3 = W01(W00(a0, b0), c1)
-
-    eq(eq1, eq2)
     eq(eq2, eq3)
