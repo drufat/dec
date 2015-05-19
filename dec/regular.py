@@ -52,15 +52,15 @@ def make(cls, n, xmin=0, xmax=pi):
                xmin=xmin, 
                xmax=xmax,
                delta=Delta,
-               N = N,
+               N=N,
                simp=simp,
                dec=bunch(P=dec.common.projection(simp),
                          B=B,
                          D=D,
                          H=H,
-			 W=None,
-			 C=None),
-               refine=None)  
+                         W=None,
+                         C=None),
+             refine=None)  
     
 def H1d_regular(f):
     r'''

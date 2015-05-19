@@ -35,19 +35,15 @@ def make(cls, n, xmin=0, xmax=2*pi):
        (0, False) : lambda i, x: sp.phid0(n, i, x),
        (1, False) : lambda i, x: sp.phid1(n, i, x),}
 
-    D0  = lambda f: roll(f, shift=-1) - f
-    D0d = lambda f: roll(D0(f), shift=+1)
-    D={(0, True)  : D0, 
+    D={(0, True)  : lambda f: roll(f, shift=-1) - f, 
        (1, True)  : lambda f: 0,
-       (0, False) : D0d,
+       (0, False) : lambda f: roll(D[0, True](f), shift=+1),
        (1, False) : lambda f: 0,}
     
-    H0 = lambda x: real(sp.H(x))
-    H1 = lambda x: real(sp.Hinv(x))
-    H={(0, True)  : H0, 
-       (1, True)  : H1,
-       (0, False) : H0,
-       (1, False) : H1,}
+    H={(0, True)  : lambda x: real(sp.H(x)), 
+       (1, True)  : lambda x: real(sp.Hinv(x)),
+       (0, False) : lambda x: H[0, True](x),
+       (1, False) : lambda x: H[1, True](x),}
 
     refine=dec.common.wrap_refine(to_refine, from_refine)
    
@@ -55,7 +51,7 @@ def make(cls, n, xmin=0, xmax=2*pi):
                xmin=xmin, 
                xmax=xmax,
                delta=Delta,
-               N = N,
+               N=N,
                simp=simp,
                dec=bunch(P=dec.common.projection(simp),
                          B=B,

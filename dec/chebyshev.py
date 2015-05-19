@@ -52,7 +52,7 @@ def make(cls, n, xmin=-1, xmax=+1):
                xmin=xmin, 
                xmax=xmax,
                delta=Delta,
-               N = N,
+               N=N,
                simp=simp,
                dec=bunch(P=dec.common.projection(simp),
                          B=B,
