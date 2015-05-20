@@ -2,6 +2,31 @@ import numpy as np
 from collections import namedtuple
 from scipy.sparse import csr_matrix
 import scipy.integrate
+import math
+
+def nCr(n,r):
+    '''
+    >>> nCr(1, 0)
+    1
+    >>> nCr(1, 1)
+    1
+    >>> nCr(2, 0)
+    1
+    >>> nCr(2, 1)
+    2
+    >>> nCr(2, 2)
+    1
+    >>> nCr(3, 0)
+    1
+    >>> nCr(3, 1)
+    3
+    >>> nCr(3, 2)
+    3
+    >>> nCr(3, 3)
+    1
+    '''
+    f = math.factorial
+    return f(n) // f(r) // f(n-r)
 
 def approx(a, b):
     c = np.round_(a, 10) == np.round_(b, 10)

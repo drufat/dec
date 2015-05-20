@@ -6,9 +6,10 @@ from sympy import (symbols, Function, diff, lambdify, simplify,
                    sympify,
                    integrate, Integral,
                    sin, cos)
+from dec.helper import bunch, nCr
 
 # Coordinates
-x, y = symbols('x y')
+x, y, z = symbols('x y z')
 # Vector Fields
 u, v = Function('u')(x,y), Function('v')(x,y)
 # Scalar Fields
@@ -39,9 +40,47 @@ p  = [
     0
 ]
 
-def derivative():    
+class Chart:
+    
+    def __init__(self, *coords):
+        self.coords = coords
+        self.dimension = len(coords)
+        if len(coords) == 1:
+            x, = coords
+            dec = bunch(D=derivative_1d(x),
+                        H=hodge_star_1d(),
+                        W=wedge_1d(),
+                        C=contraction_1d())
+        elif len(coords) == 2:
+            x, y = coords
+            dec = bunch(D=derivative_2d(x, y),
+                        H=hodge_star_2d(),
+                        W=wedge_2d(),
+                        C=contraction_2d())
+        else:
+            raise NotImplementedError
+        self.dec = dec
+        
+    def __repr__(self):
+        return "Chart{}".format(self.coords)
+
+def derivative_1d(x):    
     '''
-    >>> D = derivative()
+    >>> D = derivative_1d(x)
+    >>> D[0]( (x,) )
+    (1,)
+    >>> D[0]( (x*y,) )
+    (y,)
+    >>> D[1]( (x,) )
+    0
+    '''
+    D0 = lambda f: (diff(f[0], x),)
+    D1 = lambda f: 0
+    return D0, D1
+
+def derivative_2d(x, y):    
+    '''
+    >>> D = derivative_2d(x, y)
     >>> D[0]( (x,) )
     (1, 0)
     >>> D[0]( (x*y,) )
@@ -57,9 +96,21 @@ def derivative():
     D2 = lambda f: 0
     return D0, D1, D2
 
-def hodge_star():
+def hodge_star_1d():
     '''
-    >>> H = hodge_star()
+    >>> H = hodge_star_1d()
+    >>> H[0]((x,))
+    (x,)
+    >>> H[1]((x,))
+    (x,)
+    '''
+    H0 = lambda f: f
+    H1 = lambda f: f
+    return H0, H1
+
+def hodge_star_2d():
+    '''
+    >>> H = hodge_star_2d()
     >>> H[0]((x,))
     (x,)
     >>> H[1]((x,y))
@@ -105,10 +156,10 @@ def wedge_1d():
     antisymmetrize_wedge(W)
     return W
 
-def wedge():
+def wedge_2d():
     '''
     >>> u, v, f, g = symbols('u v f g')
-    >>> W = wedge()
+    >>> W = wedge_2d()
     >>> W[0,0]((f,),(g,))
     (f*g,)
     >>> W[0,1]((f,),(u,v))
@@ -145,10 +196,10 @@ def contraction_1d():
     C1 = lambda X, f: ( X[0]*f[0], )
     return C0, C1
     
-def contraction():
+def contraction_2d():
     '''
     Contraction
-    >>> C = contraction()
+    >>> C = contraction_2d()
     >>> u, v, f, g = symbols('u v f g')
     >>> X = (u, v)
     >>> C[0](X, (f,))
@@ -170,40 +221,41 @@ def form_factory(name):
 
     >>> f, g, u, v = symbols('f g u v')
 
-    >>> α = form(1, (f, g))
-    >>> φ = form(1, (u, v))
+    >>> c = Chart(x, y)
+    >>> α = form(1, c, (f, g))
+    >>> φ = form(1, c, (u, v))
     
     >>> -φ
-    form(1, (-u, -v))
+    form(1, Chart(x, y), (-u, -v))
     >>> φ + φ
-    form(1, (2*u, 2*v))
+    form(1, Chart(x, y), (2*u, 2*v))
     >>> φ + α
-    form(1, (f + u, g + v))
+    form(1, Chart(x, y), (f + u, g + v))
     >>> φ - α
-    form(1, (-f + u, -g + v))
-    
+    form(1, Chart(x, y), (-f + u, -g + v))
     
     We can use ^ as the wedge product operator.    
 
-    >>> φ ^ φ == form(2, (0,))
-    True
-    >>> α ^ φ == - φ ^ α
-    True
-    
+    >>> assert φ ^ φ == form(2, c, (0,))
+    >>> assert α ^ φ == - φ ^ α
     '''
     
     F = type(name, (object,), {})
     
-    def __init__(self, degree, components):
+    def __init__(self, degree, chart, components):
+        # make sure the form has the correct number of components
+        assert len(components) == nCr(chart.dimension, degree)
         self.components = tuple(sympify(_) for _ in components)
+        self.chart = chart
         self.degree = degree
 
     def __repr__(self):
-        t = (self.degree, self.components)
+        t = (self.degree, self.chart, self.components)
         return name + t.__repr__()
 
     def __eq__(self, other):
         return (self.degree == other.degree and 
+                self.chart == other.chart and
                 self.components == other.components)
     
     def __ne__(self, other):
@@ -225,46 +277,48 @@ def form_factory(name):
         def __fname__(self, other):
             if type(other) is type(self):
                 assert self.degree == other.degree
+                assert self.chart == other.chart
                 comps = tuple(getattr(s, name)(o) for s, o in zip(self.components, other.components))
             else:    
                 comps = tuple(getattr(s, name)(other) for s in self)
-            return F(self.degree, comps)
+            return F(self.degree, self.chart, comps)
         return __fname__
 
     def unary(name):
         def __fname__(self):
             comps = tuple(getattr(s, name)() for s in self.components)
-            return F(self.degree, comps)
+            return F(self.degree, self.chart, comps)
         return __fname__
     
-    D_, H_, W_, C_ = derivative(), hodge_star(), wedge(), contraction()
-
     @property
     def D(self):
-        c, d = self.components, self.degree
-        c = D_[d](c)
+        d, ch, c = self.degree, self.chart, self.components
+        c = self.chart.dec.D[d](c)
         if c is 0: return 0
-        return F(d+1, c)
+        return F(d+1, ch, c)
 
     @property
     def H(self):
-        c, d = self.components, self.degree
-        c = H_[d](c)
+        d, ch, c = self.degree, self.chart, self.components
+        c = self.chart.dec.H[d](c)
         if c is 0: return 0
-        return F(2-d, c)
+        dim = self.chart.dimension
+        return F(dim-d, ch, c)
 
     def W(self, other):
-        c1, d1 = self.components, self.degree
-        c2, d2 = other.components, other.degree
-        return F(d1+d2, W_[d1, d2](c1, c2))
+        d1, ch1, c1 = self.degree, self.chart, self.components
+        d2, ch2, c2 = other.degree, other.chart, other.components
+        assert ch1 == ch2
+        return F(d1+d2, ch1, self.chart.dec.W[d1, d2](c1, c2))
 
     def C(self, other):
-        c1, d1 = self.components, self.degree
-        assert d1 == 1 and len(c1) == 2
-        c2, d2 = other.components, other.degree
-        c = C_[d2](c1, c2)
+        d1, ch1, c1 = self.degree, self.chart, self.components
+        assert d1 == 1
+        d2, ch2, c2 = other.degree, other.chart, other.components
+        assert ch1 == ch2
+        c = self.chart.dec.C[d2](c1, c2)
         if c == 0: return 0
-        return F(d2-1, c)
+        return F(d2-1, ch1, c)
     
     for m in '''
             __init__
@@ -293,24 +347,38 @@ def form_factory(name):
 
     return F
 
-def simplified_forms(F):
+def simplified_forms(F, chart):
     '''
     Helper functions to make constructing forms easier.
-    >>> F0, F1, F2 = simplified_forms(form)
-    >>> F0(x   ) == form(0, (x,  ))
-    True
-    >>> F1(x, y) == form(1, (x, y))
-    True
-    >>> F2(x   ) == form(2, (x,  ))
-    True
+
+    >>> chart = Chart(x,)
+    >>> F0, F1 = simplified_forms(form, chart)
+    >>> assert F0(x) == form(0, chart, (x,))
+    >>> assert F1(x) == form(1, chart, (x,))
+
+    >>> chart = Chart(x, y)
+    >>> F0, F1, F2 = simplified_forms(form, chart)
+    >>> assert F0(x   ) == form(0, chart, (x,  ))
+    >>> assert F1(x, y) == form(1, chart, (x, y))
+    >>> assert F2(x   ) == form(2, chart, (x,  ))
+
+    #>>> chart = Chart(x, y, z)
+    #>>> F0, F1, F2, F3 = simplified_forms(form, chart)
+    #>>> assert F0(x      ) == form(0, chart, (x,     ))
+    #>>> assert F1(x, y, z) == form(1, chart, (x, y, z))
+    #>>> assert F2(x, y, z) == form(2, chart, (x, y, z))
+    #>>> assert F3(x      ) == form(3, chart, (x,     ))
+
     '''
-    F0 = lambda f:   form(0, (f,))
-    F1 = lambda f,g: form(1, (f,g))
-    F2 = lambda f:   form(2, (f,))
-    return F0, F1, F2
+    def getF(deg):
+        if deg == 0 or deg == chart.dimension:
+            return (lambda f: form(deg, chart, (f,)))
+        else:
+            return (lambda *f: form(deg, chart, f))
+    return tuple(getF(deg) for deg in range(chart.dimension+1))
     
 form = form_factory('form')
-F0, F1, F2 = simplified_forms(form)
+F0, F1, F2 = simplified_forms(form, Chart(x,y))
 
 ################################
 # Derivative
@@ -319,7 +387,7 @@ F0, F1, F2 = simplified_forms(form)
 def D(f):
     '''
     Derivative     
-    >>> assert  D( F0(x) ) == F1(1, 0)
+    >>> assert D( F0(x) ) == F1(1, 0)
     >>> assert D( F0(x*y) ) == F1(y, x)
     >>> assert D( F1(-y, x) ) == F2(2)
     >>> assert D( F2(x) ) == 0
@@ -435,13 +503,10 @@ def Laplacian(f):
     Laplacian Operator
 
     >>> l = Laplacian
-    >>> l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
-    True
-    >>> l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y),
-    ...                  diff(g, x, x) + diff(g, y, y))
-    True
-    >>> l(F2(f)) == F2( diff(f, x, x) + diff(f, y, y))
-    True
+    >>> assert l(F0(f)) == F0( diff(f, x, x) + diff(f, y, y))
+    >>> assert l(F1(f,g)) == F1(diff(f, x, x) + diff(f, y, y),
+    ...                         diff(g, x, x) + diff(g, y, y))
+    >>> assert l(F2(f)) == F2( diff(f, x, x) + diff(f, y, y))
     '''
     return H(D(H(D(f)))) + D(H(D(H(f))))
 
@@ -509,8 +574,7 @@ def grad(f):
     '''
     Compute the gradient of a scalar field :math:`f(x,y)`.
     
-    >>> grad(f) == (diff(f, x), diff(f, y))
-    True
+    >>> assert grad(f) == (diff(f, x), diff(f, y))
     '''
     return tuple(D(F0(f)))
 
@@ -518,8 +582,7 @@ def div(V):
     '''
     Compute the divergence of a vector field :math:`V(x,y)`.
     
-    >>> div((u,v)) == diff(u, x) + diff(v, y)
-    True
+    >>> assert div((u,v)) == diff(u, x) + diff(v, y)
     '''
     f = F1(*V)
     return H(D(H(f)))[0]
@@ -528,8 +591,7 @@ def vort(V):
     '''
     Compute the vorticity of a vector field :math:`V(x,y)`.
     
-    >>> vort((u,v)) == -diff(u, y) + diff(v, x)
-    True
+    >>> assert vort((u,v)) == -diff(u, y) + diff(v, x)
     '''
     f = F1(*V)
     return H(D(f))[0]
@@ -537,22 +599,18 @@ def vort(V):
 def adv(V):
     '''
     >>> d = diff
-    >>> simplify(adv((u,v))) == (u*d(u,x)+v*d(u,y), u*d(v,x)+v*d(v,y))
-    True
+    >>> assert simplify(adv((u,v))) == (u*d(u,x)+v*d(u,y), u*d(v,x)+v*d(v,y))
     '''
     G  = grad(V[0]**2 + V[1]**2)
     V_, G_ = F1(*V), F1(*G)
     return tuple(Lie(V_, V_) - G_/2)
 
-def projections1d():
+def projections_1d():
     '''
-    >>> P0, P1 = projections1d()
-    >>> P0(x) == x0
-    True
-    >>> P1(x) == x1**2/2 - x0**2/2
-    True
-    >>> P1(1) == x1 - x0
-    True
+    >>> P0, P1 = projections_1d()
+    >>> assert P0(x) == x0
+    >>> assert P1(x) == x1**2/2 - x0**2/2
+    >>> assert P1(1) == x1 - x0
     '''
     x0, x1 = symbols('x0 x1')
 
@@ -572,10 +630,8 @@ def projections1d():
 def lambdify2():
     '''
     >>> l0, l1 = lambdify2()
-    >>> l0(x*y)(1, 2) == (lambda x, y: x*y)(1, 2)
-    True
-    >>> l1((x, y))(1, 2) == (lambda x, y: (x,y))(1, 2)
-    True
+    >>> assert l0(x*y)(1, 2) == (lambda x, y: x*y)(1, 2)
+    >>> assert l1((x, y))(1, 2) == (lambda x, y: (x,y))(1, 2)
     '''
 
     def l0(f):
