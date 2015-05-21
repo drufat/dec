@@ -51,8 +51,7 @@ def test_R():
     assert np.allclose(f.lambdify(pnts), f.decform(g, True).R(pnts))
     assert np.allclose(f.lambdify(pnts), f.decform(g, False).R(pnts))
 
-
-def test_sym_D():
+def test_D():
     
     g = Grid_1D.periodic(11)
     f = form(0, c, (cos(x),))    
@@ -63,8 +62,26 @@ def test_sym_D():
     assert f.D.decform(g, True) == f.decform(g, True).D
     f = form(0, c, (x**3,))    
     assert f.D.decform(g, True) == f.decform(g, True).D
+    
+def test_H():
 
-def test_sym_W_C():
+    g = Grid_1D.periodic(11)
+    f = form(0, c, (cos(3*x),))    
+    assert f.H.decform(g, False) == f.decform(g, True).H
+    assert f.H.decform(g, True) == f.decform(g, False).H
+    f = form(1, c, (sin(x)+cos(x),))    
+    assert f.H.decform(g, False) == f.decform(g, True).H
+    assert f.H.decform(g, True) == f.decform(g, False).H
+
+    g = Grid_1D.chebyshev(11)
+    f = form(0, c, (x**4,))    
+    assert f.H.decform(g, False) == f.decform(g, True).H
+    assert f.H.decform(g, True) == f.decform(g, False).H
+    f = form(1, c, (x**2 + 1,))    
+    assert f.H.decform(g, False) == f.decform(g, True).H
+    assert f.H.decform(g, True) == f.decform(g, False).H
+
+def test_W_C():
 
     g = Grid_1D.periodic(11)
     
