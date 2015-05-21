@@ -40,14 +40,15 @@ def test_R():
     assert np.allclose(f.lambdify(pnts), f.decform(g, False).R(pnts))
 
     g = Grid_1D.chebyshev(11)
-    pnts = np.linspace(g.xmin, g.xmax, 50)
+    # do not include boundaries
+    pnts = np.linspace(g.xmin, g.xmax, 50)[1:-1] 
     
     f = form(0, c, (x**2,))
     assert np.allclose(f.lambdify(pnts), f.decform(g, True).R(pnts))
     assert np.allclose(f.lambdify(pnts), f.decform(g, False).R(pnts))
 
     f = form(1, c, (x**2,))
-    #assert np.allclose(f.lambdify(pnts), f.decform(g, True).R(pnts))
+    assert np.allclose(f.lambdify(pnts), f.decform(g, True).R(pnts))
     assert np.allclose(f.lambdify(pnts), f.decform(g, False).R(pnts))
 
 
