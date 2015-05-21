@@ -28,6 +28,7 @@ def discreteform_factory(name):
     def P(cls, deg, isprimal, grid, func):
         '''
         Projection
+        Python Function -> Discrete Form
         '''
         return cls(deg, isprimal, grid, grid.dec.P[deg, isprimal](func))
     
@@ -35,10 +36,11 @@ def discreteform_factory(name):
     def R(self):
         '''
         Reconstruction
+        Discrete Form -> Python Function
         '''
         d, p, g, a = self.degree, self.isprimal, self.grid, self.array
         def func(*x):
-            return sum(a[i]*g.dec.B[d, p](i, *x) for i in range(g.dec.N[d, p]))
+            return sum(a[i]*g.dec.B[d, p](i, *x) for i in range(g.N[d, p]))
         return func
     
     @property
@@ -79,7 +81,7 @@ def discreteform_factory(name):
         d2, p2, g2, a2 = other.degree, self.isprimal, other.grid, other.array
         assert g1 is g2 and d1 == 1
         a = g1.dec.C[p1, (d2, p2), toprimal](a1, a2)
-        if a == 0: return 0
+        if a is 0: return 0
         return F(d2-1, toprimal, g1, a)
 
     methods = {}

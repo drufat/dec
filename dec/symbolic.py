@@ -70,20 +70,40 @@ class Chart:
         else:
             raise NotImplementedError
         self.dec = dec
-        
+    
+    def simpl_coords(self, deg):
+        assert deg <= self.dimension
+        return enumerate_coords(self.coords, deg)
+    
     def __repr__(self):
         return "Chart{}".format(self.coords)
 
-def enumerate_coords(x, deg):
+def Chart_1d(x=x):
     '''
-    >>> enumerate_coords(x, 0)
+    >>> Chart_1d()
+    Chart(x,)
+    '''
+    return Chart(x,)
+
+def Chart_2d(x=x, y=y):
+    '''
+    >>> Chart_2d()
+    Chart(x, y)
+    '''
+    return Chart(x, y)
+
+def enumerate_coords(coord, deg):
+    '''
+    >>> enumerate_coords((x,), 0)
     (x0,)
-    >>> enumerate_coords(x, 1)
+    >>> enumerate_coords((x,), 1)
     (x0, x1)
-    >>> enumerate_coords(x, 2)
+    >>> enumerate_coords((x,), 2)
     (x0, x1, x2)
+    >>> enumerate_coords((x, y), 2)
+    (x0, y0, x1, y1, x2, y2)
     '''
-    return symbols(tuple('{}{}'.format(x.name, i) for i in range(deg+1)))
+    return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
 def projections_1d(x):
     '''
@@ -92,7 +112,7 @@ def projections_1d(x):
     >>> assert P1((x,)) == x1**2/2 - x0**2/2
     >>> assert P1((1,)) == x1 - x0
     '''
-    x0, x1 = enumerate_coords(x, 1)
+    x0, x1 = enumerate_coords((x,), 1)
 
     def P0(f):
         f = sympify(f[0])
@@ -121,8 +141,7 @@ def projections_2d(x, y):
     >>> assert P2((1,)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
     '''
     
-    x0, x1, x2 = enumerate_coords(x, 2)
-    y0, y1, y2 = enumerate_coords(y, 2)
+    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
 
     def P0(f):
         return f[0].subs({x:x0, y:y0})
@@ -334,6 +353,7 @@ def form_factory(name):
     
     def __init__(self, degree, chart, components):
         # make sure the form has the correct number of components
+        assert degree <= chart.dimension
         assert len(components) == nCr(chart.dimension, degree)
         self.components = tuple(sympify(_) for _ in components)
         self.chart = chart
@@ -415,6 +435,25 @@ def form_factory(name):
         if c == 0: return 0
         return F(d2-1, ch1, c)
     
+    def decform(self, g, isprimal):
+        import dec.forms
+        d, ch, c = self.degree, self.chart, self.components
+        assert g.dimension == ch.dimension
+        scoords = ch.simpl_coords(d)
+        if len(scoords) == 1:
+            a = lambdify(scoords, self.P, 'numpy')(g.simp[d, isprimal])
+        else:
+            a = lambdify(scoords, self.P, 'numpy')(*g.simp[d, isprimal])
+            
+        return dec.forms.decform(d, isprimal, g, a)
+    
+    @property
+    def lambdify_(self):
+        if len(self.components) == 1:
+            return lambdify(self.chart.coords, self.components[0], 'numpy')
+        else:
+            return lambdify(self.chart.coords, self.components, 'numpy')
+
     for m in '''
             __init__
             __eq__
@@ -424,6 +463,7 @@ def form_factory(name):
             __xor__
             __getitem__
             P D H W C
+            decform
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -439,6 +479,7 @@ def form_factory(name):
             __neg__
             '''.split():
         setattr(F, m, unary(m))
+    setattr(F, 'lambdify', lambdify_)
 
     return F
 

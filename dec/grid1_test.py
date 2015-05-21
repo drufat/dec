@@ -2,23 +2,7 @@ from dec.spectral import *
 from dec.grid1 import *
 from numpy.testing import assert_array_almost_equal as eq
 import pytest
-import dec.forms
 random.seed(seed=1)
-
-def test_one_form():
-
-    N = 10; h = 2*pi/N
-    g = Grid_1D.periodic(N)
-    P0, P1, P0d, P1d = g.projection()
-    eq(P1(sin),
-       P1d(lambda x: sin(x+.5*h)))
-    for i, j in itertools.combinations((integrate_boole1,
-                                        integrate_spectral_coarse,
-                                        integrate_spectral), 2):
-        for x0, x1 in (g.edges, g.edges_dual):
-                x = concatenate((x0, [x1[-1]]))
-                for f in (sin, cos, (lambda x: sin(sin(x)))):
-                    eq(i(x, f), j(x, f))
 
 def test_integrals():
     
