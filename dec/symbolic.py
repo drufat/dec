@@ -3,7 +3,7 @@
 '''
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
-                   sympify,
+                   sympify, Dummy,
                    integrate, Integral,
                    sin, cos)
 from dec.helper import bunch, nCr
@@ -41,6 +41,12 @@ p  = [
 ]
 
 class Chart:
+    '''
+    >>> c = Chart(x)
+    >>> assert c.dimension == 1
+    >>> c = Chart(x, y)
+    >>> assert c.dimension == 2    
+    '''
     
     def __init__(self, *coords):
         self.coords = coords
@@ -48,21 +54,105 @@ class Chart:
         if len(coords) == 1:
             x, = coords
             dec = bunch(D=derivative_1d(x),
+                        P=projections_1d(x),
                         H=hodge_star_1d(),
                         W=wedge_1d(),
-                        C=contraction_1d())
+                        C=contraction_1d(),
+                        )
         elif len(coords) == 2:
             x, y = coords
             dec = bunch(D=derivative_2d(x, y),
+                        P=projections_2d(x, y),
                         H=hodge_star_2d(),
                         W=wedge_2d(),
-                        C=contraction_2d())
+                        C=contraction_2d(),
+                        )
         else:
             raise NotImplementedError
         self.dec = dec
         
     def __repr__(self):
         return "Chart{}".format(self.coords)
+
+def enumerate_coords(x, deg):
+    '''
+    >>> enumerate_coords(x, 0)
+    (x0,)
+    >>> enumerate_coords(x, 1)
+    (x0, x1)
+    >>> enumerate_coords(x, 2)
+    (x0, x1, x2)
+    '''
+    return symbols(tuple('{}{}'.format(x.name, i) for i in range(deg+1)))
+
+def projections_1d(x):
+    '''
+    >>> P0, P1 = projections_1d(x)
+    >>> assert P0((x,)) == x0
+    >>> assert P1((x,)) == x1**2/2 - x0**2/2
+    >>> assert P1((1,)) == x1 - x0
+    '''
+    x0, x1 = enumerate_coords(x, 1)
+
+    def P0(f):
+        f = sympify(f[0])
+        return f.subs(x, x0)
+
+    def P1(f):
+        f = sympify(f[0])
+        iexpr = integrate(f, (x, x0, x1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+
+    return P0, P1
+
+def projections_2d(x, y):
+    '''
+    >>> P0, P1, P2 = projections_2d(x, y)
+    >>> assert P0((x*y,)) == x0*y0
+    >>> assert P1((x, 0)) == -x0**2/2 + x1**2/2
+    >>> assert P1((1, 0)) == -x0 + x1
+    >>> assert P1((1, 1)) == -x0 + x1 - y0 + y1
+    >>> assert P2((0,)) == 0
+    
+    The expression below corresponds to the area of a triangle
+    >>> from sympy import expand
+    >>> assert P2((1,)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+    '''
+    
+    x0, x1, x2 = enumerate_coords(x, 2)
+    y0, y1, y2 = enumerate_coords(y, 2)
+
+    def P0(f):
+        return f[0].subs({x:x0, y:y0})
+     
+    def P1(f):
+        ux, uy = map(sympify, f)
+        s = Dummy('s')
+        lx, ly = x1 - x0, y1 - y0
+        subst = ((x, x0*(1-s) + x1*s),
+                 (y, y0*(1-s) + y1*s))
+        integrand = (ux.subs(subst)*lx +
+                     uy.subs(subst)*ly)
+        iexpr = integrate(integrand,  (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+     
+    def P2(f):
+        omega = sympify(f[0])
+        s, t = Dummy('s'), Dummy('t')
+        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
+        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
+                 (y, y0*(1-s-t) + y1*s + y2*t))
+        integrand = (omega.subs(subst)*A)
+        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return iexpr
+    
+    return P0, P1, P2
 
 def derivative_1d(x):    
     '''
@@ -291,25 +381,30 @@ def form_factory(name):
         return __fname__
     
     @property
+    def P(self):
+        d, ch, c = self.degree, self.chart, self.components
+        return ch.dec.P[d](c)
+
+    @property
     def D(self):
         d, ch, c = self.degree, self.chart, self.components
-        c = self.chart.dec.D[d](c)
+        c = ch.dec.D[d](c)
         if c is 0: return 0
         return F(d+1, ch, c)
-
+    
     @property
     def H(self):
         d, ch, c = self.degree, self.chart, self.components
-        c = self.chart.dec.H[d](c)
+        c = ch.dec.H[d](c)
         if c is 0: return 0
-        dim = self.chart.dimension
+        dim = ch.dimension
         return F(dim-d, ch, c)
 
     def W(self, other):
         d1, ch1, c1 = self.degree, self.chart, self.components
         d2, ch2, c2 = other.degree, other.chart, other.components
         assert ch1 == ch2
-        return F(d1+d2, ch1, self.chart.dec.W[d1, d2](c1, c2))
+        return F(d1+d2, ch1, ch1.dec.W[d1, d2](c1, c2))
 
     def C(self, other):
         d1, ch1, c1 = self.degree, self.chart, self.components
@@ -328,7 +423,7 @@ def form_factory(name):
             __rmul__
             __xor__
             __getitem__
-            D H W C
+            P D H W C
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -379,6 +474,30 @@ def simplified_forms(F, chart):
     
 form = form_factory('form')
 F0, F1, F2 = simplified_forms(form, Chart(x,y))
+
+################################
+# Projections
+################################
+
+def P(f):
+    '''
+    Projection
+
+    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
+    and return the result in terms of simplex coordiates.
+
+    >>> P(F0(x*y))
+    x0*y0
+    >>> P(F1(x, 0))
+    -x0**2/2 + x1**2/2
+    >>> P(F1(1, 0))
+    -x0 + x1
+    >>> P(F1(1, 1))
+    -x0 + x1 - y0 + y1
+    >>> from sympy import expand
+    >>> assert P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+    '''
+    return f.P
 
 ################################
 # Derivative
@@ -511,62 +630,6 @@ def Laplacian(f):
     return H(D(H(D(f)))) + D(H(D(H(f))))
 
 ################################
-# Projections
-################################
-
-def P0(f):
-    return f[0].subs({x:x0, y:y0})
- 
-def P1(f):
-    #ux, uy = sympify(f[0]), sympify(f[1])
-    ux, uy = f
-    s = symbols('s')
-    lx, ly = x1 - x0, y1 - y0
-    subst = ((x, x0*(1-s) + x1*s),
-             (y, y0*(1-s) + y1*s))
-    integrand = (ux.subs(subst)*lx +
-                 uy.subs(subst)*ly)
-    iexpr = integrate(integrand,  (s, 0, 1))
-    if iexpr.has(Integral):
-        raise ValueError('Unable to evaluate {}.'.format(iexpr))
-    return iexpr
- 
-def P2(f):
-    omega = sympify(f[0])
-    s, t = symbols('s t')
-    A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
-    subst = ((x, x0*(1-s-t) + x1*s + x2*t),
-             (y, y0*(1-s-t) + y1*s + y2*t))
-    integrand = (omega.subs(subst)*A)
-    iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
-    if iexpr.has(Integral):
-        raise ValueError('Unable to evaluate {}.'.format(iexpr))
-    return iexpr
-
-def P(f):
-    '''
-    Projections 
-
-    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
-    and return the result in terms of simplex coordiates.
-
-    >>> P(F0(x*y))
-    x0*y0
-    >>> P(F1(x, 0))
-    -x0**2/2 + x1**2/2
-    >>> P(F1(1, 0))
-    -x0 + x1
-    >>> P(F1(1, 1))
-    -x0 + x1 - y0 + y1
-    >>> from sympy import expand
-    >>> P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
-    True
-    '''
-    return {0: P0, 
-            1: P1, 
-            2: P2}[f.degree](f)
-
-################################
 # Misc
 ################################
 
@@ -604,28 +667,6 @@ def adv(V):
     G  = grad(V[0]**2 + V[1]**2)
     V_, G_ = F1(*V), F1(*G)
     return tuple(Lie(V_, V_) - G_/2)
-
-def projections_1d():
-    '''
-    >>> P0, P1 = projections_1d()
-    >>> assert P0(x) == x0
-    >>> assert P1(x) == x1**2/2 - x0**2/2
-    >>> assert P1(1) == x1 - x0
-    '''
-    x0, x1 = symbols('x0 x1')
-
-    def P0(f):
-        f = sympify(f)
-        return f.subs(x, x0)
-
-    def P1(f):
-        f = sympify(f)
-        iexpr = integrate(f, (x, x0, x1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
-
-    return P0, P1
 
 def lambdify2():
     '''
