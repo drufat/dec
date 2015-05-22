@@ -217,7 +217,6 @@ def test_leibniz():
     N = 7
     g = Grid_1D.periodic(N)
     D, DD = g.derivative()
-    P0, P1, P0d, P1d = g.projection()
     W = g.wedge()
     W00 = W[(0,True),(0,True), True]
     W01 = W[(0,True),(1,True), True]

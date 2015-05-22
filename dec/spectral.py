@@ -15,6 +15,22 @@ from dec.forms import *
 
 np.seterr(divide='ignore', invalid='ignore')
 
+def alpha0_alt(N, x):
+    '''
+    >>> def a0(N, i): return round(alpha0_alt(N, i*2*pi/N), 15)
+    >>> assert (a0(5, 0), a0(5, 1), a0(5, 2)) == (1.0, 0.0, 0.0)
+    >>> assert (a0(6, 0), a0(6, 1), a0(6, 2)) == (1.0, 0.0, 0.0)
+    '''
+    y = sin(N*x/2)*(cos(x/2)*(1-(-1)**N) + 
+                             (1+(-1)**N))/sin(x/2)/N/2
+
+    if hasattr(y, '__setitem__'):
+        y[x==0] = 1
+    elif x==0:
+        y = 1
+
+    return y
+
 def alpha0(N, x):
     r'''
 
@@ -27,10 +43,8 @@ def alpha0(N, x):
 
 
     >>> def a0(N, i): return round(alpha0(N, i*2*pi/N), 15)
-    >>> (a0(5, 0), a0(5, 1), a0(5, 2)) == (1.0, 0.0, 0.0)
-    True
-    >>> (a0(6, 0), a0(6, 1), a0(6, 2)) == (1.0, 0.0, 0.0)
-    True
+    >>> assert (a0(5, 0), a0(5, 1), a0(5, 2)) == (1.0, 0.0, 0.0)
+    >>> assert (a0(6, 0), a0(6, 1), a0(6, 2)) == (1.0, 0.0, 0.0)
 
     '''
     if N % 2 == 0:
@@ -403,7 +417,7 @@ def H(a):
     '''
     N = len(a)
     h = 2*pi/N
-    return Finv( F(a) * I_diag(N, -h/2, h/2) )
+    return Finv( F(a) * I_diag(N, -h/2, h/2) ).real
 
 def Hinv(a):
     r'''
@@ -414,7 +428,7 @@ def Hinv(a):
     '''
     N = len(a)
     h = 2*pi/N
-    return Finv( F(a) / I_diag(N, -h/2, h/2) )
+    return Finv( F(a) / I_diag(N, -h/2, h/2) ).real
 
 def I(a, x0, x1):
     N = len(a)
@@ -427,12 +441,12 @@ def Iinv(a, x0, x1):
 def S(a):
     N = len(a)
     h = 2*pi/N
-    return Finv( F(a) * S_diag(N, h/2) )
+    return Finv( F(a) * S_diag(N, h/2) ).real
  
 def Sinv(a):
     N = len(a)
     h = 2*pi/N
-    return Finv( F(a) * S_diag(N, -h/2) )
+    return Finv( F(a) * S_diag(N, -h/2) ).real
 
 def I_diag(N, a, b):
     r'''

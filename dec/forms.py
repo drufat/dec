@@ -24,6 +24,27 @@ def discreteform_factory(name):
     def __ne__(self, other):
         return not self.__eq__(other)
     
+    def __xor__(self, other):
+        return self.W(other)
+
+    def binary(name):
+        def __fname__(self, other):
+            if type(other) is type(self):
+                assert self.degree == other.degree
+                assert self.grid == other.grid
+                assert self.isprimal == other.isprimal
+                arr = getattr(self.array, name)(other.array)
+            else:    
+                arr = getattr(self.array, name)(other)
+            return F(self.degree, self.isprimal, self.grid, arr)
+        return __fname__
+
+    def unary(name):
+        def __fname__(self):
+            arr = getattr(self.array, name)()
+            return F(self.degree, self.isprimal, self.grid, arr)
+        return __fname__    
+
     @classmethod
     def P(cls, deg, isprimal, grid, func):
         '''
@@ -84,15 +105,31 @@ def discreteform_factory(name):
         if a is 0: return 0
         return F(d2-1, toprimal, g1, a)
 
-    methods = {}
     for m in '''
         __init__
         __repr__
         __eq__
         __ne__
+        __repr__
+        __xor__
         P R D H W C
         '''.split():
         setattr(F, m, locals()[m])
+    for m in '''
+            __add__
+            __radd__
+            __mul__
+            __rmul__
+            __sub__
+            __rsub__
+            __div__
+            __truediv__
+            '''.split():
+        setattr(F, m, binary(m))
+    for m in '''
+            __neg__
+            '''.split():
+        setattr(F, m, unary(m))
         
     return F
 

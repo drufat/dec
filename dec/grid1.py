@@ -3,6 +3,7 @@ import dec.periodic
 import dec.chebyshev
 import dec.regular
 import dec.spectral
+from dec.forms import decform
 
 class Grid_1D(object):
     '''
@@ -62,6 +63,15 @@ class Grid_1D(object):
         p[0::2] = vp
         p[1::2] = vd
         return p
+    
+    def rand(self, deg, isprimal):
+        '''
+        Create a random form.
+        '''
+        return decform(deg, isprimal, self, np.random.rand(self.N[deg, isprimal]))
+
+    def P(self, deg, isprimal, func):
+        return decform(deg, isprimal, self, self.dec.P[deg, isprimal](func))
 
     def boundary_condition(self, f):
         bc = np.zeros((self.n, ))

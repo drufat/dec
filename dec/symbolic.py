@@ -525,7 +525,7 @@ def P(f):
     Projection
 
     Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
-    and return the result in terms of simplex coordiates.
+    and return the result in terms of simplex coordinates.
 
     >>> P(F0(x*y))
     x0*y0
