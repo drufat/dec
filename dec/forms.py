@@ -16,8 +16,8 @@ def discreteform_factory(name):
         return name + t.__repr__()
     
     def __eq__(self, other):
-        return (self.degree == other.degree and 
-                self.isprimal == other.isprimal and
+        return (self.degree is other.degree and 
+                self.isprimal is other.isprimal and
                 self.grid is other.grid and 
                 np.allclose(self.array, other.array))
     
@@ -30,9 +30,9 @@ def discreteform_factory(name):
     def binary(name):
         def __fname__(self, other):
             if type(other) is type(self):
-                assert self.degree == other.degree
-                assert self.grid == other.grid
-                assert self.isprimal == other.isprimal
+                assert self.degree is other.degree
+                assert self.grid is other.grid
+                assert self.isprimal is other.isprimal
                 arr = getattr(self.array, name)(other.array)
             else:    
                 arr = getattr(self.array, name)(other)

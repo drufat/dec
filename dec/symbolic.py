@@ -199,9 +199,11 @@ def derivative_2d(x, y):
     >>> D[2]( (x,) )
     0
     '''
-    D0 = lambda f: (diff(f[0], x), 
-                    diff(f[0], y))
-    D1 = lambda f: (-diff(f[0], y) + diff(f[1], x), )
+    Dx = lambda f: diff(f, x)
+    Dy = lambda f: diff(f, y)
+    D0 = lambda f: (Dx(f[0]), 
+                    Dy(f[0]))
+    D1 = lambda f: (-Dy(f[0]) + Dx(f[1]),)
     D2 = lambda f: 0
     return D0, D1, D2
 
@@ -228,8 +230,7 @@ def hodge_star_2d():
     (x,)
     '''
     H0 = lambda f: f
-    H1 = lambda f: (-f[1], 
-                     f[0])
+    H1 = lambda f: (-f[1], f[0])
     H2 = lambda f: f
     return H0, H1, H2
 

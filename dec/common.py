@@ -22,9 +22,10 @@ def wrap_refine(to_refine, from_refine):
 def projection(simp):
 
     P={(0, True)  : lambda f: f(simp[0, True]), 
+       (0, False) : lambda f: f(simp[0, False]),
+
        (1, True)  : lambda f: slow_integration(simp[1, True][0],
                                                simp[1, True][1], f),
-       (0, False) : lambda f: f(simp[0, False]),
        (1, False) : lambda f: slow_integration(simp[1, False][0],
                                                simp[1, False][1], f),} 
     return P

@@ -17,6 +17,11 @@ def cartesian_product(X, Y):
     X, Y = [x.flatten() for x in meshgrid(X, Y)]
     return X, Y
 
+def apply_operators(H, axis):
+    def get_apply(h):
+        return lambda x: apply_along_axis(h, axis, x)
+    return [get_apply(h) for h in H]
+
 Grid_2D_Interface = '''
     verts verts_dual
     edges edges_dual
@@ -26,9 +31,188 @@ Grid_2D_Interface = '''
     reconstruction
     derivative
     hodge_star
-    contraction
     gx gy
 '''.split()
+
+class Grid_2D(object):
+    
+    def __init__(self, gx, gy, N, simp, shape, dec, refine):
+        
+        self.gx, self.gy = gx, gy
+        self.dimension = gx.dimension + gy.dimension
+        self.N = N
+        self.simp = simp
+        self.shape = shape
+        self.dec = dec
+        self.refine = refine
+
+Π = lambda *x: tuple(itertools.product(*x))
+
+def projection(simp):
+    
+    P = {(0, True ) : lambda f: f(*simp[0, True ]),
+         (0, False) : lambda f: f(*simp[0, False]),
+
+         (1, True ) : lambda f: (integrate_1form(simp[1, True ][0], f)[0],
+                                 integrate_1form(simp[1, True ][1], f)[0]),
+         (1, False) : lambda f: (integrate_1form(simp[1, False][0], f)[0],
+                                 integrate_1form(simp[1, False][1], f)[0]),
+         
+         (2, True ) : lambda f: integrate_2form(simp[2, True ], f)[0],
+         (2, False) : lambda f: integrate_2form(simp[2, False], f)[0],
+         }
+
+    return P
+
+def derivative(gx, gy):
+
+    def deriv(g, axis):
+        d, dd = g.derivative()
+        D  = lambda arr: apply_along_axis(d, axis, arr)
+        DD = lambda arr: apply_along_axis(dd, axis, arr)
+        return D, DD
+
+    Dx, Ddx = deriv(gx, axis=1)
+    Dy, Ddy = deriv(gy, axis=0)
+
+    D0  = lambda f: (Dx(f), Dy(f))
+    D0d = lambda f: (Ddx(f), Ddy(f))
+    D1  = lambda f: -Dy(f[0]) + Dx(f[1])
+    D1d = lambda f: -Ddy(f[0]) + Ddx(f[1])
+
+
+    D = {(0, True) : D0,
+         (1, True) : D1,
+         (2, True) : lambda f: 0,
+         (0, False): D0d, 
+         (1, False): D1d,
+         (2, False): lambda f: 0}
+    return D
+
+def boundary_condition(self):
+    '''
+    Two types of boundaries: Vertices (0) or Edges (1). 
+    '''
+
+    def BC0(f):
+        ((x0, y0), (x1,y1)) = self.edges_dual[0]
+        bc0 = zeros(x0.shape)
+        ma = (x0==self.gx.xmin)
+        bc0[ma] -= f(x0[ma], y0[ma])
+        ma = (x1==self.gx.xmax)
+        bc0[ma] += f(x1[ma], y1[ma])
+
+        ((x0, y0), (x1,y1)) = self.edges_dual[1]
+        bc1 = zeros(x1.shape)
+        ma = (y0==self.gy.xmin)
+        bc1[ma] -= f(x0[ma], y0[ma])
+        ma = (y1==self.gy.xmax)
+        bc1[ma] += f(x1[ma], y1[ma])
+        return bc0, bc1
+
+    def BC1(f):
+        ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = self.faces_dual
+        bc = zeros(x0.shape)
+        ma = (y0==self.gy.xmin)
+        bc[ma] += integrate_1form( ((x0[ma], y0[ma]), (x1[ma], y1[ma])), f)[0]
+        ma = (x1==self.gx.xmax)
+        bc[ma] += integrate_1form( ((x1[ma], y1[ma]), (x2[ma], y2[ma])), f)[0]
+        ma = (y2==self.gy.xmax)
+        bc[ma] += integrate_1form( ((x2[ma], y2[ma]), (x3[ma], y3[ma])), f)[0]
+        ma = (x3==self.gx.xmin)
+        bc[ma] += integrate_1form( ((x3[ma], y3[ma]), (x0[ma], y0[ma])), f)[0]
+        return bc
+
+    return BC0, BC1
+
+def hodge_star(gx, gy):
+
+    H0x, H1x, H0dx, H1dx = apply_operators(gx.hodge_star(), axis=1)
+    H0y, H1y, H0dy, H1dy = apply_operators(gy.hodge_star(), axis=0)
+
+    H0 = lambda f: H0x(H0y(f))
+    H2 = lambda f: H1x(H1y(f))
+    H0d = lambda f: H0dx(H0dy(f))
+    H2d = lambda f: H1dx(H1dy(f))
+
+    def H1(f):
+        fx, fy = f
+        return -H0x(H1y(fy)), H0y(H1x(fx))
+    
+    def H1d(f):
+        fx, fy = f
+        return -H0dx(H1dy(fy)), H0dy(H1dx(fx))
+
+    H = {(0, True) : H0,
+         (1, True) : H1,
+         (2, True) : H2,
+         (0, False): H0d, 
+         (1, False): H1d,
+         (2, False): H2d}
+    return H
+
+def cartesian_product_grids(gx, gy):
+    
+    assert gx.dimension is 1
+    assert gy.dimension is 1
+
+    # For all meshgrids hence forth, first argument should have an x, second should have an y
+    verts = meshgrid(gx.verts, gy.verts)
+    verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
+    edges = ((meshgrid(gx.edges[0], gy.verts),
+              meshgrid(gx.edges[1], gy.verts)),
+             (meshgrid(gx.verts, gy.edges[0]),
+              meshgrid(gx.verts, gy.edges[1])))
+    edges_dual = ((meshgrid(gx.edges_dual[0], gy.verts_dual),
+                   meshgrid(gx.edges_dual[1], gy.verts_dual)),
+                  (meshgrid(gx.verts_dual, gy.edges_dual[0]),
+                   meshgrid(gx.verts_dual, gy.edges_dual[1])))
+    faces = (meshgrid(gx.edges[0], gy.edges[0]),
+             meshgrid(gx.edges[1], gy.edges[0]),
+             meshgrid(gx.edges[1], gy.edges[1]),
+             meshgrid(gx.edges[0], gy.edges[1]))
+    faces_dual = (meshgrid(gx.edges_dual[0], gy.edges_dual[0]),
+                  meshgrid(gx.edges_dual[1], gy.edges_dual[0]),
+                  meshgrid(gx.edges_dual[1], gy.edges_dual[1]),
+                  meshgrid(gx.edges_dual[0], gy.edges_dual[1]))
+
+    simp = {(0, True)  : verts, 
+            (1, True)  : edges,
+            (2, True)  : faces,
+            (0, False) : verts_dual,
+            (1, False) : edges_dual,
+            (2, False) : faces_dual}
+
+    shape = {(0, True) :  (gx.N[0, True], gy.N[0, True]),
+             (1, True) : ((gx.N[1, True], gy.N[0, True]), 
+                          (gx.N[0, True], gy.N[1, True])),
+             (2, True) :  (gx.N[1, True], gy.N[1, True]),
+             (0, False) :  (gx.N[0, False], gy.N[0, False]),
+             (1, False) : ((gx.N[1, False], gy.N[0, False]), 
+                           (gx.N[0, False], gy.N[1, False])),
+             (2, False) :  (gx.N[1, False], gy.N[1, False])}
+        
+    N = {}
+    for deg, isprimal in shape:
+        if deg == 1:
+            (hx, hy), (vx, vy) = shape[deg, isprimal]
+            N[deg, isprimal] = hx*hy + vx*vy            
+        else:
+            nx, ny = shape[deg, isprimal]
+            N[deg, isprimal] = nx*ny
+    
+    dec = bunch(P=projection(simp),
+                B=None,
+                D=None,
+                H=None,
+                W=None,
+                C=None)
+    refine = None
+    
+    return Grid_2D(gx, gy, N, simp, shape, dec, refine)
+
+from dec.grid1 import Grid_1D
+g2 = cartesian_product_grids(Grid_1D.chebyshev(2), Grid_1D.chebyshev(4))
 
 class Grid_2D_Cartesian:
     
@@ -98,108 +282,27 @@ class Grid_2D_Cartesian:
     def reconstruction(self):
         R0, R1, R2, R0d, R1d, R2d = reconstruction(self.basis_fn())
         return R0, R1, R2, R0d, R1d, R2d
-
+    
     def derivative(self):
-
-        def deriv(g, axis):
-            d, dd = g.derivative()
-            D  = lambda arr: apply_along_axis(d, axis, arr)
-            DD = lambda arr: apply_along_axis(dd, axis, arr)
-            return D, DD
-
-        Dx, Ddx = deriv(self.gx, axis=1)
-        Dy, Ddy = deriv(self.gy, axis=0)
-
-        D0  = lambda f: (Dx(f), Dy(f))
-        D0d = lambda f: (Ddx(f), Ddy(f))
-        D1  = lambda f: -Dy(f[0]) + Dx(f[1])
-        D1d = lambda f: -Ddy(f[0]) + Ddx(f[1])
-
+        D = derivative(self.gx, self.gy)
+        D0  = D[0, True]
+        D1  = D[1, True]
+        D0d = D[0, False]
+        D1d = D[1, False]
         return D0, D1, D0d, D1d
-
-    def boundary_condition(self):
-        '''
-        Two types of boundaries: Vertices (0) or Edges (1). 
-        '''
-
-        def BC0(f):
-            ((x0, y0), (x1,y1)) = self.edges_dual[0]
-            bc0 = zeros(x0.shape)
-            ma = (x0==self.gx.xmin)
-            bc0[ma] -= f(x0[ma], y0[ma])
-            ma = (x1==self.gx.xmax)
-            bc0[ma] += f(x1[ma], y1[ma])
-
-            ((x0, y0), (x1,y1)) = self.edges_dual[1]
-            bc1 = zeros(x1.shape)
-            ma = (y0==self.gy.xmin)
-            bc1[ma] -= f(x0[ma], y0[ma])
-            ma = (y1==self.gy.xmax)
-            bc1[ma] += f(x1[ma], y1[ma])
-            return bc0, bc1
-
-        def BC1(f):
-            ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = self.faces_dual
-            bc = zeros(x0.shape)
-            ma = (y0==self.gy.xmin)
-            bc[ma] += integrate_1form( ((x0[ma], y0[ma]), (x1[ma], y1[ma])), f)[0]
-            ma = (x1==self.gx.xmax)
-            bc[ma] += integrate_1form( ((x1[ma], y1[ma]), (x2[ma], y2[ma])), f)[0]
-            ma = (y2==self.gy.xmax)
-            bc[ma] += integrate_1form( ((x2[ma], y2[ma]), (x3[ma], y3[ma])), f)[0]
-            ma = (x3==self.gx.xmin)
-            bc[ma] += integrate_1form( ((x3[ma], y3[ma]), (x0[ma], y0[ma])), f)[0]
-            return bc
-
-        return BC0, BC1
-
+    
     def hodge_star(self):
-
-        H0x, H1x, H0dx, H1dx = apply_operators(self.gx.hodge_star(), axis=1)
-        H0y, H1y, H0dy, H1dy = apply_operators(self.gy.hodge_star(), axis=0)
-
-        H0 = lambda f: H0x(H0y(f))
-        H2 = lambda f: H1x(H1y(f))
-        H0d = lambda f: H0dx(H0dy(f))
-        H2d = lambda f: H1dx(H1dy(f))
-
-        def H1(f):
-            fx, fy = f
-            return -H0x(H1y(fy)), H0y(H1x(fx))
-        
-        def H1d(f):
-            fx, fy = f
-            return -H0dx(H1dy(fy)), H0dy(H1dx(fx))
-
+        H = hodge_star(self.gx, self.gy)
+        H0  = H[0, True]
+        H1  = H[1, True]
+        H2  = H[2, True]
+        H0d = H[0, False]
+        H1d = H[1, False]
+        H2d = H[2, False]
         return H0, H1, H2, H0d, H1d, H2d
     
-    def contraction(self, V):
-        H0x, H1x, H0dx, H1dx = apply_operators(self.gx.hodge_star(), axis=1)
-        H0y, H1y, H0dy, H1dy = apply_operators(self.gy.hodge_star(), axis=0)
-        Sx, Sinvx = apply_operators(self.gx.switch(), axis=1)
-        Sy, Sinvy = apply_operators(self.gy.switch(), axis=0)
-
-        Vx, Vy = V
-        vx, vy = Sinvx(H1x(Vx)), Sinvy(H1y(Vy))
-
-        def C1(f):
-            alphax, alphay = f
-            ax, ay = Sinvx(H1x(alphax)), Sinvy(H1y(alphay))
-            c = ax*vx + ay*vy
-            return real(c)
-        
-        def C2(f):
-            o = H1x(H1y(f))
-            #TODO: since we are multiplying, we need to refine the grid first. 
-            #TODO: best to implement a wedge, and use that instead of *
-            ax, ay = -Sinvy(o)*vy, Sinvx(o)*vx
-            cx, cy = H0dx(Sx(ax)), H0dy(Sy(ay))
-            return ( real(cx), real(cy) )
-        
-        return C1, C2
-
-def apply_operators(H, axis):
-    return [lambda arr, h=h: apply_along_axis(h, axis, arr) for h in H]
+    def boundary_condition(self):
+        return boundary_condition(self)
 
 def Grid_2D_Periodic(N, M):
     return Grid_2D_Cartesian(Grid_1D.periodic(N), Grid_1D.periodic(M))
