@@ -25,14 +25,14 @@ class Grid_1D(object):
     regular = classmethod(dec.regular.make)
     chebyshev = classmethod(dec.chebyshev.make)
 
-    def __init__(self, n, xmin, xmax, delta, N, simp, dec, refine):
+    def __init__(self, n, xmin, xmax, delta, N, cells, dec, refine):
         self.dimension = 1
         self.n = n
         self.xmin = xmin
         self.xmax = xmax
         self.delta = delta
         self.N = N
-        self.simp = simp
+        self.cells = cells
         self.dec = dec
         self.refine = refine
         
@@ -41,19 +41,19 @@ class Grid_1D(object):
     
     @property
     def verts(self):
-        return self.simp[0, True]
+        return self.cells[0, True]
 
     @property
     def edges(self):
-        return self.simp[1, True]
+        return self.cells[1, True]
 
     @property
     def verts_dual(self):
-        return self.simp[0, False]
+        return self.cells[0, False]
     
     @property
     def edges_dual(self):
-        return self.simp[1, False]
+        return self.cells[1, False]
 
     @property
     def points(self):
@@ -88,10 +88,11 @@ class Grid_1D(object):
         return P0, P1, P0d, P1d
 
     def basis_fn(self):
-        B0  = [lambda x, i=i:  self.dec.B[0, True ](i, x) for i in range(self.N[0, True])]
-        B1  = [lambda x, i=i:  self.dec.B[1, True ](i, x) for i in range(self.N[1, True])]
-        B0d = [lambda x, i=i:  self.dec.B[0, False](i, x) for i in range(self.N[0, False])]
-        B1d = [lambda x, i=i:  self.dec.B[1, False](i, x) for i in range(self.N[1, False])]
+        B = self.dec.B
+        B0  = [B[0, True ](i) for i in range(self.N[0, True])]
+        B1  = [B[1, True ](i) for i in range(self.N[1, True])]
+        B0d = [B[0, False](i) for i in range(self.N[0, False])]
+        B1d = [B[1, False](i) for i in range(self.N[1, False])]
         return B0, B1, B0d, B1d
 
     def reconstruction(self):

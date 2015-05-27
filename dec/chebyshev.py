@@ -26,15 +26,15 @@ def make(cls, n, xmin=-1, xmax=+1):
     Delta = {True  : delta,
              False : delta_dual}
     
-    simp = {(0, True)  : verts, 
-            (1, True)  : edges,
-            (0, False) : verts_dual,
-            (1, False) : edges_dual,}
+    cells = {(0, True)  : verts, 
+             (1, True)  : edges,
+             (0, False) : verts_dual,
+             (1, False) : edges_dual,}
 
-    B={(0, True)  : lambda i, x: sp.psi0(n, i, x), 
-       (1, True)  : lambda i, x: sp.psi1(n, i, x),
-       (0, False) : lambda i, x: sp.psid0(n, i, x),
-       (1, False) : lambda i, x: sp.psid1(n, i, x),}
+    B={(0, True)  : lambda i: lambda x: sp.psi0(n, i, x), 
+       (1, True)  : lambda i: lambda x: sp.psi1(n, i, x),
+       (0, False) : lambda i: lambda x: sp.psid0(n, i, x),
+       (1, False) : lambda i: lambda x: sp.psid1(n, i, x),}
 
     D={(0, True)  : lambda f: diff(f), 
        (1, True)  : lambda f: 0,
@@ -53,8 +53,8 @@ def make(cls, n, xmin=-1, xmax=+1):
                xmax=xmax,
                delta=Delta,
                N=N,
-               simp=simp,
-               dec=bunch(P=dec.common.projection(simp),
+               cells=cells,
+               dec=bunch(P=dec.common.projection(cells),
                          B=B,
                          D=D,
                          H=H,

@@ -442,9 +442,9 @@ def form_factory(name):
         assert g.dimension == ch.dimension
         scoords = ch.simpl_coords(d)
         if len(scoords) == 1:
-            a = lambdify(scoords, self.P, 'numpy')(g.simp[d, isprimal])
+            a = lambdify(scoords, self.P, 'numpy')(g.cells[d, isprimal])
         else:
-            a = lambdify(scoords, self.P, 'numpy')(*g.simp[d, isprimal])
+            a = lambdify(scoords, self.P, 'numpy')(*g.cells[d, isprimal])
             
         return dec.forms.decform(d, isprimal, g, a)
     

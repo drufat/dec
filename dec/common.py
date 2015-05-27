@@ -19,15 +19,15 @@ def wrap_refine(to_refine, from_refine):
 
     return bunch(T=T, U=U)
 
-def projection(simp):
+def projection(cells):
 
-    P={(0, True)  : lambda f: f(simp[0, True]), 
-       (0, False) : lambda f: f(simp[0, False]),
+    P={(0, True)  : lambda f: f(cells[0, True]), 
+       (0, False) : lambda f: f(cells[0, False]),
 
-       (1, True)  : lambda f: slow_integration(simp[1, True][0],
-                                               simp[1, True][1], f),
-       (1, False) : lambda f: slow_integration(simp[1, False][0],
-                                               simp[1, False][1], f),} 
+       (1, True)  : lambda f: slow_integration(cells[1, True][0],
+                                               cells[1, True][1], f),
+       (1, False) : lambda f: slow_integration(cells[1, False][0],
+                                               cells[1, False][1], f),} 
     return P
 
 def wedge(refine):

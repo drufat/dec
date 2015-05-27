@@ -61,7 +61,7 @@ def discreteform_factory(name):
         '''
         d, p, g, a = self.degree, self.isprimal, self.grid, self.array
         def func(*x):
-            return sum(a[i]*g.dec.B[d, p](i, *x) for i in range(g.N[d, p]))
+            return sum(a[i]*g.dec.B[d, p](i)(*x) for i in range(g.N[d, p]))
         return func
     
     @property

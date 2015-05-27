@@ -110,11 +110,11 @@ def reshapeO(shape, O, Otype):
 
 class Grid_2D(object):
     
-    def __init__(self, gx, gy, N, simp, shape, dec, refine):
+    def __init__(self, gx, gy, N, cells, shape, dec, refine):
         self.gx, self.gy = gx, gy
         self.dimension = gx.dimension + gy.dimension
         self.N = N
-        self.simp = simp
+        self.cells = cells
         self.shape = shape
         self.dec = dec
         self.refine = refine
@@ -133,27 +133,27 @@ class Grid_2D(object):
         
     @property
     def verts(self):
-        return self.simp[0, True]
+        return self.cells[0, True]
 
     @property
     def edges(self):
-        return self.simp[1, True]
+        return self.cells[1, True]
     
     @property
     def faces(self):
-        return self.simp[2, True]
+        return self.cells[2, True]
 
     @property
     def verts_dual(self):
-        return self.simp[0, False]
+        return self.cells[0, False]
     
     @property
     def edges_dual(self):
-        return self.simp[1, False]
+        return self.cells[1, False]
     
     @property
     def faces_dual(self):
-        return self.simp[2, False]
+        return self.cells[2, False]
     
     def projection(self):
         P = self.dec.P
@@ -206,21 +206,21 @@ class Grid_2D(object):
         return R0, R1, R2, R0d, R1d, R2d
 
     def boundary_condition(self):
-        BC0, BC1 = boundary_condition(self.simp[1, False], 
-                                      self.simp[2, False], 
+        BC0, BC1 = boundary_condition(self.cells[1, False], 
+                                      self.cells[2, False], 
                                       self.gx, self.gy)
         BC0_ = lambda f: unshape(BC0(f))[0]
         BC1_ = lambda f: unshape(BC1(f))[0]
         return BC0_, BC1_
 
-def projection(simp):
+def projection(cells):
     
-    P = {(0, True ) : lambda f: f(*simp[0, True ]),
-         (0, False) : lambda f: f(*simp[0, False]),
-         (1, True ) : lambda f: integrate_1form(simp[1, True ], f)[0],
-         (1, False) : lambda f: integrate_1form(simp[1, False], f)[0],
-         (2, True ) : lambda f: integrate_2form(simp[2, True ], f)[0],
-         (2, False) : lambda f: integrate_2form(simp[2, False], f)[0]}
+    P = {(0, True ) : lambda f: f(*cells[0, True ]),
+         (0, False) : lambda f: f(*cells[0, False]),
+         (1, True ) : lambda f: integrate_1form(cells[1, True ], f)[0],
+         (1, False) : lambda f: integrate_1form(cells[1, False], f)[0],
+         (2, True ) : lambda f: integrate_2form(cells[2, True ], f)[0],
+         (2, False) : lambda f: integrate_2form(cells[2, False], f)[0]}
 
     return P
 
@@ -308,7 +308,7 @@ def hodge_star(gx, gy):
          (2, False): H2d}
     return H
 
-def product_simplices(sx, sy):
+def product_cells(sx, sy):
     '''
     Representation of a cellular complex in 2D (block array):
 
@@ -341,15 +341,15 @@ def product_simplices(sx, sy):
         return  ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
      
     t, f = True, False
-    simp = {(0, t) : vertices(sx[0, t], sy[0, t]),
-            (0, f) : vertices(sx[0, f], sy[0, f]),
-            (1, t) : edges(sx[0, t], sy[0, t], sx[1, t], sy[1, t]),
-            (1, f) : edges(sx[0, f], sy[0, f], sx[1, f], sy[1, f]),
-            (2, t) : faces(sx[1, t], sy[1, t]),
-            (2, f) : faces(sx[1, f], sy[1, f])}
-    return simp
+    cells = {(0, t) : vertices(sx[0, t], sy[0, t]),
+             (0, f) : vertices(sx[0, f], sy[0, f]),
+             (1, t) : edges(sx[0, t], sy[0, t], sx[1, t], sy[1, t]),
+             (1, f) : edges(sx[0, f], sy[0, f], sx[1, f], sy[1, f]),
+             (2, t) : faces(sx[1, t], sy[1, t]),
+             (2, f) : faces(sx[1, f], sy[1, f])}
+    return cells
 
-def product_simplices_flat(sx, sy):
+def product_cells_flat(sx, sy):
     '''
     Representation of a cellular complex in 2D (flat array):
 
@@ -359,8 +359,8 @@ def product_simplices_flat(sx, sy):
 
     '''
     
-    simp = product_simplices(sx, sy)
-    simp_new = {}
+    cells = product_cells(sx, sy)
+    cells_new = {}
     shape = {}
     
     def get_f(k):
@@ -371,27 +371,27 @@ def product_simplices_flat(sx, sy):
 
     for t in (True, False):
 
-        (x, y) = simp[0, t]
+        (x, y) = cells[0, t]
         (x, y) = map(get_f((0, t)), 
         (x, y))
-        simp_new[0, t] = (x, y)
+        cells_new[0, t] = (x, y)
         
-        (((x0h, y0h), (x1h, y1h)), ((x0v, y0v), (x1v, y1v))) = simp[1, t]
+        (((x0h, y0h), (x1h, y1h)), ((x0v, y0v), (x1v, y1v))) = cells[1, t]
         (x0, y0, x1, y1) = map(get_f((1,t)), ((x0h, x0v), (y0h, y0v), (x1h, x1v), (y1h, y1v)))
-        simp_new[1, t] = ((x0, y0), (x1, y1))
+        cells_new[1, t] = ((x0, y0), (x1, y1))
 
-        ((x0, y0), (x1, y1), (x2, y2), (x3, y3)) = simp[2, t]
+        ((x0, y0), (x1, y1), (x2, y2), (x3, y3)) = cells[2, t]
         (x0, y0, x1, y1, x2, y2, x3, y3) = map(get_f((2, t)), (x0, y0, x1, y1, x2, y2, x3, y3))
-        simp_new[2, t] = ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
+        cells_new[2, t] = ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
     
-    return simp_new, shape
+    return cells_new, shape
 
 def cartesian_product_grids(gx, gy):
 
     assert gx.dimension is 1
     assert gy.dimension is 1
     
-    simp, shape = product_simplices_flat(gx.simp, gy.simp)
+    cells, shape = product_cells_flat(gx.cells, gy.cells)
     
 #     shape = {(0, True) :  (gy.N[0, True], gx.N[0, True]),
 #              (1, True) : ((gy.N[0, True], gx.N[1, True]), 
@@ -414,7 +414,7 @@ def cartesian_product_grids(gx, gy):
     decnf = bunch(D=derivative(gx, gy),
                   H=hodge_star(gx, gy),)
 
-    dec = bunch(P=projection(simp),
+    dec = bunch(P=projection(cells),
                 B=None,
                 D=reshapeO(shape, decnf.D, (lambda d, p: (d+1, p))),
                 H=reshapeO(shape, decnf.H, (lambda d, p: (2-d, not p))),
@@ -423,7 +423,7 @@ def cartesian_product_grids(gx, gy):
     
     refine = None
 
-    return Grid_2D(gx, gy, N, simp, shape, dec, refine)
+    return Grid_2D(gx, gy, N, cells, shape, dec, refine)
 
 def laplacian2(g):
     '''
