@@ -19,23 +19,24 @@ def run():
 
     L = [[], [], [], []]
     for N in size:
-        g = Grid_2D_Periodic(N, N)
+        g = Grid_2D.periodic(N, N)
+        P0, P1, P2, P0d, P1d, P2d = g.projection()
         L0, L1, L0d, L1d = laplacian2(g)
 
-        z =  L0(g.P0(f))
-        err0 = linalg.norm(g.P0(q) - z, inf)
+        z =  L0(P0(f))
+        err0 = linalg.norm(P0(q) - z, inf)
         L[0].append(err0)
 
-        z =  L0d(g.P0d(f))
-        err1 = linalg.norm(g.P0d(q) - z, inf)
+        z =  L0d(P0d(f))
+        err1 = linalg.norm(P0d(q) - z, inf)
         L[1].append(err1)
 
-        z =  L1(g.P1(f1))
-        err2 = linalg.norm(flat(g.P1(q1)) - flat(z), inf)
+        z =  L1(P1(f1))
+        err2 = linalg.norm(P1(q1) - z, inf)
         L[2].append(err2)
 
-        z =  L1d(g.P1d(f1))
-        err3 = linalg.norm(flat(g.P1d(q1)) - flat(z), inf)
+        z =  L1d(P1d(f1))
+        err3 = linalg.norm(P1d(q1) - z, inf)
         L[3].append(err3)
 
     #    print N, err0, err1, err2, err3

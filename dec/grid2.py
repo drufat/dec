@@ -381,6 +381,23 @@ def cartesian_product_grids(gx, gy):
 
     return Grid_2D(gx, gy, N, simp, shape, dec, refine)
 
+def laplacian2(g):
+    '''
+    2D Laplacian Operator
+    '''
+    D0, D1, D0d, D1d = g.derivative()
+    H0, H1, H2, H0d, H1d, H2d = g.hodge_star()
+    
+    L0 = lambda f: H2d(D1d(H1(D0(f))))
+    L0d = lambda f: H2(D1(H1d(D0d(f))))
+    L1 = lambda f: (H1d(D0d(H2(D1(f)))) + 
+                    D0(H2d(D1d(H1(f)))))
+    L1d = lambda f: (H1(D0(H2d(D1d(f)))) +
+                     D0d(H2(D1(H1d(f)))))
+    
+    return L0, L1, L0d, L1d
+
+
 def _draw(plt, pnts, xytext=(10,10), color='k', fc='blue'):
     def average(pnts):
         Sx, Sy = [reduce(operator.add, x) for x in zip(*pnts)]

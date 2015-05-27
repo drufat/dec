@@ -17,12 +17,11 @@ def run():
 
     L = [[], [], [], []]
     for N in size:
-        g = Grid_2D_Chebyshev(N, N)
+        g = Grid_2D.chebyshev(N, N)
         L0, L1, L0d, L1d = laplacian2(g)
         D0, D1, D0d, D1d = g.derivative()
         P0, P1, P2, P0d, P1d, P2d = g.projection()
         H0, H1, H2, H0d, H1d, H2d = g.hodge_star()
-        add = lambda x, y: (x[0]+y[0], x[1]+y[1])
         BC0, BC1 = g.boundary_condition()
 
         z = L0(P0(f)) + H2d(BC1(hs(f_grad)))
@@ -33,14 +32,14 @@ def run():
         err1 = linalg.norm(P0d(q) - z, inf)
         L[1].append(err1)
 
-        # curl, and normal
-        z = add( L1(P1(f1)), add(H1d(BC0(f1_curl)), D0(H2d(BC1(hs(f1))))) )
-        err2 = linalg.norm(flat(g.P1(q1)) - flat(z), inf)
+        # normal, and curl
+        z = L1(P1(f1)) + H1d(BC0(f1_curl)) + D0(H2d(BC1(hs(f1))))
+        err2 = linalg.norm(P1(q1) - z, inf)
         L[2].append(err2)
 
         # tangent, and divergence
-        z = add( L1d(P1d(f1)), add(H1(D0(H2d(BC1(f1)))), BC0(f1_div)) )
-        err3 = linalg.norm(flat(g.P1d(q1)) - flat(z), inf)
+        z = L1d(P1d(f1)) + H1(D0(H2d(BC1(f1)))) + BC0(f1_div)
+        err3 = linalg.norm(P1d(q1) - z, inf)
         L[3].append(err3)
 
     #    print N, err0, err1, err2, err3
