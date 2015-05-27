@@ -464,13 +464,11 @@ def _plot_scatter(g):
 
     xytext = (20,20)
     _draw(plt, [g.verts,], xytext=xytext, fc='black', color='k')
-#    _draw(plt, g.faces, xytext=xytext, fc='green', color='r')
-    _draw(plt, g.edges[0], xytext=xytext, fc='green', color='r')
-#    _draw(plt, g.edges[1], xytext=xytext, fc='green', color='r')
+    #_draw(plt, g.faces, xytext=xytext, fc='green', color='r')
+    _draw(plt, g.edges, xytext=xytext, fc='green', color='r')
 
     xytext = (-20,-20)
     _draw(plt, [g.verts_dual,], xytext=xytext, fc='red', color='r')
     #_draw(plt, g.faces_dual, xytext=xytext, fc='orange', color='r')
-    _draw(plt, g.edges_dual[0], xytext=xytext, fc='orange', color='r')
-#    _draw(plt, g.edges_dual[1], xytext=xytext, fc='orange', color='r')
+    _draw(plt, g.edges_dual, xytext=xytext, fc='orange', color='r')
     plt.show()
