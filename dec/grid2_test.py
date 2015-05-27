@@ -3,6 +3,31 @@ import itertools
 import collections
 from numpy.testing import assert_array_almost_equal as eq
 
+def test_N():
+
+    def check_N(g, f, df):
+        P = g.dec.P
+        assert P[0, True](f).shape[0]   == g.N[0, True]
+        assert P[1, True](df).shape[0]  == g.N[1, True]
+        assert P[0, False](f).shape[0]  == g.N[0, False]
+        assert P[1, False](df).shape[0] == g.N[1, False]
+ 
+    check_N(Grid_2D.periodic(4, 3),
+             lambda x, y: sin(x) ,
+             lambda x, y: (cos(x),0) )
+
+    check_N(Grid_2D.periodic(3, 5),
+             lambda x, y: sin(x) ,
+             lambda x, y: (cos(x),0) )
+
+    check_N(Grid_2D.chebyshev(2, 3),
+             lambda x, y: x,
+             lambda x, y: (-y, x) )
+
+    check_N(Grid_2D.periodic(5, 4),
+             lambda x, y: x,
+             lambda x, y: (-y, x) )
+
 def test_d():
  
     def check_d0(g, f, df):
