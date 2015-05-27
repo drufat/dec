@@ -207,8 +207,8 @@ class Grid_2D(object):
 
     def boundary_condition(self):
         BC0, BC1 = boundary_condition(self.simp[1, False], 
-                                  self.simp[2, False], 
-                                  self.gx, self.gy)
+                                      self.simp[2, False], 
+                                      self.gx, self.gy)
         BC0_ = lambda f: unshape(BC0(f))[0]
         BC1_ = lambda f: unshape(BC1(f))[0]
         return BC0_, BC1_
@@ -251,6 +251,7 @@ def derivative(gx, gy):
          (0, False): D0d, 
          (1, False): D1d,
          (2, False): lambda f: 0}
+
     return D
 
 def boundary_condition(edges_dual, faces_dual, gx, gy):
@@ -315,37 +316,51 @@ def hodge_star(gx, gy):
          (2, False): H2d}
     return H
 
+def product_simplices(sx, sy):
+
+    # vertices: (x, y)
+    # edges:    ((x0, y0), (x1, y1))
+    # faces:    ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
+    
+    def vertices(vx, vy):
+        x, y = meshgrid(vx, vy)
+        return (x, y)
+    
+    def edges(vx, vy, ex, ey):
+        eh0x, eh0y = meshgrid(ex[0], vy)
+        eh1x, eh1y = meshgrid(ex[1], vy)
+        ev0x, ev0y = meshgrid(vx, ey[0])
+        ev1x, ev1y = meshgrid(vx, ey[1])
+        
+        #x0, y0, x1, y1 = (eh0x, ev0x), (eh0y, ev0y), (eh1x, ev1x), (eh1y, ev1y)
+        #return ((x0, y0), (x1, y1))
+        return ((eh0x, eh0y), (eh1x, eh1y)), ((ev0x, ev0y),(ev1x, ev1y))
+    
+    def faces(ex, ey):
+        ((x0, y0), 
+         (x1, y1), 
+         (x2, y2), 
+         (x3, y3)) = (meshgrid(ex[0], ey[0]),
+                      meshgrid(ex[1], ey[0]),
+                      meshgrid(ex[1], ey[1]),
+                      meshgrid(ex[0], ey[1]))
+        return  ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
+     
+    t, f = True, False
+    simp = {(0, t) : vertices(sx[0, t], sy[0, t]),
+            (0, f) : vertices(sx[0, f], sy[0, f]),
+            (1, t) : edges(sx[0, t], sy[0, t], sx[1, t], sy[1, t]),
+            (1, f) : edges(sx[0, f], sy[0, f], sx[1, f], sy[1, f]),
+            (2, t) : faces(sx[1, t], sy[1, t]),
+            (2, f) : faces(sx[1, f], sy[1, f])}
+    return simp
+
 def cartesian_product_grids(gx, gy):
 
     assert gx.dimension is 1
     assert gy.dimension is 1
-
-    # For all meshgrids hence forth, first argument should have an x, second should have an y
-    verts = meshgrid(gx.verts, gy.verts)
-    verts_dual = meshgrid(gx.verts_dual, gy.verts_dual)
-    edges = ((meshgrid(gx.edges[0], gy.verts),
-              meshgrid(gx.edges[1], gy.verts)),
-             (meshgrid(gx.verts, gy.edges[0]),
-              meshgrid(gx.verts, gy.edges[1])))
-    edges_dual = ((meshgrid(gx.edges_dual[0], gy.verts_dual),
-                   meshgrid(gx.edges_dual[1], gy.verts_dual)),
-                  (meshgrid(gx.verts_dual, gy.edges_dual[0]),
-                   meshgrid(gx.verts_dual, gy.edges_dual[1])))
-    faces = (meshgrid(gx.edges[0], gy.edges[0]),
-             meshgrid(gx.edges[1], gy.edges[0]),
-             meshgrid(gx.edges[1], gy.edges[1]),
-             meshgrid(gx.edges[0], gy.edges[1]))
-    faces_dual = (meshgrid(gx.edges_dual[0], gy.edges_dual[0]),
-                  meshgrid(gx.edges_dual[1], gy.edges_dual[0]),
-                  meshgrid(gx.edges_dual[1], gy.edges_dual[1]),
-                  meshgrid(gx.edges_dual[0], gy.edges_dual[1]))
-
-    simp = {(0, True)  : verts, 
-            (1, True)  : edges,
-            (2, True)  : faces,
-            (0, False) : verts_dual,
-            (1, False) : edges_dual,
-            (2, False) : faces_dual}
+    
+    simp = product_simplices(gx.simp, gy.simp)
 
     shape = {(0, True) :  (gy.N[0, True], gx.N[0, True]),
              (1, True) : ((gy.N[0, True], gx.N[1, True]), 

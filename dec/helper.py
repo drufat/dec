@@ -286,15 +286,10 @@ def integrate_boole2(x1, x5, f):
         (7*f(*x1) + 32*f(*x2) + 12*f(*x3) + 32*f(*x4) + 7*f(*x5))
     return I
 
-def flat(f):
-    if isinstance(f, tuple):
-        return np.concatenate([x.ravel() for x in f])
-    else:
-        return f.ravel()
-
 def integrate_1form(edge, f):
     '''
-    Integrate a continuous one-form **f** along an **edge** ((x0, y0), (x1, y1))
+    Integrate a continuous one-form **f** along an **edge** 
+    ((x0, y0), (x1, y1))
     >>> integrate_1form( ((0,0), (1,0)), lambda x, y: (1, 0) )[0]
     array(1.0)
     >>> integrate_1form( ((0,0), (1,0)), lambda x, y: (0, 1) )[0]
@@ -331,7 +326,8 @@ def _integrate_2form(face, f):
 
 def integrate_2form(face, f):
     '''
-    Integrate a continuous two-form **f** on a **face** ((x0, y0), (x1, y1), (x2, y2), ...)
+    Integrate a continuous two-form **f** on a **face** 
+    ((x0, y0), (x1, y1), (x2, y2), ...)
     >>> integrate_2form( ((0,0), (2,0), (0,2)), lambda x, y: 1 )[0]
     2.0
     >>> integrate_2form( ((0,0), (1,0), (1,1), (0,1)), lambda x, y: 1 )[0]
