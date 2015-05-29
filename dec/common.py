@@ -33,7 +33,6 @@ def projection(cells):
 def wedge(refine):
 
     T, U = refine.T, refine.U
-    p = Π((0, 1), (True, False))
     
     Ws = dec.symbolic.wedge_1d()
     W = {}    
@@ -46,20 +45,21 @@ def wedge(refine):
             return U[d0+d1, p2](c)
         return w
 
-    for ((d0, p0), (d1, p1), p2) in Π(p, p,(True, False)):
+    for ((d0, p0), (d1, p1), p2) in Π(Π((0, 1), (True, False)), 
+                                      Π((0, 1), (True, False)),
+                                      (True, False)):
         if d0 + d1 > 1: continue
         if p0==p1==p2 and d0==d1==0:
             #no refinement necessary, just multiply directly
             W[(d0, p0), (d1, p1), p2] = lambda a, b: a*b
-            continue
-        W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)    
+        else:
+            W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)
 
     return W
 
 def contraction(refine):
 
     T, U = refine.T, refine.U        
-    p = Π((0, 1), (True, False))
     
     Cs = dec.symbolic.contraction_1d()        
     C = {}
@@ -72,9 +72,10 @@ def contraction(refine):
             return U[d1-1, p2](c)
         return c
 
-    for (p0, (d1, p1), p2) in Π((True, False), p, (True, False)):
+    for (p0, (d1, p1), p2) in Π((True, False), 
+                                Π((0, 1), (True, False)), 
+                                (True, False)):
         if d1-1 < 0: continue
         C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
 
     return C
-  

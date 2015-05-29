@@ -5,8 +5,10 @@ Spectral DEC in 2D
 from numpy import *
 from dec.helper import *
 from dec.grid1 import *
-from dec.spectral import *
 from operator import mul
+from functools import reduce
+import itertools
+import operator
 
 Π = lambda *x: tuple(itertools.product(*x))
 
@@ -19,10 +21,37 @@ def arange2(shape):
     array([[ 0,  1,  2,  3],
     ...    [ 4,  5,  6,  7],
     ...    [ 8,  9, 10, 11]])
+    >>> arange2(((2, 2), (3, 2)))
+    (array([[0, 1],
+    ...     [2, 3]]), array([[4, 5],
+    ...     [6, 7],
+    ...     [8, 9]]))
     '''
-    n = 1
-    for s in shape: n*=s
-    return arange(n, dtype=int).reshape(shape)
+    if type(shape[0]) is int:
+        n = cumul_index((shape,))[-1]
+    else:    
+        n = cumul_index(shape)[-1]
+    return reshape(arange(n, dtype=int), shape)
+
+def unravel_idx(i, shape):
+    '''
+    >>> shape = ((11, 12), (13, 14))
+    >>> A = arange2(shape)
+    >>> k, (i, j) = unravel_idx(10, shape)
+    >>> A[k][i,j]
+    10
+    >>> k, (i, j) = unravel_idx(0, shape)
+    >>> A[k][i,j]
+    0
+    >>> k, (i, j) = unravel_idx(200, shape)
+    >>> A[k][i,j]
+    200
+    '''
+    cum = (0,) + cumul_index(shape)
+    for (k, (a, b)) in enumerate(zip(cum[:-1], cum[1:])):
+        if a <= i < b:
+            return k, unravel_index(i-a, shape[k])
+    raise ValueError
 
 def cartesian_product(X, Y):
     '''
@@ -37,7 +66,20 @@ def cartesian_product(X, Y):
 def apply_operators(H, axis):
     def get_apply(h):
         return lambda x: apply_along_axis(h, axis, x)
-    return [get_apply(h) for h in H]
+    if type(H) is tuple or type(H) is list:
+        return tuple(get_apply(h) for h in H)
+    elif type(H) is dict:
+        return {k:get_apply(H[k]) for k in H}
+    else:
+        raise TypeError
+        
+def cumul_index(shape):
+    '''
+    >>> cumul_index(((3,1), (4,5), (6,7)))
+    (3, 23, 65)
+    '''
+    lngth = array([reduce(mul, s) for s in shape], dtype=int)
+    return tuple(cumsum(lngth))
 
 def unshape(X):
     '''
@@ -73,8 +115,7 @@ def reshape(x, shape):
     ...     [8, 9]]))
     '''
     if type(shape[0]) is tuple:
-        lngth = array([reduce(mul, s) for s in shape], dtype=int)
-        arr = split(x, cumsum(lngth)[:-1])
+        arr = split(x, cumul_index(shape)[:-1])
         return tuple(a.reshape(s) for a, s in zip(arr, shape))
     elif type(shape[0]) is int:
         return x.reshape(shape)
@@ -90,6 +131,24 @@ def reshapeP(shape, P):
         return new_p
     newP = {k : get_new_p(P[k], k) for k in P}
     return newP
+
+def reshapeT(shape, T):
+    def get_new(p, k):
+        def new_f(f):
+            f = reshape(f, shape[k])
+            f = p(f)
+            return f
+        return new_f
+    return {k:get_new(T[k], k) for k in T}
+
+def reshapeU(shape, U):
+    def get_new(p, k):
+        def new_f(f):
+            f = p(f)
+            f, _ = unshape(f)
+            return f
+        return new_f
+    return {k:get_new(U[k], k) for k in U}
 
 def reshapeO(shape, O, Otype):
     def get_new_op(op, typ):
@@ -130,7 +189,11 @@ class Grid_2D(object):
     @classmethod
     def chebyshev(cls, N, M):
         return cls.product(Grid_1D.chebyshev(N), Grid_1D.chebyshev(M))
-        
+    
+    @property
+    def points(self):
+        return meshgrid(self.gx.points, self.gy.points)
+    
     @property
     def verts(self):
         return self.cells[0, True]
@@ -164,7 +227,7 @@ class Grid_2D(object):
         P1d = P[1, False]
         P2d = P[2, False]
         return P0, P1, P2, P0d, P1d, P2d
-    
+
     def derivative(self):
         D = self.dec.D
         D0  = D[0, True]
@@ -184,25 +247,17 @@ class Grid_2D(object):
         return H0, H1, H2, H0d, H1d, H2d
     
     def basis_fn(self):
-        vec = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y))))
-        mg = lambda x, y: meshgrid(x, y, copy=False, sparse=False)
-        gxB0, gxB1, gxB0d, gxB1d = self.gx.basis_fn()
-        gyB0, gyB1, gyB0d, gyB1d = self.gy.basis_fn()
-        B0  = vec(*mg(gxB0,  gyB0))
-        B0d = vec(*mg(gxB0d, gyB0d))
-        B2  = vec(*mg(gxB1,  gyB1))
-        B2d = vec(*mg(gxB1d, gyB1d))
- 
-        fx = vectorize(lambda u, v: (lambda x, y: (u(x)*v(y), 0)))
-        fy = vectorize(lambda u, v: (lambda x, y: (0, u(x)*v(y))))
-        B1  = (fx(*mg(gxB1, gyB0)),
-               fy(*mg(gxB0, gyB1)))
-        B1d = (fx(*mg(gxB1d, gyB0d)),
-               fy(*mg(gxB0d, gyB1d)))
+        B = self.dec.B
+        B0  = [B[0, True ](i) for i in range(self.N[0, True])]
+        B1  = [B[1, True ](i) for i in range(self.N[1, True])]
+        B2  = [B[2, True ](i) for i in range(self.N[2, True])]
+        B0d = [B[0, False](i) for i in range(self.N[0, False])]
+        B1d = [B[1, False](i) for i in range(self.N[1, False])]
+        B2d = [B[2, False](i) for i in range(self.N[2, False])]
         return B0, B1, B2, B0d, B1d, B2d
 
     def reconstruction(self):
-        R0, R1, R2, R0d, R1d, R2d = reconstruction(self.basis_fn())
+        R0, R1, R2, R0d, R1d, R2d = dec.spectral.reconstruction(self.basis_fn())
         return R0, R1, R2, R0d, R1d, R2d
 
     def boundary_condition(self):
@@ -212,6 +267,15 @@ class Grid_2D(object):
         BC0_ = lambda f: unshape(BC0(f))[0]
         BC1_ = lambda f: unshape(BC1(f))[0]
         return BC0_, BC1_
+    
+    def rand(self, deg, isprimal):
+        '''
+        Create a random form.
+        '''
+        return decform(deg, isprimal, self, np.random.rand(self.N[deg, isprimal]))
+
+    def P(self, deg, isprimal, func):
+        return decform(deg, isprimal, self, self.dec.P[deg, isprimal](func))
 
 def projection(cells):
     
@@ -223,6 +287,35 @@ def projection(cells):
          (2, False) : lambda f: integrate_2form(cells[2, False], f)[0]}
 
     return P
+
+def basis_fn(Bx, By):
+
+    B = {}
+    def update_B(t):
+        B[0, t] = lambda j, i: lambda x, y: Bx[0, t](i)(x)*By[0, t](j)(y)
+        B[1, t] =(lambda j, i: lambda x, y: array((Bx[1, t](i)(x)*By[0, t](j)(y), 0), dtype=object),
+                  lambda j, i: lambda x, y: array((0, Bx[0, t](i)(x)*By[1, t](j)(y)), dtype=object))
+        B[2, t] = lambda j, i: lambda x, y: Bx[1, t](i)(x)*By[1, t](j)(y)
+    update_B(True)
+    update_B(False)
+    return B
+
+def basis_fn_flat(Bx, By, shape):
+
+    B = basis_fn(Bx, By)
+    def getB(b, s):
+        if type(b) is tuple:
+            # 1form
+            def Bi(i):
+                k, ij = unravel_idx(i, s)
+                return b[k](*ij)
+        else:
+            # 0form or 2form
+            def Bi(i):
+                ij = unravel_index(i, s)
+                return b(*ij)
+        return Bi
+    return { k : getB(B[k], shape[k]) for k in B}
 
 def derivative(gx, gy):
 
@@ -308,6 +401,36 @@ def hodge_star(gx, gy):
          (2, False): H2d}
     return H
 
+def to_refine(gx, gy):
+    Tx = apply_operators(gx.refine.T, axis=1)
+    Ty = apply_operators(gy.refine.T, axis=0)
+    
+    T = {(0, True ): lambda f: Ty[0, True ](Tx[0, True ](f)),
+         (1, True ): lambda f:(Ty[0, True ](Tx[1, True ](f[0])),
+                               Ty[1, True ](Tx[0, True ](f[1]))),
+         (2, True ): lambda f: Ty[1, True ](Tx[1, True ](f)),
+         (0, False): lambda f: Ty[0, False](Tx[0, False](f)),
+         (1, False): lambda f:(Ty[0, False](Tx[1, False](f[0])),
+                               Ty[1, False](Tx[0, False](f[1]))),
+         (2, False): lambda f: Ty[1, False](Tx[1, False](f)),}
+    
+    return T
+
+def from_refine(gx, gy):
+    Ux = apply_operators(gx.refine.U, axis=1)
+    Uy = apply_operators(gy.refine.U, axis=0)
+    
+    U = {(0, True ): lambda f: Uy[0, True ](Ux[0, True ](f)),
+         (1, True ): lambda f:(Uy[0, True ](Ux[1, True ](f[0])),
+                               Uy[1, True ](Ux[0, True ](f[1]))),
+         (2, True ): lambda f: Uy[1, True ](Ux[1, True ](f)),
+         (0, False): lambda f: Uy[0, False](Ux[0, False](f)),
+         (1, False): lambda f:(Uy[0, False](Ux[1, False](f[0])),
+                               Uy[1, False](Ux[0, False](f[1]))),
+         (2, False): lambda f: Uy[1, False](Ux[1, False](f)),}
+    
+    return U
+
 def product_cells(sx, sy):
     '''
     Representation of a cellular complex in 2D (block array):
@@ -358,7 +481,6 @@ def product_cells_flat(sx, sy):
         faces:    ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
 
     '''
-    
     cells = product_cells(sx, sy)
     cells_new = {}
     shape = {}
@@ -393,15 +515,6 @@ def cartesian_product_grids(gx, gy):
     
     cells, shape = product_cells_flat(gx.cells, gy.cells)
     
-#     shape = {(0, True) :  (gy.N[0, True], gx.N[0, True]),
-#              (1, True) : ((gy.N[0, True], gx.N[1, True]), 
-#                           (gy.N[1, True], gx.N[0, True])),
-#              (2, True) :  (gy.N[1, True], gx.N[1, True]),
-#              (0, False) :  (gy.N[0, False], gx.N[0, False]),
-#              (1, False) : ((gy.N[0, False], gx.N[1, False]), 
-#                            (gy.N[1, False], gx.N[0, False])),
-#              (2, False) :  (gy.N[1, False], gx.N[1, False])}
-
     N = {}
     for deg, isprimal in shape:
         if deg == 1:
@@ -415,13 +528,14 @@ def cartesian_product_grids(gx, gy):
                   H=hodge_star(gx, gy),)
 
     dec = bunch(P=projection(cells),
-                B=None,
+                B=basis_fn_flat(gx.dec.B, gy.dec.B, shape),
                 D=reshapeO(shape, decnf.D, (lambda d, p: (d+1, p))),
                 H=reshapeO(shape, decnf.H, (lambda d, p: (2-d, not p))),
                 W=None,
                 C=None,)
     
-    refine = None
+    refine = bunch(T=reshapeT(shape, to_refine(gx, gy)),
+                   U=reshapeU(shape, from_refine(gx, gy)))
 
     return Grid_2D(gx, gy, N, cells, shape, dec, refine)
 
@@ -465,10 +579,10 @@ def _plot_scatter(g):
     xytext = (20,20)
     _draw(plt, [g.verts,], xytext=xytext, fc='black', color='k')
     #_draw(plt, g.faces, xytext=xytext, fc='green', color='r')
-    _draw(plt, g.edges, xytext=xytext, fc='green', color='r')
+    #_draw(plt, g.edges, xytext=xytext, fc='green', color='r')
 
     xytext = (-20,-20)
     _draw(plt, [g.verts_dual,], xytext=xytext, fc='red', color='r')
     #_draw(plt, g.faces_dual, xytext=xytext, fc='orange', color='r')
-    _draw(plt, g.edges_dual, xytext=xytext, fc='orange', color='r')
+    #_draw(plt, g.edges_dual, xytext=xytext, fc='orange', color='r')
     plt.show()

@@ -153,29 +153,21 @@ def test_W_C():
     
     f0 = form(0, c, (cos(x),))
     f1 = form(1, c, (sin(x),))
+    f = [f0, f1]
 
-    assert (f0^f0).decform(g, True) == f0.decform(g, True).W(f0.decform(g, True))
-    assert (f0^f1).decform(g, True) == f0.decform(g, True).W(f1.decform(g, True))
-    assert (f0^f1).decform(g, False) == f0.decform(g, True).W(f1.decform(g, True), toprimal=False)
-    assert (f0^f1).decform(g, False) == f0.decform(g, False).W(f1.decform(g, False), toprimal=False)
-    #assert (f0^f1).decform(g, False) == f0.decform(g, True).W(f1.decform(g, False), toprimal=False)
-    
-    assert (f1.C(f1)).decform(g, True) == f1.decform(g, True).C(f1.decform(g, True))
-    assert (f1.C(f1)).decform(g, False) == f1.decform(g, False).C(f1.decform(g, False), toprimal=False)
-    
+    for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
+        assert (f[d1]^f[d2]).decform(g, p3) == f[d1].decform(g, p1).W(f[d2].decform(g, p2), toprimal=p3)
+
     g = Grid_1D.chebyshev(11)
     
     f0 = form(0, c, (x,))
     f1 = form(1, c, (x**2,))
-
-    assert (f0^f0).decform(g, True) == f0.decform(g, True) ^ f0.decform(g, True)
-    assert (f0^f1).decform(g, True) == f0.decform(g, True) ^ f1.decform(g, True)
-    assert (f0^f1).decform(g, False) == f0.decform(g, True).W(f1.decform(g, True), toprimal=False)
-    assert (f0^f1).decform(g, False) == f0.decform(g, False).W(f1.decform(g, False), toprimal=False)
+    f = [f0, f1]
     
-    assert (f1.C(f1)).decform(g, True) == f1.decform(g, True).C(f1.decform(g, True))
-    assert (f1.C(f1)).decform(g, False) == f1.decform(g, False).C(f1.decform(g, False), toprimal=False)
-
+    assert (f0^f0).decform(g, True) == f0.decform(g, True) ^ f0.decform(g, True)
+    for (p1, (d2, p2), p3) in g.dec.C.keys():
+        assert (f[d1]^f[d2]).decform(g, p3) == f[d1].decform(g, p1).W(f[d2].decform(g, p2), toprimal=p3)
+        
 if __name__ == '__main__':
     g = Grid_1D.periodic(11)
     

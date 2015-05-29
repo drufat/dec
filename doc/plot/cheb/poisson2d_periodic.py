@@ -39,7 +39,8 @@ def run():
         err3 = linalg.norm(P1d(q1) - z, inf)
         L[3].append(err3)
 
-    #    print N, err0, err1, err2, err3
+        #print N, err0, err1, err2, err3
+
     return size, L
 
 dataname = "converge/poisson2d_periodic.json"

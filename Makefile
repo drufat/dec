@@ -5,6 +5,7 @@ SOURCESRST := $(SOURCESTEX:.tex=.rst) $(SOURCESLYX:.lyx=.rst)
 RESULTS := $(SOURCESRST)
 
 all: $(SOURCESTEX) $(SOURCESLYX) $(RESULTS)
+	sphinx-build -b html doc build/html
 
 %.rst: %.tex
 	./make_rst.py $< 

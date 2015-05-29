@@ -99,7 +99,7 @@ Chebyshev Basis Functions
     
     N = 5
     g = Grid_1D.chebyshev(N)
-    plot_bases_1d(plt, g, g.xmin, g.xmax, "\kappa")
+    plot_bases_1d(plt, g, g.xmin, g.xmax, "\psi")
  
     plt.show()
 
