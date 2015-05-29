@@ -66,6 +66,7 @@ def to_refine():
     >>> T0, T1, T0d, T1d = to_refine()
     >>> U0, U1, U0d, U1d = from_refine()
     >>> for f in (random.rand(8), random.rand(9), arange(10)):
+    ...    assert len(T0(f)) == len(T1(f)) == len(T0d(f)) == len(T1d(f))
     ...    assert allclose(f, U0(T0(f)))
     ...    assert allclose(f, U1(T1(f)))
     ...    assert allclose(f, U0d(T0d(f)))
