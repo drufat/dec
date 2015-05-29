@@ -89,7 +89,7 @@ def discreteform_factory(name):
         Wedge Product
         '''
         d1, p1, g1, a1 = self.degree, self.isprimal, self.grid, self.array
-        d2, p2, g2, a2 = other.degree, self.isprimal, other.grid, other.array
+        d2, p2, g2, a2 = other.degree, other.isprimal, other.grid, other.array
         assert g1 is g2
         a = g1.dec.W[(d1, p1), (d2, p2), toprimal](a1, a2)
         return F(d1+d2, toprimal, g1, a)
@@ -99,7 +99,7 @@ def discreteform_factory(name):
         Contraction
         '''
         d1, p1, g1, a1 = self.degree, self.isprimal, self.grid, self.array
-        d2, p2, g2, a2 = other.degree, self.isprimal, other.grid, other.array
+        d2, p2, g2, a2 = other.degree, other.isprimal, other.grid, other.array
         assert g1 is g2 and d1 == 1
         a = g1.dec.C[p1, (d2, p2), toprimal](a1, a2)
         if a is 0: return 0
