@@ -527,17 +527,75 @@ def cartesian_product_grids(gx, gy):
     decnf = bunch(D=derivative(gx, gy),
                   H=hodge_star(gx, gy),)
 
+    refine = bunch(T=reshapeT(shape, to_refine(gx, gy)),
+                   U=reshapeU(shape, from_refine(gx, gy)))
+
     dec = bunch(P=projection(cells),
                 B=basis_fn_flat(gx.dec.B, gy.dec.B, shape),
                 D=reshapeO(shape, decnf.D, (lambda d, p: (d+1, p))),
                 H=reshapeO(shape, decnf.H, (lambda d, p: (2-d, not p))),
-                W=None,
-                C=None,)
+                W=wedge(refine),
+                C=contraction(refine),)
     
-    refine = bunch(T=reshapeT(shape, to_refine(gx, gy)),
-                   U=reshapeU(shape, from_refine(gx, gy)))
-
     return Grid_2D(gx, gy, N, cells, shape, dec, refine)
+
+import dec.symbolic
+
+def wedge(refine):
+
+    T, U = refine.T, refine.U
+    
+    Ws = dec.symbolic.wedge_2d()
+    W = {}    
+    
+    def get_w(d0, p0, d1, p1, p2):
+        def w(a, b):
+            a = T[d0, p0](a)
+            b = T[d1, p1](b)
+            if d0 != 1: a = (a,)
+            if d1 != 1: b = (b,)
+            c = Ws[d0, d1](a, b)
+            if (d0+d1) != 1: (c,) = c
+            return U[d0+d1, p2](c)
+        return w
+
+    for ((d0, p0), (d1, p1), p2) in Π(Π((0, 1, 2), (True, False)), 
+                                      Π((0, 1, 2), (True, False)),
+                                      (True, False)):
+        if d0 + d1 > 2: continue
+        if p0==p1==p2 and d0==d1==0:
+            #no refinement necessary, just multiply directly
+            W[(d0, p0), (d1, p1), p2] = lambda a, b: a*b
+        else:
+            W[(d0, p0), (d1, p1), p2] = get_w(d0, p0, d1, p1, p2)
+
+    return W
+
+def contraction(refine):
+
+    T, U = refine.T, refine.U        
+    
+    Cs = dec.symbolic.contraction_2d()
+    C = {}
+    
+    def get_c(p0, d1, p1, p2):
+        def c(a, b):
+            a = T[1, p0](a)
+            b = T[d1, p1](b)
+            a = (a,)
+            if d1 != 1: b = (b,)
+            c = Cs[d1](a, b)
+            if (d1-1) != 1: (c,) = c
+            return U[d1-1, p2](c)
+        return c
+
+    for (p0, (d1, p1), p2) in Π((True, False), 
+                                Π((0, 1, 2), (True, False)), 
+                                (True, False)):
+        if d1-1 < 0: continue
+        C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
+
+    return C
 
 def laplacian2(g):
     '''

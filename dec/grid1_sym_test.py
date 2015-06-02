@@ -1,13 +1,12 @@
 from dec.symbolic import *
 from dec.grid1 import Grid_1D
-from dec.forms import decform
-from sympy.core.numbers import One
 
 c = Chart(x,)
 
 def compare_comps(g, f, isprimal):
     #TODO: Why aren't the arrays equal to higher tolerance?
     df = f.decform(g, isprimal)
+
     assert np.allclose(f.lambdify(g.points),
                        g.refine.T[f.degree, df.isprimal](df.array),
                        atol=1e-7)

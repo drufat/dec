@@ -12,6 +12,7 @@ def run():
     for N in size:
 
         g = Grid_1D.periodic(N)
+        P0, P1, P0d, P1d = g.projection()
         laplace, laplace_d = laplacian(g)
 
         #################
@@ -19,9 +20,9 @@ def run():
         one = zeros(N); one[0] = 1
         p = vstack((one, p))
 
-        z = dot(linalg.pinv(p), concatenate(( [f(g.verts[0])], g.P0(q) )) )
+        z = dot(linalg.pinv(p), concatenate(( [f(g.verts[0])], P0(q) )) )
 
-        err = linalg.norm(g.P0(f) - z, inf)
+        err = linalg.norm(P0(f) - z, inf)
         L[0].append( err )
 
         #######################
@@ -30,14 +31,14 @@ def run():
         one = zeros(N); one[0] = 1
         p = vstack((one, p))
 
-        z = dot(linalg.pinv(p), concatenate(( [f(g.verts_dual[0])], g.P0d(q) )) )
+        z = dot(linalg.pinv(p), concatenate(( [f(g.verts_dual[0])], P0d(q) )) )
 
-        err = linalg.norm(g.P0d(f) - z, inf)
+        err = linalg.norm(P0d(f) - z, inf)
         L[1].append( err )
 
     return size, L
 dataname = "converge/poisson1d_periodic.json"
-#dec.store_data(dataname, run())
+dec.store_data(dataname, run())
 
 import matplotlib
 matplotlib.rcParams['legend.fancybox'] = True

@@ -3,7 +3,7 @@
 '''
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
-                   sympify, Dummy,
+                   sympify, Dummy, Symbol,
                    integrate, Integral,
                    sin, cos)
 from dec.helper import bunch, nCr
@@ -105,6 +105,23 @@ def enumerate_coords(coord, deg):
     '''
     return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
+try:
+
+    from pythematica import Pythematica
+    mathematica = Pythematica()
+        
+    def Integrate(*args, Assumptions=None):
+        return mathematica.Integrate(
+                *args, 
+                Assumptions=Assumptions)
+
+except ImportError:
+    
+    def Integrate(*args, Assumptions=None):
+        expr, *bounds = args
+        return integrate(expr, *reversed(bounds))
+
+
 def projections_1d(x):
     '''
     >>> P0, P1 = projections_1d(x)
@@ -123,7 +140,7 @@ def projections_1d(x):
         iexpr = integrate(f, (x, x0, x1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
+        return simplify(iexpr)
 
     return P0, P1
 
@@ -142,36 +159,77 @@ def projections_2d(x, y):
     '''
     
     x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
+    assum = (x0 != x1) | (y0 != y1)
 
     def P0(f):
-        return f[0].subs({x:x0, y:y0})
+        f, = sympify(f)
+        return f.subs({x:x0, y:y0})
      
     def P1(f):
-        ux, uy = map(sympify, f)
-        s = Dummy('s')
+        ux, uy = sympify(f)
+        s = Symbol('s')
         lx, ly = x1 - x0, y1 - y0
         subst = ((x, x0*(1-s) + x1*s),
                  (y, y0*(1-s) + y1*s))
         integrand = (ux.subs(subst)*lx +
                      uy.subs(subst)*ly)
-        iexpr = integrate(integrand,  (s, 0, 1))
+        iexpr = Integrate(integrand, (s, 0, 1), Assumptions=assum)
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
+        return simplify(iexpr)
      
     def P2(f):
-        omega = sympify(f[0])
-        s, t = Dummy('s'), Dummy('t')
+        omega, = sympify(f)
+        s, t = Symbol('s'), Symbol('t')
         A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
         integrand = (omega.subs(subst)*A)
-        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
+        iexpr = Integrate(integrand, (s, 0, 1), (t, 0, 1-s), Assumptions=assum)
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return iexpr
+        return simplify(iexpr)
     
     return P0, P1, P2
+
+def run_mathematica():
+    from sympy import sin, cos
+    P0, P1, P2 = projections_2d(x, y)
+
+    P1_d = {}    
+    for f in ((1,0),
+              (0,1),
+              (sin(x),0),
+              (sin(y),0),
+              (-sin(y), sin(x)),
+              (sin(x), sin(y)),
+              (sin(x), cos(2*y)),
+              ):
+        P1_d[repr(f)] = repr(P1(f))
+        print()
+        print(f)
+        print(P1_d[repr(f)])
+        
+    P2_d = {}    
+    for f in (1,
+              sin(x),
+              sin(y),
+              cos(x),
+              cos(y),
+              sin(x+y),
+              sin(x+2*y),
+              x, y, x**2, y**2, x*y, 
+              x**3, x**2*y, x*y**2, y**3,
+              ):
+        P2_d[repr((f,))] = repr(P2((f,)))
+        print()
+        print(f)
+        print(P2_d[repr((f,))])
+    
+    dataname = 'memoize/projections.json'
+    import dec
+    dec.store_data(dataname, {1:P1_d, 2:P2_d})
+    return
 
 def derivative_1d(x):    
     '''
@@ -440,11 +498,26 @@ def form_factory(name):
         import dec.forms
         d, ch, c = self.degree, self.chart, self.components
         assert g.dimension == ch.dimension
-        scoords = ch.simpl_coords(d)
-        if len(scoords) == 1:
-            a = lambdify(scoords, self.P, 'numpy')(g.cells[d, isprimal])
-        else:
-            a = lambdify(scoords, self.P, 'numpy')(*g.cells[d, isprimal])
+        cells = g.cells[d, isprimal]
+        
+        #Symbolic Integration
+        λ = lambdify(ch.simpl_coords(d), self.P, 'numpy')
+        if   d == 0 and ch.dimension == 1:
+            x0 = cells
+            a = λ(x0)
+        elif d == 1 and ch.dimension == 1:
+            x0, x1 = cells
+            a = λ(x0, x1)
+        elif d == 0 and ch.dimension == 2:
+            x0, y0 = cells
+            a = λ(x0, y0)
+        elif d == 1 and ch.dimension == 2:
+            (x0, y0), (x1, y1) = cells
+            a = λ(x0, y0, x1, y1)
+        elif d == 2 and ch.dimension == 2:
+            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
+            a = (λ(x0, y0, x1, y1, x2, y2) + 
+                 λ(x0, y0, x2, y2, x3, y3))
             
         return dec.forms.decform(d, isprimal, g, a)
     
