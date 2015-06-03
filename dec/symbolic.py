@@ -124,6 +124,7 @@ except ImportError:
 def simplex_measure(σ):
 
     n, k = len(σ[0]), len(σ)
+    assert all(n==len(s) for s in  σ)
     
     if n == 1:
         if k == 1:

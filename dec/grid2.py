@@ -436,9 +436,8 @@ def product_cells(sx, sy):
     Representation of a cellular complex in 2D (block array):
 
         vertices: (x, y)
-        edges:    (((x0h, y0h), (x1h, y1h)), ((x0v, y0v), (x1v, y1v)))
-        faces:    ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
-
+        edges:    (((x0, x1), y), (x, (y0, y1)))
+        faces:    ((x0, y0), (x1, y1))
     '''
 
     def vertices(vx, vy):
@@ -446,22 +445,16 @@ def product_cells(sx, sy):
         return (x, y)
     
     def edges(vx, vy, ex, ey):
-        x0h, y0h = meshgrid(ex[0], vy)
-        x1h, y1h = meshgrid(ex[1], vy)
-        x0v, y0v = meshgrid(vx, ey[0])
-        x1v, y1v = meshgrid(vx, ey[1])        
-        return (((x0h, y0h), (x1h, y1h)), 
-                ((x0v, y0v), (x1v, y1v)))
-    
+        x0, y = meshgrid(ex[0], vy)
+        x1, y = meshgrid(ex[1], vy)
+        x, y0 = meshgrid(vx, ey[0])
+        x, y1 = meshgrid(vx, ey[1])
+        return (((x0, x1), y), (x, (y0, y1)))
+        
     def faces(ex, ey):
-        ((x0, y0), 
-         (x1, y1), 
-         (x2, y2), 
-         (x3, y3)) = (meshgrid(ex[0], ey[0]),
-                      meshgrid(ex[1], ey[0]),
-                      meshgrid(ex[1], ey[1]),
-                      meshgrid(ex[0], ey[1]))
-        return  ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
+        x0, y0 = meshgrid(ex[0], ey[0])
+        x1, y1 = meshgrid(ex[1], ey[1])
+        return ((x0, y0), (x1, y1))
      
     t, f = True, False
     cells = {(0, t) : vertices(sx[0, t], sy[0, t]),
@@ -494,17 +487,16 @@ def product_cells_flat(sx, sy):
     for t in (True, False):
 
         (x, y) = cells[0, t]
-        (x, y) = map(get_f((0, t)), 
-        (x, y))
+        (x, y) = map(get_f((0, t)), (x, y))
         cells_new[0, t] = (x, y)
         
-        (((x0h, y0h), (x1h, y1h)), ((x0v, y0v), (x1v, y1v))) = cells[1, t]
-        (x0, y0, x1, y1) = map(get_f((1,t)), ((x0h, x0v), (y0h, y0v), (x1h, x1v), (y1h, y1v)))
+        (((x0, x1), y), (x, (y0, y1))) = cells[1, t]
+        (x0, y0, x1, y1) = map(get_f((1,t)), ((x0, x), (y, y0), (x1, x), (y, y1)))
         cells_new[1, t] = ((x0, y0), (x1, y1))
 
-        ((x0, y0), (x1, y1), (x2, y2), (x3, y3)) = cells[2, t]
-        (x0, y0, x1, y1, x2, y2, x3, y3) = map(get_f((2, t)), (x0, y0, x1, y1, x2, y2, x3, y3))
-        cells_new[2, t] = ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
+        ((x0, y0), (x1, y1)) = cells[2, t]
+        (x0, y0, x1, y1) = map(get_f((2, t)), (x0, y0, x1, y1))
+        cells_new[2, t] = ((x0, y0), (x1, y0), (x1, y1), (x0, y1))
     
     return cells_new, shape
 
