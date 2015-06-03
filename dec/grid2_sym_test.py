@@ -5,7 +5,7 @@ c = Chart(x,y)
 
 def compare_comps(g, f, isprimal):
     #TODO: Why aren't the arrays equal to higher tolerance?
-    df = f.decform(g, isprimal)
+    df = f.P(g, isprimal)
 
     assert np.allclose(f.lambdify(*g.points),
                        g.refine.T[f.degree, df.isprimal](df.array),

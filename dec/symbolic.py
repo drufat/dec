@@ -5,7 +5,7 @@ import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
                    sympify, Dummy, Symbol,
                    integrate, Integral,
-                   sin, cos)
+                   sin, cos, sqrt)
 from dec.helper import bunch, nCr
 
 # Coordinates
@@ -121,10 +121,130 @@ except ImportError:
         expr, *bounds = args
         return integrate(expr, *reversed(bounds))
 
+def simplex_measure(σ):
+
+    n, k = len(σ[0]), len(σ)
+    
+    if n == 1:
+        if k == 1:
+            return 1
+        if k == 2:
+            ((x0,), (x1,)) = σ
+            return x1 - x0
+
+    if n == 2:
+        if k == 1:
+            return 1
+        if k == 2:
+            ((x0,y0), (x1,y1)) = σ
+            return sqrt((x1 - x0)**2 + (y1 -y0)**2)
+        if k == 3:
+            ((x0,y0), (x1,y1), (y1,y2)) = σ
+            return ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2
+
+    if n == 3:
+        if k == 1:
+            return 1
+        if k == 2:
+            ((x0,y0,z0), (x1,y1,z1)) = σ
+            return sqrt((x1 - x0)**2 + (y1 -y0)**2 + (z1 -z0)**2)
+        if k == 3:
+            ((x0,y0,z0), (x1,y1,z1), (x2,y2,z2)) = σ
+            raise NotImplementedError
+        if k == 4:
+            ((x0,y0,z0), (x1,y1,z1), (x2,y2,z2), (x3,y3,z3)) = σ
+            raise NotImplementedError
+
+def regular_cells():
+    '''
+        (x3, y3)--------(x2, y2)
+           |                |
+           |                |
+        (x0, y0)--------(x1, y1)
+
+        (x0, y1)--------(x1, y1)
+           |                |
+           |                |
+        (x0, y0)--------(x1, y0)
+    '''
+    pass
+
+def averages_1d(x):
+    '''
+    >>> A0, A1 = averages_1d(x)
+    >>> assert A0(1)     == 1
+    >>> assert A0(x)     == x0
+    >>> assert A1(1)     == 1
+    >>> assert A1(x)     == (x1 + x0)/2
+    >>> assert A1(x**2)  == (x0**2 + x0*x1 + x1**2)/3
+    >>> assert A1(x**3)  == (x0**3 + x0**2*x1 + x0*x1**2 + x1**3)/4
+    '''
+    x0, x1 = enumerate_coords((x,), 1)
+    s, t = Symbol('s'), Symbol('t')
+    assert t != x != s
+
+    def A0(f):
+        f = sympify(f)
+        return f.subs(x, x0)
+
+    def A1(f):
+        f = sympify(f)
+        integrand = f.subs(x, x0*(1-s) + x1*s)
+        iexpr = integrate(integrand, (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return simplify(iexpr)
+
+    return A0, A1
+
+def averages_2d(x, y):
+    '''
+    >>> A0, A1, A2 = averages_2d(x, y)
+    >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
+    >>> assert A0(1) == 1
+    >>> assert A0(x) == x0
+    >>> assert A1(1) == 1
+    >>> assert A1(x) == (x0 + x1)/2
+    >>> assert A1(y) == (y0 + y1)/2
+    >>> assert A2(1) == 1
+    >>> assert A2(x) == (x0 + x1 + x2)/3
+    >>> assert A2(y) == (y0 + y1 + y2)/3
+    '''
+    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
+    s, t = Symbol('s'), Symbol('t')
+    assert t != x != s
+    assert t != y != s
+
+    def A0(f):
+        f = sympify(f)
+        return f.subs({x:x0, y:y0})
+     
+    def A1(f):
+        f = sympify(f)
+        subst = ((x, x0*(1-s) + x1*s),
+                 (y, y0*(1-s) + y1*s))
+        integrand = f.subs(subst)
+        iexpr = Integrate(integrand, (s, 0, 1))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return simplify(iexpr)
+     
+    def A2(f):
+        f = sympify(f)
+        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
+                 (y, y0*(1-s-t) + y1*s + y2*t))
+        integrand = 2*f.subs(subst)
+        iexpr = Integrate(integrand, (s, 0, 1), (t, 0, 1-s))
+        if iexpr.has(Integral):
+            raise ValueError('Unable to evaluate {}.'.format(iexpr))
+        return simplify(iexpr)
+    
+    return A0, A1, A2
 
 def projections_1d(x):
     '''
     >>> P0, P1 = projections_1d(x)
+    >>> x0, x1 = enumerate_coords((x,), 1)
     >>> assert P0((x,)) == x0
     >>> assert P1((x,)) == x1**2/2 - x0**2/2
     >>> assert P1((1,)) == x1 - x0
@@ -132,16 +252,16 @@ def projections_1d(x):
     x0, x1 = enumerate_coords((x,), 1)
 
     def P0(f):
-        f = sympify(f[0])
+        f, = sympify(f)
         return f.subs(x, x0)
 
     def P1(f):
-        f = sympify(f[0])
+        f, = sympify(f)
         iexpr = integrate(f, (x, x0, x1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return simplify(iexpr)
-
+    
     return P0, P1
 
 def projections_2d(x, y):
@@ -459,10 +579,37 @@ def form_factory(name):
             return F(self.degree, self.chart, comps)
         return __fname__
     
-    @property
-    def P(self):
+    def P(self, g, isprimal):
+        import dec.forms
         d, ch, c = self.degree, self.chart, self.components
-        return ch.dec.P[d](c)
+        assert g.dimension == ch.dimension
+        cells = g.cells[d, isprimal]
+        
+        #Symbolic Integration
+        λ = lambdify(ch.simpl_coords(d), ch.dec.P[d](c), 'numpy')
+        if   d == 0 and ch.dimension == 1:
+            x0 = cells
+            a = λ(x0)
+        elif d == 1 and ch.dimension == 1:
+            x0, x1 = cells
+            a = λ(x0, x1)
+        elif d == 0 and ch.dimension == 2:
+            x0, y0 = cells
+            a = λ(x0, y0)
+        elif d == 1 and ch.dimension == 2:
+            (x0, y0), (x1, y1) = cells
+            a = λ(x0, y0, x1, y1)
+        elif d == 2 and ch.dimension == 2:
+            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
+            a = (λ(x0, y0, x1, y1, x2, y2) + 
+                 λ(x0, y0, x2, y2, x3, y3))
+            
+        return dec.forms.decform(d, isprimal, g, a)
+
+#     @property
+#     def P(self):
+#         d, ch, c = self.degree, self.chart, self.components
+#         return ch.dec.P[d](c)
 
     @property
     def D(self):
@@ -493,34 +640,7 @@ def form_factory(name):
         c = self.chart.dec.C[d2](c1, c2)
         if c == 0: return 0
         return F(d2-1, ch1, c)
-    
-    def decform(self, g, isprimal):
-        import dec.forms
-        d, ch, c = self.degree, self.chart, self.components
-        assert g.dimension == ch.dimension
-        cells = g.cells[d, isprimal]
         
-        #Symbolic Integration
-        λ = lambdify(ch.simpl_coords(d), self.P, 'numpy')
-        if   d == 0 and ch.dimension == 1:
-            x0 = cells
-            a = λ(x0)
-        elif d == 1 and ch.dimension == 1:
-            x0, x1 = cells
-            a = λ(x0, x1)
-        elif d == 0 and ch.dimension == 2:
-            x0, y0 = cells
-            a = λ(x0, y0)
-        elif d == 1 and ch.dimension == 2:
-            (x0, y0), (x1, y1) = cells
-            a = λ(x0, y0, x1, y1)
-        elif d == 2 and ch.dimension == 2:
-            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
-            a = (λ(x0, y0, x1, y1, x2, y2) + 
-                 λ(x0, y0, x2, y2, x3, y3))
-            
-        return dec.forms.decform(d, isprimal, g, a)
-    
     @property
     def lambdify_(self):
         if len(self.components) == 1:
@@ -537,7 +657,6 @@ def form_factory(name):
             __xor__
             __getitem__
             P D H W C
-            decform
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -594,25 +713,25 @@ F0, F1, F2 = simplified_forms(form, Chart(x,y))
 # Projections
 ################################
 
-def P(f):
-    '''
-    Projection
-
-    Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
-    and return the result in terms of simplex coordinates.
-
-    >>> P(F0(x*y))
-    x0*y0
-    >>> P(F1(x, 0))
-    -x0**2/2 + x1**2/2
-    >>> P(F1(1, 0))
-    -x0 + x1
-    >>> P(F1(1, 1))
-    -x0 + x1 - y0 + y1
-    >>> from sympy import expand
-    >>> assert P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
-    '''
-    return f.P
+# def P(f):
+#     '''
+#     Projection
+# 
+#     Integrate a symbolic form (expressed in terms of coordinates x, y) on the simplices,
+#     and return the result in terms of simplex coordinates.
+# 
+#     >>> P(F0(x*y))
+#     x0*y0
+#     >>> P(F1(x, 0))
+#     -x0**2/2 + x1**2/2
+#     >>> P(F1(1, 0))
+#     -x0 + x1
+#     >>> P(F1(1, 1))
+#     -x0 + x1 - y0 + y1
+#     >>> from sympy import expand
+#     >>> assert P(F2(1)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
+#     '''
+#     return f.P
 
 ################################
 # Derivative
