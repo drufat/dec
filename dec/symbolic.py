@@ -313,6 +313,46 @@ def projections_2d(x, y):
     
     return P0, P1, P2
 
+def projections_2d_regular(x, y):
+    '''
+    >>> P0, P1, P2 = projections_2d_regular(x, y)
+    >>> assert P0((1,)) == 1
+    >>> assert P0((x*y,)) == x0*y0
+    >>> assert P1((1, 0)) == ((x1-x0), 0)
+    >>> assert P1((0, 1)) == (0, (y1-y0))
+    >>> assert P1((y, x)) == (y*(x1-x0), x*(y1-y0))
+    >>> assert P2((0,)) == 0
+    >>> assert P2((1,)) == (x0-x1)*(y0-y1)
+    '''
+    
+    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
+
+    def P0(f):
+        f, = sympify(f)
+        return f.subs({x:x0, y:y0})
+
+    def I(x, a, b):
+        def I_(f):
+            iexpr = Integrate(f, (x, a, b))
+            if iexpr.has(Integral):
+                raise ValueError('Unable to evaluate {}.'.format(iexpr))
+            return simplify(iexpr)
+        return I_
+    
+    Ix = I(x, x0, x1) 
+    Iy = I(y, y0, y1) 
+    
+    def P1(f):
+        fx, fy = f
+        return (Ix(fx), 
+                Iy(fy))
+     
+    def P2(f):
+        f, = sympify(f)
+        return Ix(Iy(f))
+    
+    return P0, P1, P2
+
 def run_mathematica():
     from sympy import sin, cos
     P0, P1, P2 = projections_2d(x, y)
@@ -581,32 +621,8 @@ def form_factory(name):
         return __fname__
     
     def P(self, g, isprimal):
-        import dec.forms
-        d, ch, c = self.degree, self.chart, self.components
-        assert g.dimension == ch.dimension
-        cells = g.cells[d, isprimal]
-        
-        #Symbolic Integration
-        λ = lambdify(ch.simpl_coords(d), ch.dec.P[d](c), 'numpy')
-        if   d == 0 and ch.dimension == 1:
-            x0 = cells
-            a = λ(x0)
-        elif d == 1 and ch.dimension == 1:
-            x0, x1 = cells
-            a = λ(x0, x1)
-        elif d == 0 and ch.dimension == 2:
-            x0, y0 = cells
-            a = λ(x0, y0)
-        elif d == 1 and ch.dimension == 2:
-            (x0, y0), (x1, y1) = cells
-            a = λ(x0, y0, x1, y1)
-        elif d == 2 and ch.dimension == 2:
-            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
-            a = (λ(x0, y0, x1, y1, x2, y2) + 
-                 λ(x0, y0, x2, y2, x3, y3))
-            
-        return dec.forms.decform(d, isprimal, g, a)
-
+        return todiscrete(self, g, isprimal)
+    
 #     @property
 #     def P(self):
 #         d, ch, c = self.degree, self.chart, self.components
@@ -713,6 +729,34 @@ F0, F1, F2 = simplified_forms(form, Chart(x,y))
 ################################
 # Projections
 ################################
+
+def todiscrete(f, g, isprimal):
+    
+    import dec.forms
+    d, ch, c = f.degree, f.chart, f.components
+    assert g.dimension == ch.dimension
+    cells = g.cells[d, isprimal]
+    
+    #Symbolic Integration
+    λ = lambdify(ch.simpl_coords(d), ch.dec.P[d](c), 'numpy')
+    if   d == 0 and ch.dimension == 1:
+        x0 = cells
+        a = λ(x0)
+    elif d == 1 and ch.dimension == 1:
+        x0, x1 = cells
+        a = λ(x0, x1)
+    elif d == 0 and ch.dimension == 2:
+        x0, y0 = cells
+        a = λ(x0, y0)
+    elif d == 1 and ch.dimension == 2:
+        (x0, y0), (x1, y1) = cells
+        a = λ(x0, y0, x1, y1)
+    elif d == 2 and ch.dimension == 2:
+        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
+        a = (λ(x0, y0, x1, y1, x2, y2) + 
+             λ(x0, y0, x2, y2, x3, y3))
+        
+    return dec.forms.decform(d, isprimal, g, a)
 
 # def P(f):
 #     '''

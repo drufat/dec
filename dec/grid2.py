@@ -122,51 +122,6 @@ def reshape(x, shape):
     else:
         raise TypeError
 
-def reshapeP(shape, P):
-    def get_new_p(p, k):
-        def new_p(f):
-            f = p(f)
-            f, _ = unshape(f)
-            return f
-        return new_p
-    newP = {k : get_new_p(P[k], k) for k in P}
-    return newP
-
-def reshapeT(shape, T):
-    def get_new(p, k):
-        def new_f(f):
-            f = reshape(f, shape[k])
-            f = p(f)
-            return f
-        return new_f
-    return {k:get_new(T[k], k) for k in T}
-
-def reshapeU(shape, U):
-    def get_new(p, k):
-        def new_f(f):
-            f = p(f)
-            f, _ = unshape(f)
-            return f
-        return new_f
-    return {k:get_new(U[k], k) for k in U}
-
-def reshapeO(shape, O, Otype):
-    def get_new_op(op, typ):
-        deg, isprimal = typ
-        def new_op(f):
-            f = reshape(f, shape[deg  , isprimal])
-            f = op(f)
-            f, _ = unshape(f)
-            return f
-        return new_op
-    newO = {}
-    for k in O:
-        if Otype(*k) in shape:
-            newO[k] = get_new_op(O[k], k)
-        else: 
-            newO[k] = O[k]
-    return newO
-
 class Grid_2D(object):
     
     def __init__(self, gx, gy, N, cells, shape, dec, refine):
@@ -465,7 +420,7 @@ def product_cells(sx, sy):
              (2, f) : faces(sx[1, f], sy[1, f])}
     return cells
 
-def product_cells_flat(sx, sy):
+def flatten_cells(cells):
     '''
     Representation of a cellular complex in 2D (flat array):
 
@@ -474,7 +429,6 @@ def product_cells_flat(sx, sy):
         faces:    ((x0, y0), (x1, y1), (x2, y2), (x3, y3))
 
     '''
-    cells = product_cells(sx, sy)
     cells_new = {}
     shape = {}
     
@@ -500,12 +454,58 @@ def product_cells_flat(sx, sy):
     
     return cells_new, shape
 
+def reshapeP(shape, P):
+    def get_new_p(p, k):
+        def new_p(f):
+            f = p(f)
+            f, _ = unshape(f)
+            return f
+        return new_p
+    newP = {k : get_new_p(P[k], k) for k in P}
+    return newP
+
+def reshapeT(shape, T):
+    def get_new(p, k):
+        def new_f(f):
+            f = reshape(f, shape[k])
+            f = p(f)
+            return f
+        return new_f
+    return {k:get_new(T[k], k) for k in T}
+
+def reshapeU(shape, U):
+    def get_new(p, k):
+        def new_f(f):
+            f = p(f)
+            f, _ = unshape(f)
+            return f
+        return new_f
+    return {k:get_new(U[k], k) for k in U}
+
+def reshapeO(shape, O, Otype):
+    def get_new_op(op, typ):
+        deg, isprimal = typ
+        def new_op(f):
+            f = reshape(f, shape[deg  , isprimal])
+            f = op(f)
+            f, _ = unshape(f)
+            return f
+        return new_op
+    newO = {}
+    for k in O:
+        if Otype(*k) in shape:
+            newO[k] = get_new_op(O[k], k)
+        else: 
+            newO[k] = O[k]
+    return newO
+
 def cartesian_product_grids(gx, gy):
 
     assert gx.dimension is 1
     assert gy.dimension is 1
     
-    cells, shape = product_cells_flat(gx.cells, gy.cells)
+    cells = product_cells(gx.cells, gy.cells)
+    cells, shape = flatten_cells(cells)
     
     N = {}
     for deg, isprimal in shape:
@@ -516,16 +516,16 @@ def cartesian_product_grids(gx, gy):
             nx, ny = shape[deg, isprimal]
             N[deg, isprimal] = nx*ny
             
-    decnf = bunch(D=derivative(gx, gy),
-                  H=hodge_star(gx, gy),)
+    D_ = derivative(gx, gy)
+    H_ = hodge_star(gx, gy)
 
     refine = bunch(T=reshapeT(shape, to_refine(gx, gy)),
                    U=reshapeU(shape, from_refine(gx, gy)))
 
     dec = bunch(P=projection(cells),
                 B=basis_fn_flat(gx.dec.B, gy.dec.B, shape),
-                D=reshapeO(shape, decnf.D, (lambda d, p: (d+1, p))),
-                H=reshapeO(shape, decnf.H, (lambda d, p: (2-d, not p))),
+                D=reshapeO(shape, D_, (lambda d, p: (d+1, p))),
+                H=reshapeO(shape, H_, (lambda d, p: (2-d, not p))),
                 W=wedge(refine),
                 C=contraction(refine),)
     
