@@ -71,7 +71,7 @@ class Chart:
             raise NotImplementedError
         self.dec = dec
     
-    def simpl_coords(self, deg):
+    def cell_coords(self, deg):
         assert deg <= self.dimension
         return enumerate_coords(self.coords, deg)
     
@@ -105,21 +105,6 @@ def enumerate_coords(coord, deg):
     '''
     return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
-try:
-
-    from pythematica import Pythematica
-    mathematica = Pythematica()
-        
-    def Integrate(*args, Assumptions=None):
-        return mathematica.Integrate(
-                *args, 
-                Assumptions=Assumptions)
-
-except ImportError:
-    
-    def Integrate(*args, Assumptions=None):
-        expr, *bounds = args
-        return integrate(expr, *reversed(bounds))
 
 def simplex_measure(σ):
 
@@ -225,7 +210,7 @@ def averages_2d(x, y):
         subst = ((x, x0*(1-s) + x1*s),
                  (y, y0*(1-s) + y1*s))
         integrand = f.subs(subst)
-        iexpr = Integrate(integrand, (s, 0, 1))
+        iexpr = integrate(integrand, (s, 0, 1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return simplify(iexpr)
@@ -235,7 +220,7 @@ def averages_2d(x, y):
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
         integrand = 2*f.subs(subst)
-        iexpr = Integrate(integrand, (s, 0, 1), (t, 0, 1-s))
+        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return simplify(iexpr)
@@ -280,7 +265,6 @@ def projections_2d(x, y):
     '''
     
     x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    assum = (x0 != x1) | (y0 != y1)
 
     def P0(f):
         f, = sympify(f)
@@ -294,7 +278,7 @@ def projections_2d(x, y):
                  (y, y0*(1-s) + y1*s))
         integrand = (ux.subs(subst)*lx +
                      uy.subs(subst)*ly)
-        iexpr = Integrate(integrand, (s, 0, 1), Assumptions=assum)
+        iexpr = integrate(integrand, (s, 0, 1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return simplify(iexpr)
@@ -306,7 +290,7 @@ def projections_2d(x, y):
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
         integrand = (omega.subs(subst)*A)
-        iexpr = Integrate(integrand, (s, 0, 1), (t, 0, 1-s), Assumptions=assum)
+        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
         if iexpr.has(Integral):
             raise ValueError('Unable to evaluate {}.'.format(iexpr))
         return simplify(iexpr)
@@ -333,7 +317,7 @@ def projections_2d_regular(x, y):
 
     def I(x, a, b):
         def I_(f):
-            iexpr = Integrate(f, (x, a, b))
+            iexpr = integrate(f, (x, a, b))
             if iexpr.has(Integral):
                 raise ValueError('Unable to evaluate {}.'.format(iexpr))
             return simplify(iexpr)
@@ -352,45 +336,6 @@ def projections_2d_regular(x, y):
         return Ix(Iy(f))
     
     return P0, P1, P2
-
-def run_mathematica():
-    from sympy import sin, cos
-    P0, P1, P2 = projections_2d(x, y)
-
-    P1_d = {}    
-    for f in ((1,0),
-              (0,1),
-              (sin(x),0),
-              (sin(y),0),
-              (-sin(y), sin(x)),
-              (sin(x), sin(y)),
-              (sin(x), cos(2*y)),
-              ):
-        P1_d[repr(f)] = repr(P1(f))
-        print()
-        print(f)
-        print(P1_d[repr(f)])
-        
-    P2_d = {}    
-    for f in (1,
-              sin(x),
-              sin(y),
-              cos(x),
-              cos(y),
-              sin(x+y),
-              sin(x+2*y),
-              x, y, x**2, y**2, x*y, 
-              x**3, x**2*y, x*y**2, y**3,
-              ):
-        P2_d[repr((f,))] = repr(P2((f,)))
-        print()
-        print(f)
-        print(P2_d[repr((f,))])
-    
-    dataname = 'memoize/projections.json'
-    import dec
-    dec.store_data(dataname, {1:P1_d, 2:P2_d})
-    return
 
 def derivative_1d(x):    
     '''
@@ -623,10 +568,10 @@ def form_factory(name):
     def P(self, g, isprimal):
         return todiscrete(self, g, isprimal)
     
-#     @property
-#     def P(self):
-#         d, ch, c = self.degree, self.chart, self.components
-#         return ch.dec.P[d](c)
+    @property
+    def integrate(self):
+        d, ch, c = self.degree, self.chart, self.components
+        return ch.dec.P[d](c)
 
     @property
     def D(self):
@@ -674,6 +619,7 @@ def form_factory(name):
             __xor__
             __getitem__
             P D H W C
+            integrate
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -738,7 +684,7 @@ def todiscrete(f, g, isprimal):
     cells = g.cells[d, isprimal]
     
     #Symbolic Integration
-    λ = lambdify(ch.simpl_coords(d), ch.dec.P[d](c), 'numpy')
+    λ = lambdify(ch.cell_coords(d), f.integrate, 'numpy')
     if   d == 0 and ch.dimension == 1:
         x0 = cells
         a = λ(x0)
