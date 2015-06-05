@@ -517,12 +517,22 @@ def fourier_K(x, a, b):
     x = x.copy()
     N = x.shape[0]
     x = hstack([[0], x, [0]])
+
     x = (roll(x,+1) - roll(x,-1))/2j
     x *= I_diag(N+2, a, b) 
     rslt = x[1:-1]
-    rslt[0]  += x[-1]
+
+    rslt[ 0] += x[-1]
     rslt[-1] += x[0]
     return rslt
+
+#    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))/2j
+# Can we get the inverse of above opeator using Schur's complement?
+# def fourier_K_inv((x, λ), a, b):
+#     f, g = rslt, (x[-1] - λ0, x[0] - λ1)
+#     rslt[0]  += λ0
+#     rslt[-1] += λ1
+#     return (f, g )
 
 def fourier_K_inv(x, a, b):
     # Make sure type is coerced to complex, otherwise numpy ignores the complex parts
@@ -532,13 +542,15 @@ def fourier_K_inv(x, a, b):
     I = I_diag(N+2, a, b)
     x /= I[1:-1]
     
-    y = zeros(N, dtype=complex)
-    E = sum(x[::2]); O = sum(x[1::2])
     if (isclose(I[0], I[N]) or 
         isclose(I[1], I[N+1]) or 
         isclose(I[0]*I[1], I[N]*I[N+1])):
         raise ValueError("Singular operator.")
-    elif N % 2 == 0:
+
+    y = zeros(N, dtype=complex)
+    # The computations below are essentially Schur's complement?
+    E = sum(x[::2]); O = sum(x[1::2])
+    if N % 2 == 0:
         y[0]  = O/(1-I[0]/I[N])
         y[-1] = E/(I[N+1]/I[1]-1)
     else:

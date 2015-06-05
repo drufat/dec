@@ -160,6 +160,7 @@ def H1d_cheb(f):
            [-0.5,  1.5]])
     '''
     N = f.shape[0]; h = pi/(N-1)
+    # Is this essentially Schur's complement?
     def endpoints(f):
         f0 = sp.mirror0(sp.matC(f), -1)
         aa = f - sp.unmirror0(sp.I_space(0, h/2)(sp.I_space_inv(-h/2, h/2)(f0)))
