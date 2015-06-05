@@ -4,16 +4,17 @@ from dec.grid1 import Grid_1D
 c = Chart(x,)
 
 def compare_comps(g, f, isprimal):
-    #TODO: Why aren't the arrays equal to higher tolerance?
+    '''
+    Avoid mixing float32 and float64 or else we will get mismatch
+    between the values below. 
+    '''
     df = f.P(g, isprimal)
 
     assert np.allclose(f.lambdify(g.points),
-                       g.refine.T[f.degree, df.isprimal](df.array),
-                       atol=1e-7)
+                       g.refine.T[f.degree, df.isprimal](df.array))
 
     assert np.allclose(df.array,
-                       g.refine.U[f.degree, df.isprimal](f.lambdify(g.points)),
-                       atol=1e-7)
+                       g.refine.U[f.degree, df.isprimal](f.lambdify(g.points)))
 
 def test_refine():
 

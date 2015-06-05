@@ -6,7 +6,7 @@ def discreteform_factory(name):
     F = type(name, (object,), {})
     
     def __init__(self, degree, isprimal, grid, array):
-        self.array = np.asarray(array, dtype=np.float32)
+        self.array = np.asarray(array)
         self.degree = degree
         self.isprimal = isprimal
         self.grid = grid
