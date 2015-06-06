@@ -175,7 +175,8 @@ def H1d_cheb(f):
         f = sp.T_space(-h/2)(f)
         f = sp.unmirror0(f)
         return f
-    return midpoints(f) + endpoints(f)
+    f = midpoints(f) + endpoints(f)
+    return real(f)
     
 def S_cheb(f):
     '''

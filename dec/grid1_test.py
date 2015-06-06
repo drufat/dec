@@ -1,7 +1,6 @@
 from dec.spectral import *
 from dec.grid1 import *
 from numpy.testing import assert_array_almost_equal as eq
-import pytest
 random.seed(seed=1)
 
 def test_integrals():
@@ -228,10 +227,10 @@ def test_leibniz():
     rhs = W01(a0, D(b0)) + W01(b0, D(a0))
     eq(lhs, rhs)
 
-@pytest.mark.xfail
 def test_associativity_exact():
-    ''' Associativity satisfied by exact forms. '''
-
+    ''' 
+    Associativity NOT satisfied by discrete forms. 
+    '''
     N = 5
     g = Grid_1D.periodic(N)
     W = g.wedge()
@@ -247,5 +246,5 @@ def test_associativity_exact():
     eq2 = W01(b0, W01(a0, c1))
     eq3 = W01(W00(a0, b0), c1)
 
-    eq(eq1, eq3)
-    eq(eq2, eq3)
+    assert not allclose(eq1, eq3)
+    assert not allclose(eq2, eq3)
