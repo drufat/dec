@@ -53,33 +53,33 @@ def schurλ(Ainv, B, C, D, n, m):
     return Minv
 
 def test_schur():
-    
-    n, m = 5, 2
     np.random.seed(1)
-    
-    f, g = rand(n, 1), rand(m, 1)
-    
-    A = rand(n, n)
-    B = rand(n, m)
-    C = rand(m, n)
-    D = rand(m, m)
-    
-    Ainv = np.linalg.inv(A)
-    M = bmat([[A, B],[C,D]])
-    Minv = np.linalg.inv(M)
-    
-    λ = lambda A: lambda x: A.dot(x)
-    
-    Mschur = schur(λ(Ainv), B, C, D)
-    assert np.allclose(Minv.dot(np.vstack([f,g])), np.vstack(Mschur(f, g)))
-    
-    Mschur = schurλ(λ(Ainv), λ(B), λ(C), λ(D), n, m)
-    assert np.allclose(Minv.dot(np.vstack([f,g])), np.vstack(Mschur(f, g)))
 
-    #print([λ(Ainv)(b) for b in B.T])
-    #print([λ(Ainv)(λ(B)(i)) for i in np.eye(m)])
-    #print(D)
-    #print(np.array([λ(D)(i) for i in np.eye(m)]).T)
+    for (n, m) in ((0, 1), (0, 2), (1, 1), (5, 2), (10, 3)):
+
+        f, g = rand(n, 1), rand(m, 1)
+        
+        A = rand(n, n)
+        B = rand(n, m)
+        C = rand(m, n)
+        D = rand(m, m)
+        
+        Ainv = np.linalg.inv(A)
+        M = bmat([[A, B],[C,D]])
+        Minv = np.linalg.inv(M)
+        
+        λ = lambda A: lambda x: A.dot(x)
+        
+        Mschur = schur(λ(Ainv), B, C, D)
+        assert np.allclose(Minv.dot(np.vstack([f,g])), np.vstack(Mschur(f, g)))
+        
+        Mschur = schurλ(λ(Ainv), λ(B), λ(C), λ(D), n, m)
+        assert np.allclose(Minv.dot(np.vstack([f,g])), np.vstack(Mschur(f, g)))
+    
+        #print([λ(Ainv)(b) for b in B.T])
+        #print([λ(Ainv)(λ(B)(i)) for i in np.eye(m)])
+        #print(D)
+        #print(np.array([λ(D)(i) for i in np.eye(m)]).T)
 
 if __name__  == '__main__':
     n, m = 5, 2

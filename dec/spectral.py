@@ -2,6 +2,7 @@
 Spectral DEC
 =============
 '''
+
 from numpy import *
 from numpy.testing import assert_almost_equal
 import operator
@@ -451,7 +452,7 @@ def Sinv(a):
 def I_diag(N, a, b):
     r'''
 
-    A diagonal matrix that corresponds to integration in Fourier space.
+    The diagonal that corresponds to integration in Fourier space.
     Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) d\xi`
 
     .. math::
@@ -468,7 +469,7 @@ def I_diag(N, a, b):
 
 def S_diag(N, a):
     r'''
-    A diagonal matrix that corresponds to shifting in Fourier Space
+    The diagonal that corresponds to shifting in Fourier Space
     Corresponds to :math:`f(x) \mapsto f(x-h)`
 
     .. math::
@@ -517,23 +518,14 @@ def fourier_K(x, a, b):
     x = array(x, dtype=complex)
     N = x.shape[0]
     
-    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))
-    #x = hstack([[0], x, [0]])
-    #x = (roll(x,+1) - roll(x,-1))
+    x = hstack([[0], x, [0]])
+    x = (roll(x,+1) - roll(x,-1))
     x *= I_diag(N+2, a, b)/2j
     rslt = x[1:-1]
 
     rslt[ 0] += x[-1]
     rslt[-1] += x[0]
     return rslt
-
-#    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))
-# Can we get the inverse of above opeator using Schur's complement?
-# def fourier_K_inv((x, λ), a, b):
-#     f, g = rslt, (x[-1] - λ0, x[0] - λ1)
-#     rslt[0]  += λ0
-#     rslt[-1] += λ1
-#     return (f, g )
 
 def fourier_K_inv(x, a, b):
     # Make sure type is coerced to complex, otherwise numpy ignores the complex parts
@@ -1147,12 +1139,3 @@ def laplacian(g):
     Ld = lambda x: H1(D(H1d(DD(x))))
 
     return L, Ld
-
-def contraction1(g, V):
-    '''
-    Implement contraction for a 1D grid where V is the one-form corresponding to the vector field.
-    '''
-    S, Sinv = g.switch()
-    H0, H1, H0d, H1d = g.hodge_star()
-    def C1(f): return Sinv(H1(V)) * Sinv(H1(f))
-    return C1
