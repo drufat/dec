@@ -514,19 +514,20 @@ def fourier_K(x, a, b):
     r'''
     Corresponds to :math:`f(x) \mapsto \int_{x+a}^{x+b} f(\xi) \sin(\xi) d\xi`
     '''
-    x = x.copy()
+    x = array(x, dtype=complex)
     N = x.shape[0]
-    x = hstack([[0], x, [0]])
-
-    x = (roll(x,+1) - roll(x,-1))/2j
-    x *= I_diag(N+2, a, b) 
+    
+    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))
+    #x = hstack([[0], x, [0]])
+    #x = (roll(x,+1) - roll(x,-1))
+    x *= I_diag(N+2, a, b)/2j
     rslt = x[1:-1]
 
     rslt[ 0] += x[-1]
     rslt[-1] += x[0]
     return rslt
 
-#    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))/2j
+#    x = (hstack([[0,0], x]) - hstack([x, [0,0]]))
 # Can we get the inverse of above opeator using Schur's complement?
 # def fourier_K_inv((x, λ), a, b):
 #     f, g = rslt, (x[-1] - λ0, x[0] - λ1)

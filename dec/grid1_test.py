@@ -111,7 +111,7 @@ def test_hodge_star_inv():
 def test_compare_chebyshev_and_lagrange_polynomials():
     '''
     The Chebyshev basis functions are equivalent to the
-    Lagrange basis functions.
+    Lagrange basis functions for the grid points.
     '''
 
     for n in (10, 11, 12, 13):
