@@ -132,27 +132,6 @@ def H0_cheb(f):
     f = sp.fold0(f, -1)
     return real(f)
 
-def H1d_cheb_new(f):
-     
-#     f=f.copy()
-#     aa, bb = f[0], f[-1]
-#     f[0], f[-1] = 0, 0
-#     f = mirror0(f, -1)
-#     N = f.shape[0]; h = 2*pi/N
-#     f = F(f)
-#     f = fourier_K_inv(f, -h/2, h/2)
-#     f = Finv(f)
-#     f = unmirror0(f)
-#     return real(f)
-    
-    f = sp.unfold0(f)
-    N = f.shape[0]; h = 2*pi/N
-    f = sp.F(f)
-    f = sp.fourier_K_inv(f, 0, h/2)
-    f = sp.Finv(f)
-    f = sp.unmirror0(f)
-    return real(f)
-
 def H1d_cheb(f):
     '''
     >>> sp.to_matrix(H1d_cheb, 2)

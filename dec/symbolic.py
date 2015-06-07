@@ -105,7 +105,6 @@ def enumerate_coords(coord, deg):
     '''
     return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
-
 def simplex_measure(σ):
 
     n, k = len(σ[0]), len(σ)

@@ -231,6 +231,7 @@ def test_associativity_exact():
     ''' 
     Associativity NOT satisfied by discrete forms. 
     '''
+
     N = 5
     g = Grid_1D.periodic(N)
     W = g.wedge()
