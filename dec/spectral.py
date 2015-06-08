@@ -313,7 +313,6 @@ def kappad1_symm(N, n, x):
 #        -0.   ,  0.   ,  0.   ])
 ############################################################
 
-
 #TODO: This is a dirty hack. Compute the limits explicilty?
 def __fix_singularity_at_boundary(x):
     # Avoid division by zero
@@ -363,6 +362,10 @@ def psid1(N, n, x):
     '''
     x = __fix_singularity_at_boundary(x)
     return kappad1(N, n, arccos(-x))/sqrt(1 - x**2)
+
+#########################
+#  Lagrange Polynomials
+#########################
 
 def lagrange_polynomials(x):
     r'''

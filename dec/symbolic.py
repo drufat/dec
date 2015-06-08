@@ -3,8 +3,7 @@
 '''
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
-                   sympify, Dummy, Symbol,
-                   integrate, Integral,
+                   sympify, Dummy, Symbol, Integral,
                    sin, cos, sqrt)
 from dec.helper import bunch, nCr
 
@@ -39,6 +38,44 @@ p  = [
     -4*cos(x)*cos(2*y)/5,
     0
 ]
+
+def memoize(name):
+
+    from dec.data import Data
+    data = Data()
+    changed = [False,]
+    try:
+        dct = data[name]
+    except FileNotFoundError:
+        dct = dict()
+        changed[0] = True
+            
+    def memoize_name(process):            
+        def f(expr):
+            rexpr = repr(expr)
+            if rexpr in dct:
+                rslt = sympify(dct[rexpr])
+            else:
+                rslt = process(expr)
+                dct[rexpr] = repr(rslt)
+                changed[0] = True
+            return rslt
+        return f
+
+    def commit():
+        if changed[0]:
+            data[name] = dct
+    import atexit
+    atexit.register(commit)
+
+    return memoize_name
+        
+@memoize('memoize/sympy.json')
+def process(expr):
+    rslt = simplify(expr.doit())
+    if rslt.has(Integral):
+        raise ValueError('Unable to evaluate {}.'.format(rslt))    
+    return rslt
 
 class Chart:
     '''
@@ -175,10 +212,8 @@ def averages_1d(x):
     def A1(f):
         f = sympify(f)
         integrand = f.subs(x, x0*(1-s) + x1*s)
-        iexpr = integrate(integrand, (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(integrand, (s, 0, 1))
+        return process(iexpr)
 
     return A0, A1
 
@@ -209,20 +244,16 @@ def averages_2d(x, y):
         subst = ((x, x0*(1-s) + x1*s),
                  (y, y0*(1-s) + y1*s))
         integrand = f.subs(subst)
-        iexpr = integrate(integrand, (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(integrand, (s, 0, 1))
+        return process(iexpr)
      
     def A2(f):
         f = sympify(f)
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
         integrand = 2*f.subs(subst)
-        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(integrand, (t, 0, 1-s), (s, 0, 1))
+        return process(iexpr)
     
     return A0, A1, A2
 
@@ -242,10 +273,8 @@ def projections_1d(x):
 
     def P1(f):
         f, = sympify(f)
-        iexpr = integrate(f, (x, x0, x1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(f, (x, x0, x1))
+        return process(iexpr)
     
     return P0, P1
 
@@ -277,10 +306,8 @@ def projections_2d(x, y):
                  (y, y0*(1-s) + y1*s))
         integrand = (ux.subs(subst)*lx +
                      uy.subs(subst)*ly)
-        iexpr = integrate(integrand, (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(integrand, (s, 0, 1))
+        return process(iexpr)
      
     def P2(f):
         omega, = sympify(f)
@@ -289,10 +316,8 @@ def projections_2d(x, y):
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
         integrand = (omega.subs(subst)*A)
-        iexpr = integrate(integrand, (t, 0, 1-s), (s, 0, 1))
-        if iexpr.has(Integral):
-            raise ValueError('Unable to evaluate {}.'.format(iexpr))
-        return simplify(iexpr)
+        iexpr = Integral(integrand, (t, 0, 1-s), (s, 0, 1))
+        return process(iexpr)
     
     return P0, P1, P2
 
@@ -316,10 +341,8 @@ def projections_2d_regular(x, y):
 
     def I(x, a, b):
         def I_(f):
-            iexpr = integrate(f, (x, a, b))
-            if iexpr.has(Integral):
-                raise ValueError('Unable to evaluate {}.'.format(iexpr))
-            return simplify(iexpr)
+            iexpr = Integral(f, (x, a, b))
+            return process(iexpr)
         return I_
     
     Ix = I(x, x0, x1) 
@@ -488,9 +511,9 @@ def contraction_2d():
                         X[0]*f[0],)
     return C0, C1, C2
 
-def form_factory(name):
+def symform_factory(name):
     '''
-    >>> form = form_factory('form')
+    >>> form = symform_factory('form')
 
     >>> f, g, u, v = symbols('f g u v')
 
@@ -515,21 +538,21 @@ def form_factory(name):
     
     F = type(name, (object,), {})
     
-    def __init__(self, degree, chart, components):
+    def __init__(self, degree, grid, components):
         # make sure the form has the correct number of components
-        assert degree <= chart.dimension
-        assert len(components) == nCr(chart.dimension, degree)
+        assert degree <= grid.dimension
+        assert len(components) == nCr(grid.dimension, degree)
         self.components = tuple(sympify(_) for _ in components)
-        self.chart = chart
+        self.grid = grid
         self.degree = degree
 
     def __repr__(self):
-        t = (self.degree, self.chart, self.components)
+        t = (self.degree, self.grid, self.components)
         return name + t.__repr__()
 
     def __eq__(self, other):
         return (self.degree == other.degree and 
-                self.chart == other.chart and
+                self.grid == other.grid and
                 self.components == other.components)
     
     def __ne__(self, other):
@@ -551,17 +574,17 @@ def form_factory(name):
         def __fname__(self, other):
             if type(other) is type(self):
                 assert self.degree == other.degree
-                assert self.chart == other.chart
+                assert self.grid == other.grid
                 comps = tuple(getattr(s, name)(o) for s, o in zip(self.components, other.components))
             else:    
                 comps = tuple(getattr(s, name)(other) for s in self)
-            return F(self.degree, self.chart, comps)
+            return F(self.degree, self.grid, comps)
         return __fname__
 
     def unary(name):
         def __fname__(self):
             comps = tuple(getattr(s, name)() for s in self.components)
-            return F(self.degree, self.chart, comps)
+            return F(self.degree, self.grid, comps)
         return __fname__
     
     def P(self, g, isprimal):
@@ -569,45 +592,45 @@ def form_factory(name):
     
     @property
     def integrate(self):
-        d, ch, c = self.degree, self.chart, self.components
+        d, ch, c = self.degree, self.grid, self.components
         return ch.dec.P[d](c)
 
     @property
     def D(self):
-        d, ch, c = self.degree, self.chart, self.components
+        d, ch, c = self.degree, self.grid, self.components
         c = ch.dec.D[d](c)
         if c is 0: return 0
         return F(d+1, ch, c)
     
     @property
     def H(self):
-        d, ch, c = self.degree, self.chart, self.components
+        d, ch, c = self.degree, self.grid, self.components
         c = ch.dec.H[d](c)
         if c is 0: return 0
         dim = ch.dimension
         return F(dim-d, ch, c)
 
     def W(self, other):
-        d1, ch1, c1 = self.degree, self.chart, self.components
-        d2, ch2, c2 = other.degree, other.chart, other.components
+        d1, ch1, c1 = self.degree, self.grid, self.components
+        d2, ch2, c2 = other.degree, other.grid, other.components
         assert ch1 == ch2
         return F(d1+d2, ch1, ch1.dec.W[d1, d2](c1, c2))
 
     def C(self, other):
-        d1, ch1, c1 = self.degree, self.chart, self.components
+        d1, ch1, c1 = self.degree, self.grid, self.components
         assert d1 == 1
-        d2, ch2, c2 = other.degree, other.chart, other.components
+        d2, ch2, c2 = other.degree, other.grid, other.components
         assert ch1 == ch2
-        c = self.chart.dec.C[d2](c1, c2)
+        c = self.grid.dec.C[d2](c1, c2)
         if c == 0: return 0
         return F(d2-1, ch1, c)
         
     @property
     def lambdify_(self):
         if len(self.components) == 1:
-            return lambdify(self.chart.coords, self.components[0], 'numpy')
+            return lambdify(self.grid.coords, self.components[0], 'numpy')
         else:
-            return lambdify(self.chart.coords, self.components, 'numpy')
+            return lambdify(self.grid.coords, self.components, 'numpy')
 
     for m in '''
             __init__
@@ -642,23 +665,23 @@ def simplified_forms(F, chart):
     '''
     Helper functions to make constructing forms easier.
 
-    >>> chart = Chart(x,)
-    >>> F0, F1 = simplified_forms(form, chart)
-    >>> assert F0(x) == form(0, chart, (x,))
-    >>> assert F1(x) == form(1, chart, (x,))
+    >>> grid = Chart(x,)
+    >>> F0, F1 = simplified_forms(form, grid)
+    >>> assert F0(x) == form(0, grid, (x,))
+    >>> assert F1(x) == form(1, grid, (x,))
 
-    >>> chart = Chart(x, y)
-    >>> F0, F1, F2 = simplified_forms(form, chart)
-    >>> assert F0(x   ) == form(0, chart, (x,  ))
-    >>> assert F1(x, y) == form(1, chart, (x, y))
-    >>> assert F2(x   ) == form(2, chart, (x,  ))
+    >>> grid = Chart(x, y)
+    >>> F0, F1, F2 = simplified_forms(form, grid)
+    >>> assert F0(x   ) == form(0, grid, (x,  ))
+    >>> assert F1(x, y) == form(1, grid, (x, y))
+    >>> assert F2(x   ) == form(2, grid, (x,  ))
 
-    #>>> chart = Chart(x, y, z)
-    #>>> F0, F1, F2, F3 = simplified_forms(form, chart)
-    #>>> assert F0(x      ) == form(0, chart, (x,     ))
-    #>>> assert F1(x, y, z) == form(1, chart, (x, y, z))
-    #>>> assert F2(x, y, z) == form(2, chart, (x, y, z))
-    #>>> assert F3(x      ) == form(3, chart, (x,     ))
+    #>>> grid = Chart(x, y, z)
+    #>>> F0, F1, F2, F3 = simplified_forms(form, grid)
+    #>>> assert F0(x      ) == form(0, grid, (x,     ))
+    #>>> assert F1(x, y, z) == form(1, grid, (x, y, z))
+    #>>> assert F2(x, y, z) == form(2, grid, (x, y, z))
+    #>>> assert F3(x      ) == form(3, grid, (x,     ))
 
     '''
     def getF(deg):
@@ -668,7 +691,7 @@ def simplified_forms(F, chart):
             return (lambda *f: form(deg, chart, f))
     return tuple(getF(deg) for deg in range(chart.dimension+1))
     
-form = form_factory('form')
+form = symform_factory('form')
 F0, F1, F2 = simplified_forms(form, Chart(x,y))
 
 ################################
@@ -676,14 +699,15 @@ F0, F1, F2 = simplified_forms(form, Chart(x,y))
 ################################
 
 def todiscrete(f, g, isprimal):
+    from dec.decform import decform
     
-    import dec.forms
-    d, ch, c = f.degree, f.chart, f.components
+    d, ch, c = f.degree, f.grid, f.components
     assert g.dimension == ch.dimension
     cells = g.cells[d, isprimal]
     
     #Symbolic Integration
     λ = lambdify(ch.cell_coords(d), f.integrate, 'numpy')
+    #TODO: It may be necessary to compute limits when x0==x1, y0==y1
     if   d == 0 and ch.dimension == 1:
         x0 = cells
         a = λ(x0)
@@ -701,7 +725,7 @@ def todiscrete(f, g, isprimal):
         a = (λ(x0, y0, x1, y1, x2, y2) + 
              λ(x0, y0, x2, y2, x3, y3))
         
-    return dec.forms.decform(d, isprimal, g, a)
+    return decform(d, isprimal, g, a)
 
 # def P(f):
 #     '''
@@ -957,7 +981,8 @@ def plot(plt, V, p):
     axes[3].contourf(X, Y, P)
     axes[3].set_title(r'$p(x,y)$')
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
+    process(Integral(x, x))
 #     import matplotlib.pyplot as plt
 #     for V_, p_ in zip(V, p):
 #         plot(plt, V_, p_)

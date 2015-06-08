@@ -3,7 +3,7 @@ import dec.periodic
 import dec.chebyshev
 import dec.regular
 import dec.spectral
-from dec.forms import decform
+from dec.decform import decform
 
 class Grid_1D(object):
     '''
