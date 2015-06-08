@@ -147,31 +147,30 @@ def test_H():
     assert f.H.P(g, False) == f.P(g, True).H
     assert f.H.P(g, True) == f.P(g, False).H
 
-#TODO: Takes too much time. 
-# def test_W_C():
-#  
-#     g = Grid_1D.periodic(11)
-#      
-#     f0 = form(0, c, (cos(x),))
-#     f1 = form(1, c, (sin(x),))
-#     f = [f0, f1]
-#  
-#     for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
-#         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
-#     for (p1, (d2, p2), p3) in g.dec.C.keys():
-#         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
-#  
-#     g = Grid_1D.chebyshev(11)
-#      
-#     f0 = form(0, c, (x,))
-#     f1 = form(1, c, (x**2,))
-#     f = [f0, f1]
-#      
-#     assert (f0^f0).P(g, True) == f0.P(g, True) ^ f0.P(g, True)
-#     for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
-#         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
-#     for (p1, (d2, p2), p3) in g.dec.C.keys():
-#         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+def test_W_C():
+  
+    g = Grid_1D.periodic(11)
+      
+    f0 = form(0, c, (cos(x),))
+    f1 = form(1, c, (sin(x),))
+    f = [f0, f1]
+  
+    for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
+        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+    for (p1, (d2, p2), p3) in g.dec.C.keys():
+        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+  
+    g = Grid_1D.chebyshev(11)
+      
+    f0 = form(0, c, (x,))
+    f1 = form(1, c, (x**2,))
+    f = [f0, f1]
+      
+    assert (f0^f0).P(g, True) == f0.P(g, True) ^ f0.P(g, True)
+    for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
+        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+    for (p1, (d2, p2), p3) in g.dec.C.keys():
+        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
 
 if __name__ == '__main__':
     test_H()

@@ -36,6 +36,7 @@
   "Integral(sin(2*x), (x, x0, x1))": "cos(2*x0)/2 - cos(2*x1)/2",
   "Integral(sin(x) + 1, (x, x0, x1))": "-x0 + x1 + cos(x0) - cos(x1)",
   "Integral(sin(x) + cos(x), (x, x0, x1))": "sqrt(2)*(cos(x0 + pi/4) - cos(x1 + pi/4))",
+  "Integral(sin(x)*cos(x), (x, x0, x1))": "-sin(x0)**2/2 + sin(x1)**2/2",
   "Integral(sin(x), (x, x0, x1))": "cos(x0) - cos(x1)",
   "Integral(x + 1, (x, x0, x1))": "-x0**2/2 - x0 + x1**2/2 + x1",
   "Integral(x**2 + 1, (x, x0, x1))": "-x0**3/3 - x0 + x1**3/3 + x1",
