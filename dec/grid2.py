@@ -574,7 +574,6 @@ def contraction(refine):
         def c(a, b):
             a = T[1, p0](a)
             b = T[d1, p1](b)
-            a = (a,)
             if d1 != 1: b = (b,)
             c = Cs[d1](a, b)
             if (d1-1) != 1: (c,) = c

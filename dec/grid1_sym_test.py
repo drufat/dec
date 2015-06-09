@@ -157,6 +157,7 @@ def test_W_C():
   
     for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+    
     for (p1, (d2, p2), p3) in g.dec.C.keys():
         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
   
@@ -166,11 +167,11 @@ def test_W_C():
     f1 = form(1, c, (x**2,))
     f = [f0, f1]
       
-    assert (f0^f0).P(g, True) == f0.P(g, True) ^ f0.P(g, True)
     for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
         assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+
     for (p1, (d2, p2), p3) in g.dec.C.keys():
-        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+        assert f[1].C(f[d2]).P(g, p3) == f[1].P(g, p1).C(f[d2].P(g, p2), toprimal=p3)
 
 if __name__ == '__main__':
     test_H()
