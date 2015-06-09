@@ -7,6 +7,7 @@ SOURCESIPYNB := $(shell find notebooks -name '*.ipynb')
 RESULTS := $(SOURCESRST) $(SOURCESIPYNB:.ipynb=.html)
 
 all: $(SOURCESTEX) $(SOURCESLYX) $(SOURCESIPYNB) $(RESULTS)
+	sphinx-build -b html doc build/html
 
 
 %.rst: %.tex

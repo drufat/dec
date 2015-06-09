@@ -6,16 +6,16 @@ Contents
 ==========
 
 .. toctree::
-   :maxdepth: 3
-
-   symbolic
-   contraction
-   wedge
-   sample_advection
-   paper
-   bases
-   hodge-star
-   poisson
+    :maxdepth: 3
+    
+    symbolic
+    contraction
+    wedge
+    sample_advection
+    paper
+    bases
+    hodge-star
+    poisson
 
 Installation
 =============
