@@ -355,26 +355,14 @@ def to_refine(tx, ty):
     Tx = apply_operators(tx, axis=1)
     Ty = apply_operators(ty, axis=0)
     
-    T = {(0, True ): lambda f:(
-                               Ty[0, True ](Tx[0, True ](f)),
-                               ),
-         (1, True ): lambda f:(
-                               Ty[0, True ](Tx[1, True ](f[0])),
-                               Ty[1, True ](Tx[0, True ](f[1])),
-                               ),
-         (2, True ): lambda f:(
-                               Ty[1, True ](Tx[1, True ](f)),
-                               ),
-         (0, False): lambda f:(
-                               Ty[0, False](Tx[0, False](f)),
-                               ),
-         (1, False): lambda f:(
-                               Ty[0, False](Tx[1, False](f[0])),
-                               Ty[1, False](Tx[0, False](f[1])),
-                               ),
-         (2, False): lambda f:(
-                               Ty[1, False](Tx[1, False](f)),
-                               ),}
+    T = {(0, True ): lambda f:(Ty[0, True ](Tx[0, True ](f)),),
+         (1, True ): lambda f:(Ty[0, True ](Tx[1, True ](f[0])),
+                               Ty[1, True ](Tx[0, True ](f[1])),),
+         (2, True ): lambda f:(Ty[1, True ](Tx[1, True ](f)),),
+         (0, False): lambda f:(Ty[0, False](Tx[0, False](f)),),
+         (1, False): lambda f:(Ty[0, False](Tx[1, False](f[0])),
+                               Ty[1, False](Tx[0, False](f[1])),),
+         (2, False): lambda f:(Ty[1, False](Tx[1, False](f)),),}
     
     return T
 
