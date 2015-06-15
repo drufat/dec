@@ -165,7 +165,7 @@ def integration_2d(x, y):
         (x0,y0)----(x1,y1)
         '''
         omega, = sy.sympify(f)
-        s, t = sy.Symbol('s'), sy.Symbol('t')
+        s, t = sy.symbols('s, t')
         A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
         subst = ((x, x0*(1-s-t) + x1*s + x2*t),
                  (y, y0*(1-s-t) + y1*s + y2*t))
@@ -279,6 +279,57 @@ def integrate_boole2(x1, x5, f):
 
 def slow_integration(a, b, f):
     return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
+
+def n_integration_1d():
+    '''
+    >>> P0, P1  = n_integration_1d()
+    >>> P1(lambda x: x, 0, 1)
+    array(0.5)
+    >>> P1(lambda x: 1, 0, 1)
+    array(1.0)
+    >>> P1(lambda x: 1, [0, 1], [1, 4])
+    array([ 1.,  3.])
+    '''
+    
+    def P0(f, x0):
+        return f(x0)
+    
+    def P1(f, x0, x1):
+        return quad(f, x0, x1)[0]
+    
+    V = lambda P: np.vectorize(P, excluded=[0])
+    return P0, V(P1)
+
+def n_integration_2d():
+    '''
+    >>> P0, P1, P2  = n_integration_2d()
+    >>> P1(lambda x, y: (1, 0), 0, 0, 1, 0)
+    array(1.0)
+    >>> P2(lambda x, y: 1, 0, 0, 1, 0, 1, 1)
+    array(0.5)
+    '''
+    
+    def P0(f, x0, y0):
+        return f(x0, y0)
+    
+    def P1(f, x0, y0, x1, y1):
+        lx, ly = x1 - x0, y1 - y0
+        def integrand(s):
+            ux, uy = f(x0*(1-s) + x1*s, 
+                       y0*(1-s) + y1*s)
+            return ux*lx + uy*ly
+        return quad(integrand, 0, 1)[0]
+    
+    def P2(f, x0, y0, x1, y1, x2, y2):
+        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
+        def integrand(s, t):
+            omega = f(x0*(1-s-t) + x1*s + x2*t,
+                      y0*(1-s-t) + y1*s + y2*t)
+            return omega*A
+        return dblquad(integrand, 0, 1, lambda s: 0, lambda s: 1-s)[0]
+    
+    V = lambda P: np.vectorize(P, excluded=[0])
+    return P0, V(P1), V(P2)
 
 def integrate_1form(edge, f):
     '''
