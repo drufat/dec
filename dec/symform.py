@@ -118,11 +118,6 @@ def symform_factory(name):
     #############
     def P(self, g, isprimal):
         return to_discrete(self, g, isprimal)
-    
-    @property
-    def integrate(self):
-        d, ch, c = self.degree, self.grid, self.components
-        return ch.dec.P[d](c)
     #############
 
     for m in '''
@@ -134,7 +129,6 @@ def symform_factory(name):
             __xor__
             __getitem__
             P D H W C
-            integrate
             '''.split():
         setattr(F, m, locals()[m])
     for m in '''
@@ -161,28 +155,31 @@ def to_discrete(f, g, isprimal):
     
     d, ch, c = f.degree, f.grid, f.components
     assert g.dimension == ch.dimension
-    
+
     #Symbolic Integration
-    λ = sy.lambdify(ch.cell_coords(d), f.integrate, 'numpy')
-    
+    integrate = ch.dec.P[d](c)
+    λ = sy.lambdify(ch.cell_coords(d), integrate, 'numpy')
+
     cells = g.cells[d, isprimal]
     #TODO: It may be necessary to compute limits when x0==x1, y0==y1
-    if   d == 0 and ch.dimension == 1:
-        x0 = cells
-        a = λ(x0)
-    elif d == 1 and ch.dimension == 1:
-        x0, x1 = cells
-        a = λ(x0, x1)
-    elif d == 0 and ch.dimension == 2:
-        x0, y0 = cells
-        a = λ(x0, y0)
-    elif d == 1 and ch.dimension == 2:
-        (x0, y0), (x1, y1) = cells
-        a = λ(x0, y0, x1, y1)
-    elif d == 2 and ch.dimension == 2:
-        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
-        a = (λ(x0, y0, x1, y1, x2, y2) + 
-             λ(x0, y0, x2, y2, x3, y3))
+    if ch.dimension == 1:
+        if   d == 0:
+            x0 = cells
+            a = λ(x0)
+        elif d == 1:
+            x0, x1 = cells
+            a = λ(x0, x1)
+    elif ch.dimension == 2:
+        if   d == 0:
+            x0, y0 = cells
+            a = λ(x0, y0)
+        elif d == 1:
+            (x0, y0), (x1, y1) = cells
+            a = λ(x0, y0, x1, y1)
+        elif d == 2:
+            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
+            a = (λ(x0, y0, x1, y1, x2, y2) + 
+                 λ(x0, y0, x2, y2, x3, y3))
         
     return decform(d, isprimal, g, a)
 
