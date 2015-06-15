@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def decform_factory(name):
     
     F = type(name, (object,), {})
@@ -44,14 +45,7 @@ def decform_factory(name):
             return F(self.degree, self.isprimal, self.grid, arr)
         return __fname__    
 
-    @classmethod
-    def P(cls, deg, isprimal, grid, func):
-        '''
-        Projection
-        Python Function -> Discrete Form
-        '''
-        return cls(deg, isprimal, grid, grid.dec.P[deg, isprimal](func))
-    
+    #################
     @property
     def R(self):
         '''
@@ -62,7 +56,26 @@ def decform_factory(name):
         def func(*x):
             return sum(a[i]*g.dec.B[d, p](i)(*x) for i in range(g.N[d, p]))
         return func
-    
+
+    @property
+    def I(self):
+        '''
+        Interpolation
+        Discrete Form -> Python Function
+        '''
+        d, p, g, a = self.degree, self.isprimal, self.grid, self.array
+        return g.dec.I[d, p](a)
+
+    @property
+    def Rf(self):
+        '''
+        Refine
+        Discrete Form -> Component Form
+        '''
+        d, p, g, a = self.degree, self.isprimal, self.grid, self.array
+        return g.refine.T[d, p](a)
+    ####################
+        
     @property
     def D(self):
         '''
@@ -111,7 +124,7 @@ def decform_factory(name):
         __ne__
         __repr__
         __xor__
-        P R D H W C
+        R I Rf D H W C
         '''.split():
         setattr(F, m, locals()[m])
     for m in '''

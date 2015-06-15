@@ -29,15 +29,15 @@ def test_N():
              lambda x, y: (-y, x) )
 
 #TODO: Takes too much time. 
-# def test_basis_functions():
-#   
-#     def check_grid(g):
-#         for P, B in zip(g.projection(), g.basis_fn()):
-#             eq( vstack(P(b) for b in B), eye(len(B)) )
-#   
-#     for n in (2,3):
-#         check_grid(Grid_2D.periodic(n, n))
-#         #check_grid(Grid_2D.chebyshev(n, n+1))
+def test_basis_functions():
+   
+    def check_grid(g):
+        for P, B in zip(g.projection(), g.basis_fn()):
+            eq( vstack(P(b) for b in B), eye(len(B)) )
+   
+    for n in (2,3):
+        check_grid(Grid_2D.periodic(n, n))
+        #check_grid(Grid_2D.chebyshev(n, n+1))
 
 def test_d():
  

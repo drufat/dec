@@ -9,6 +9,7 @@ from operator import mul
 from functools import reduce
 import itertools
 import operator
+from scipy.interpolate.interpolate import interp2d
 
 Π = lambda *x: tuple(itertools.product(*x))
 
@@ -63,16 +64,6 @@ def cartesian_product(X, Y):
     X, Y = [x.flatten() for x in meshgrid(X, Y)]
     return X, Y
 
-def apply_operators(H, axis):
-    def get_apply(h):
-        return lambda x: apply_along_axis(h, axis, x)
-    if type(H) is tuple or type(H) is list:
-        return tuple(get_apply(h) for h in H)
-    elif type(H) is dict:
-        return {k:get_apply(H[k]) for k in H}
-    else:
-        raise TypeError
-        
 def cumul_index(shape):
     '''
     >>> cumul_index(((3,1), (4,5), (6,7)))
@@ -122,6 +113,16 @@ def reshape(x, shape):
     else:
         raise TypeError
 
+def apply_operators(H, axis):
+    def get_apply(h):
+        return lambda x: apply_along_axis(h, axis, x)
+    if type(H) is tuple or type(H) is list:
+        return tuple(get_apply(h) for h in H)
+    elif type(H) is dict:
+        return {k:get_apply(H[k]) for k in H}
+    else:
+        raise TypeError
+        
 class Grid_2D(object):
     
     def __init__(self, gx, gy, N, cells, shape, dec, refine):
@@ -135,7 +136,8 @@ class Grid_2D(object):
         
     @classmethod
     def product(cls, gx, gy):
-        return cartesian_product_grids(gx, gy)
+        g = cartesian_product_grids(gx, gy)
+        return flatten_grid(g)
     
     @classmethod
     def periodic(cls, N, M):
@@ -210,7 +212,7 @@ class Grid_2D(object):
         B1d = [B[1, False](i) for i in range(self.N[1, False])]
         B2d = [B[2, False](i) for i in range(self.N[2, False])]
         return B0, B1, B2, B0d, B1d, B2d
-
+    
     def reconstruction(self):
         R0, R1, R2, R0d, R1d, R2d = dec.spectral.reconstruction(self.basis_fn())
         return R0, R1, R2, R0d, R1d, R2d
@@ -218,7 +220,8 @@ class Grid_2D(object):
     def boundary_condition(self):
         BC0, BC1 = boundary_condition(self.cells[1, False], 
                                       self.cells[2, False], 
-                                      self.gx, self.gy)
+                                      self.gx.xmin, self.gx.xmax, 
+                                      self.gy.xmin, self.gy.xmax)
         BC0_ = lambda f: unshape(BC0(f))[0]
         BC1_ = lambda f: unshape(BC1(f))[0]
         return BC0_, BC1_
@@ -243,6 +246,44 @@ def projection(cells):
 
     return P
 
+# def interpolate(T, px, py):
+#     I = {(0, True )  : lambda f: interp2d(px, py, T[0, True](f)),
+#          (0, False ) : lambda f: interp2d(px, py, T[0, False](f)),}
+#     return I
+
+def boundary_condition(edges_dual, faces_dual, xmin, xmax, ymin, ymax):
+    '''
+    Two types of boundaries: Vertices (0) or Edges (1). 
+    '''
+
+    def BC0(f):
+        ((x0, y0), (x1,y1)) = edges_dual
+        bc = zeros(x0.shape)
+        ma = (x0==xmin)
+        bc[ma] -= f(x0[ma], y0[ma])
+        ma = (x1==xmax)
+        bc[ma] += f(x1[ma], y1[ma])
+        ma = (y0==ymin)
+        bc[ma] -= f(x0[ma], y0[ma])
+        ma = (y1==ymax)
+        bc[ma] += f(x1[ma], y1[ma])
+        return bc
+
+    def BC1(f):
+        ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = faces_dual
+        bc = zeros(x0.shape)
+        ma = (y0==ymin)
+        bc[ma] += integrate_1form( ((x0[ma], y0[ma]), (x1[ma], y1[ma])), f)[0]
+        ma = (x1==xmax)
+        bc[ma] += integrate_1form( ((x1[ma], y1[ma]), (x2[ma], y2[ma])), f)[0]
+        ma = (y2==ymax)
+        bc[ma] += integrate_1form( ((x2[ma], y2[ma]), (x3[ma], y3[ma])), f)[0]
+        ma = (x3==xmin)
+        bc[ma] += integrate_1form( ((x3[ma], y3[ma]), (x0[ma], y0[ma])), f)[0]
+        return bc
+
+    return BC0, BC1
+
 def basis_fn(Bx, By):
 
     B = {}
@@ -255,33 +296,16 @@ def basis_fn(Bx, By):
     update_B(False)
     return B
 
-def basis_fn_flat(Bx, By, shape):
+def derivative(dx, dy):
 
-    B = basis_fn(Bx, By)
-    def getB(b, s):
-        if type(b) is tuple:
-            # 1form
-            def Bi(i):
-                k, ij = unravel_idx(i, s)
-                return b[k](*ij)
-        else:
-            # 0form or 2form
-            def Bi(i):
-                ij = unravel_index(i, s)
-                return b(*ij)
-        return Bi
-    return { k : getB(B[k], shape[k]) for k in B}
-
-def derivative(gx, gy):
-
-    def deriv(g, axis):
-        d, dd = g.derivative()
+    def deriv(D, axis):
+        d, dd = D[0, True], D[0, False]
         D  = lambda arr: apply_along_axis(d, axis, arr)
         DD = lambda arr: apply_along_axis(dd, axis, arr)
         return D, DD
 
-    Dx, Ddx = deriv(gx, axis=1)
-    Dy, Ddy = deriv(gy, axis=0)
+    Dx, Ddx = deriv(dx, axis=1)
+    Dy, Ddy = deriv(dy, axis=0)
 
     D0  = lambda f: (Dx(f), Dy(f))
     D0d = lambda f: (Ddx(f), Ddy(f))
@@ -297,43 +321,13 @@ def derivative(gx, gy):
 
     return D
 
-def boundary_condition(edges_dual, faces_dual, gx, gy):
-    '''
-    Two types of boundaries: Vertices (0) or Edges (1). 
-    '''
+def hodge_star(hx, hy):
 
-    def BC0(f):
-        ((x0, y0), (x1,y1)) = edges_dual
-        bc = zeros(x0.shape)
-        ma = (x0==gx.xmin)
-        bc[ma] -= f(x0[ma], y0[ma])
-        ma = (x1==gx.xmax)
-        bc[ma] += f(x1[ma], y1[ma])
-        ma = (y0==gy.xmin)
-        bc[ma] -= f(x0[ma], y0[ma])
-        ma = (y1==gy.xmax)
-        bc[ma] += f(x1[ma], y1[ma])
-        return bc
+    def expand(h):
+        return (h[0, True], h[1, True], h[0, False], h[1, False])
 
-    def BC1(f):
-        ((x0, y0), (x1,y1), (x2, y2), (x3, y3)) = faces_dual
-        bc = zeros(x0.shape)
-        ma = (y0==gy.xmin)
-        bc[ma] += integrate_1form( ((x0[ma], y0[ma]), (x1[ma], y1[ma])), f)[0]
-        ma = (x1==gx.xmax)
-        bc[ma] += integrate_1form( ((x1[ma], y1[ma]), (x2[ma], y2[ma])), f)[0]
-        ma = (y2==gy.xmax)
-        bc[ma] += integrate_1form( ((x2[ma], y2[ma]), (x3[ma], y3[ma])), f)[0]
-        ma = (x3==gx.xmin)
-        bc[ma] += integrate_1form( ((x3[ma], y3[ma]), (x0[ma], y0[ma])), f)[0]
-        return bc
-
-    return BC0, BC1
-
-def hodge_star(gx, gy):
-
-    H0x, H1x, H0dx, H1dx = apply_operators(gx.hodge_star(), axis=1)
-    H0y, H1y, H0dy, H1dy = apply_operators(gy.hodge_star(), axis=0)
+    H0x, H1x, H0dx, H1dx = apply_operators(expand(hx), axis=1)
+    H0y, H1y, H0dy, H1dy = apply_operators(expand(hy), axis=0)
 
     H0 = lambda f: H0x(H0y(f))
     H2 = lambda f: H1x(H1y(f))
@@ -356,9 +350,10 @@ def hodge_star(gx, gy):
          (2, False): H2d}
     return H
 
-def to_refine(gx, gy):
-    Tx = apply_operators(gx.refine.T, axis=1)
-    Ty = apply_operators(gy.refine.T, axis=0)
+def to_refine(tx, ty):
+    
+    Tx = apply_operators(tx, axis=1)
+    Ty = apply_operators(ty, axis=0)
     
     T = {(0, True ): lambda f: Ty[0, True ](Tx[0, True ](f)),
          (1, True ): lambda f:(Ty[0, True ](Tx[1, True ](f[0])),
@@ -371,9 +366,10 @@ def to_refine(gx, gy):
     
     return T
 
-def from_refine(gx, gy):
-    Ux = apply_operators(gx.refine.U, axis=1)
-    Uy = apply_operators(gy.refine.U, axis=0)
+def from_refine(ux, uy):
+    
+    Ux = apply_operators(ux, axis=1)
+    Uy = apply_operators(uy, axis=0)
     
     U = {(0, True ): lambda f: Uy[0, True ](Ux[0, True ](f)),
          (1, True ): lambda f:(Uy[0, True ](Ux[1, True ](f[0])),
@@ -454,6 +450,69 @@ def flatten_cells(cells):
     
     return cells_new, shape
 
+def countshape(shape):
+    '''
+    >>> shape = {(0, False): (4, 4),
+    ...          (0, True): (5, 5),
+    ...          (1, False): ((4, 5), (5, 4)),
+    ...          (1, True): ((5, 4), (4, 5)),
+    ...          (2, False): (5, 5),
+    ...          (2, True): (4, 4)}
+    >>> assert countshape(shape) == {
+    ...         (0, False): 16,
+    ...         (0, True): 25,
+    ...         (1, False): 40,
+    ...         (1, True): 40,
+    ...         (2, False): 25,
+    ...         (2, True): 16}
+    '''
+    N = {}
+    for deg, isprimal in shape:
+        if deg == 1:
+            (hx, hy), (vx, vy) = shape[deg, isprimal]
+            N[deg, isprimal] = hx*hy + vx*vy            
+        else:
+            nx, ny = shape[deg, isprimal]
+            N[deg, isprimal] = nx*ny
+    return N
+
+def cartesian_product_grids(gx, gy):
+
+    assert gx.dimension is 1
+    assert gy.dimension is 1
+    
+    cells = product_cells(gx.cells, gy.cells)    
+    P = projection(cells)
+
+    B = basis_fn(gx.dec.B, gy.dec.B)
+    D = derivative(gx.dec.D, gy.dec.D)
+    H = hodge_star(gx.dec.H, gy.dec.H)
+    dec = bunch(P=P, B=B, D=D, H=H,)
+    
+    T = to_refine(  gx.refine.T, gy.refine.T)
+    U = from_refine(gx.refine.U, gy.refine.U)
+            
+    refine = bunch(T=T, U=U)
+    
+    return Grid_2D(gx, gy, None, cells, None, dec, refine)
+
+
+def reshapeB(shape, B):
+
+    def getB(b, s):
+        if type(b) is tuple:
+            # 1form
+            def Bi(i):
+                k, ij = unravel_idx(i, s)
+                return b[k](*ij)
+        else:
+            # 0form or 2form
+            def Bi(i):
+                ij = unravel_index(i, s)
+                return b(*ij)
+        return Bi
+    return { k : getB(B[k], shape[k]) for k in B}
+
 def reshapeP(shape, P):
     def get_new_p(p, k):
         def new_p(f):
@@ -499,43 +558,26 @@ def reshapeO(shape, O, Otype):
             newO[k] = O[k]
     return newO
 
-def cartesian_product_grids(gx, gy):
-
-    assert gx.dimension is 1
-    assert gy.dimension is 1
+def flatten_grid(g):
     
-    cells = product_cells(gx.cells, gy.cells)
-    cells, shape = flatten_cells(cells)
-    
-    N = {}
-    for deg, isprimal in shape:
-        if deg == 1:
-            (hx, hy), (vx, vy) = shape[deg, isprimal]
-            N[deg, isprimal] = hx*hy + vx*vy            
-        else:
-            nx, ny = shape[deg, isprimal]
-            N[deg, isprimal] = nx*ny
-            
-    D_ = derivative(gx, gy)
-    H_ = hodge_star(gx, gy)
+    cells, shape = flatten_cells(g.cells)
+    N = countshape(shape)
 
-    refine = bunch(T=reshapeT(shape, to_refine(gx, gy)),
-                   U=reshapeU(shape, from_refine(gx, gy)))
+    refine = bunch(T=reshapeT(shape, g.refine.T),
+                   U=reshapeU(shape, g.refine.U))
 
     dec = bunch(P=projection(cells),
-                B=basis_fn_flat(gx.dec.B, gy.dec.B, shape),
-                D=reshapeO(shape, D_, (lambda d, p: (d+1, p))),
-                H=reshapeO(shape, H_, (lambda d, p: (2-d, not p))),
-                W=wedge(refine),
-                C=contraction(refine),)
+                B=reshapeB(shape, g.dec.B),
+                D=reshapeO(shape, g.dec.D, (lambda d, p: (d+1, p))),
+                H=reshapeO(shape, g.dec.H, (lambda d, p: (2-d, not p))),
+                W=wedge(refine.T, refine.U),
+                C=contraction(refine.T, refine.U),)
     
-    return Grid_2D(gx, gy, N, cells, shape, dec, refine)
+    return Grid_2D(g.gx, g.gy, N, cells, shape, dec, refine)
 
 import dec.symbolic
 
-def wedge(refine):
-
-    T, U = refine.T, refine.U
+def wedge(T, U):
     
     Ws = dec.symbolic.wedge_2d()
     W = {}    
@@ -563,10 +605,8 @@ def wedge(refine):
 
     return W
 
-def contraction(refine):
+def contraction(T, U):
 
-    T, U = refine.T, refine.U        
-    
     Cs = dec.symbolic.contraction_2d()
     C = {}
     
@@ -587,23 +627,6 @@ def contraction(refine):
         C[p0, (d1, p1), p2] = get_c(p0, d1, p1, p2)    
 
     return C
-
-def laplacian2(g):
-    '''
-    2D Laplacian Operator
-    '''
-    D0, D1, D0d, D1d = g.derivative()
-    H0, H1, H2, H0d, H1d, H2d = g.hodge_star()
-    
-    L0 = lambda f: H2d(D1d(H1(D0(f))))
-    L0d = lambda f: H2(D1(H1d(D0d(f))))
-    L1 = lambda f: (H1d(D0d(H2(D1(f)))) + 
-                    D0(H2d(D1d(H1(f)))))
-    L1d = lambda f: (H1(D0(H2d(D1d(f)))) +
-                     D0d(H2(D1(H1d(f)))))
-    
-    return L0, L1, L0d, L1d
-
 
 def _draw(plt, pnts, xytext=(10,10), color='k', fc='blue'):
     def average(pnts):

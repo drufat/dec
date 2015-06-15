@@ -5,7 +5,9 @@ import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
                    sympify, Dummy, Symbol, Integral,
                    sin, cos, sqrt)
-from dec.helper import bunch, nCr
+from dec.helper import bunch
+from dec.symform import form
+from dec.data import memoize
 
 # Coordinates
 x, y, z = symbols('x y z')
@@ -39,45 +41,14 @@ p  = [
     0
 ]
 
-def memoize(name):
-
-    from dec.data import Data
-    data = Data()
-    changed = [False,]
-    try:
-        dct = data[name]
-    except FileNotFoundError:
-        dct = dict()
-        changed[0] = True
-            
-    def memoize_name(process):            
-        def f(expr):
-            rexpr = repr(expr)
-            if rexpr in dct:
-                rslt = sympify(dct[rexpr])
-            else:
-                rslt = process(expr)
-                dct[rexpr] = repr(rslt)
-                changed[0] = True
-            return rslt
-        return f
-
-    def commit():
-        if changed[0]:
-            data[name] = dct
-    import atexit
-    atexit.register(commit)
-
-    return memoize_name
-        
-@memoize('memoize/sympy.json')
+@memoize('memoize/sympy.json', lambda expr: repr(expr), lambda expr: sympify(expr))
 def process(expr):
     rslt = simplify(expr.doit())
     if rslt.has(Integral):
         raise ValueError('Unable to evaluate {}.'.format(rslt))    
     return rslt
 
-class Chart:
+class Chart(object):
     '''
     >>> c = Chart(x)
     >>> assert c.dimension == 1
@@ -176,20 +147,6 @@ def simplex_measure(σ):
         if k == 4:
             ((x0,y0,z0), (x1,y1,z1), (x2,y2,z2), (x3,y3,z3)) = σ
             raise NotImplementedError
-
-def regular_cells():
-    '''
-        (x3, y3)--------(x2, y2)
-           |                |
-           |                |
-        (x0, y0)--------(x1, y1)
-
-        (x0, y1)--------(x1, y1)
-           |                |
-           |                |
-        (x0, y0)--------(x1, y0)
-    '''
-    pass
 
 def averages_1d(x):
     '''
@@ -323,6 +280,17 @@ def projections_2d(x, y):
 
 def projections_2d_regular(x, y):
     '''
+    
+    (x3, y3)--------(x2, y2)
+       |                |
+       |                |
+    (x0, y0)--------(x1, y1)
+
+    (x0, y1)--------(x1, y1)
+       |                |
+       |                |
+    (x0, y0)--------(x1, y0)
+
     >>> P0, P1, P2 = projections_2d_regular(x, y)
     >>> assert P0((1,)) == 1
     >>> assert P0((x*y,)) == x0*y0
@@ -511,156 +479,6 @@ def contraction_2d():
                         X[0]*f[0],)
     return C0, C1, C2
 
-def symform_factory(name):
-    '''
-    >>> form = symform_factory('form')
-
-    >>> f, g, u, v = symbols('f g u v')
-
-    >>> c = Chart(x, y)
-    >>> α = form(1, c, (f, g))
-    >>> φ = form(1, c, (u, v))
-    
-    >>> -φ
-    form(1, Chart(x, y), (-u, -v))
-    >>> φ + φ
-    form(1, Chart(x, y), (2*u, 2*v))
-    >>> φ + α
-    form(1, Chart(x, y), (f + u, g + v))
-    >>> φ - α
-    form(1, Chart(x, y), (-f + u, -g + v))
-    
-    We can use ^ as the wedge product operator.    
-
-    >>> assert φ ^ φ == form(2, c, (0,))
-    >>> assert α ^ φ == - φ ^ α
-    '''
-    
-    F = type(name, (object,), {})
-    
-    def __init__(self, degree, grid, components):
-        # make sure the form has the correct number of components
-        assert degree <= grid.dimension
-        assert len(components) == nCr(grid.dimension, degree)
-        self.components = tuple(sympify(_) for _ in components)
-        self.grid = grid
-        self.degree = degree
-
-    def __repr__(self):
-        t = (self.degree, self.grid, self.components)
-        return name + t.__repr__()
-
-    def __eq__(self, other):
-        return (self.degree == other.degree and 
-                self.grid == other.grid and
-                self.components == other.components)
-    
-    def __ne__(self, other):
-        return not self.__eq__(other)
-    
-    def __rmul__(self, other):
-        if callable(other):
-            return other(self)
-        else:
-            return type(self)(self.degree, (c.__rmul__(other) for c in self.components))
-
-    def __xor__(self, other):
-        return self.W(other)
-    
-    def __getitem__(self, k):
-        return self.components[k]
-        
-    def binary(name):
-        def __fname__(self, other):
-            if type(other) is type(self):
-                assert self.degree == other.degree
-                assert self.grid == other.grid
-                comps = tuple(getattr(s, name)(o) for s, o in zip(self.components, other.components))
-            else:    
-                comps = tuple(getattr(s, name)(other) for s in self)
-            return F(self.degree, self.grid, comps)
-        return __fname__
-
-    def unary(name):
-        def __fname__(self):
-            comps = tuple(getattr(s, name)() for s in self.components)
-            return F(self.degree, self.grid, comps)
-        return __fname__
-    
-    def P(self, g, isprimal):
-        return todiscrete(self, g, isprimal)
-    
-    @property
-    def integrate(self):
-        d, ch, c = self.degree, self.grid, self.components
-        return ch.dec.P[d](c)
-
-    @property
-    def D(self):
-        d, ch, c = self.degree, self.grid, self.components
-        c = ch.dec.D[d](c)
-        if c is 0: return 0
-        return F(d+1, ch, c)
-    
-    @property
-    def H(self):
-        d, ch, c = self.degree, self.grid, self.components
-        c = ch.dec.H[d](c)
-        if c is 0: return 0
-        dim = ch.dimension
-        return F(dim-d, ch, c)
-
-    def W(self, other):
-        d1, ch1, c1 = self.degree, self.grid, self.components
-        d2, ch2, c2 = other.degree, other.grid, other.components
-        assert ch1 == ch2
-        return F(d1+d2, ch1, ch1.dec.W[d1, d2](c1, c2))
-
-    def C(self, other):
-        d1, ch1, c1 = self.degree, self.grid, self.components
-        assert d1 == 1
-        d2, ch2, c2 = other.degree, other.grid, other.components
-        assert ch1 == ch2
-        c = self.grid.dec.C[d2](c1, c2)
-        if c == 0: return 0
-        return F(d2-1, ch1, c)
-        
-    @property
-    def lambdify_(self):
-        if len(self.components) == 1:
-            return lambdify(self.grid.coords, self.components[0], 'numpy')
-        else:
-            return lambdify(self.grid.coords, self.components, 'numpy')
-
-    for m in '''
-            __init__
-            __eq__
-            __ne__
-            __repr__
-            __rmul__
-            __xor__
-            __getitem__
-            P D H W C
-            integrate
-            '''.split():
-        setattr(F, m, locals()[m])
-    for m in '''
-            __add__
-            __radd__
-            __sub__
-            __rsub__
-            __div__
-            __truediv__
-            '''.split():
-        setattr(F, m, binary(m))
-    for m in '''
-            __neg__
-            '''.split():
-        setattr(F, m, unary(m))
-    setattr(F, 'lambdify', lambdify_)
-
-    return F
-
 def simplified_forms(F, chart):
     '''
     Helper functions to make constructing forms easier.
@@ -691,41 +509,11 @@ def simplified_forms(F, chart):
             return (lambda *f: form(deg, chart, f))
     return tuple(getF(deg) for deg in range(chart.dimension+1))
     
-form = symform_factory('form')
 F0, F1, F2 = simplified_forms(form, Chart(x,y))
 
 ################################
 # Projections
 ################################
-
-def todiscrete(f, g, isprimal):
-    from dec.decform import decform
-    
-    d, ch, c = f.degree, f.grid, f.components
-    assert g.dimension == ch.dimension
-    cells = g.cells[d, isprimal]
-    
-    #Symbolic Integration
-    λ = lambdify(ch.cell_coords(d), f.integrate, 'numpy')
-    #TODO: It may be necessary to compute limits when x0==x1, y0==y1
-    if   d == 0 and ch.dimension == 1:
-        x0 = cells
-        a = λ(x0)
-    elif d == 1 and ch.dimension == 1:
-        x0, x1 = cells
-        a = λ(x0, x1)
-    elif d == 0 and ch.dimension == 2:
-        x0, y0 = cells
-        a = λ(x0, y0)
-    elif d == 1 and ch.dimension == 2:
-        (x0, y0), (x1, y1) = cells
-        a = λ(x0, y0, x1, y1)
-    elif d == 2 and ch.dimension == 2:
-        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
-        a = (λ(x0, y0, x1, y1, x2, y2) + 
-             λ(x0, y0, x2, y2, x3, y3))
-        
-    return decform(d, isprimal, g, a)
 
 # def P(f):
 #     '''
@@ -981,8 +769,7 @@ def plot(plt, V, p):
     axes[3].contourf(X, Y, P)
     axes[3].set_title(r'$p(x,y)$')
 
-if __name__ == '__main__':
-    process(Integral(x, x))
+#if __name__ == '__main__':
 #     import matplotlib.pyplot as plt
 #     for V_, p_ in zip(V, p):
 #         plot(plt, V_, p_)

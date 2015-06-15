@@ -72,3 +72,32 @@ class Data(object):
 
     def __delitem__(self, name):
         delitem(name)
+
+def memoize(name, fin, fout):
+    data = Data()
+    changed = [False,]
+    try:
+        dct = data[name]
+    except FileNotFoundError:
+        dct = dict()
+        changed[0] = True
+            
+    def memoize_name(process):            
+        def f(expr):
+            if fin(expr) in dct:
+                rslt = fout(dct[fin(expr)])
+            else:
+                rslt = process(expr)
+                dct[fin(expr)] = fin(rslt)
+                changed[0] = True
+            return rslt
+        return f
+
+    def commit():
+        if changed[0]:
+            data[name] = dct
+    import atexit
+    atexit.register(commit)
+
+    return memoize_name
+        

@@ -76,11 +76,24 @@ def test_P():
 def test_D():
     
     g = Grid_2D.periodic(3, 3)
+    
     f = form(0, c, (cos(x)+cos(y),))
     assert f.D.P(g, True) == f.P(g, True).D
     assert f.D.P(g, False) == f.P(g, False).D
 
-#TODO: fix boundary conditoins
+    f = form(1, c, (cos(x),cos(y),))
+    assert f.D.P(g, True) == f.P(g, True).D
+    assert f.D.P(g, False) == f.P(g, False).D
+
+#TODO: fix boundary conditions
+    g = Grid_2D.chebyshev(3, 3)
+    f = form(0, c, (x+y,))
+    assert f.D.P(g, True) == f.P(g, True).D
+    #assert f.D.P(g, False) == f.P(g, False).D
+
+    f = form(1, c, (-y,x))
+    assert f.D.P(g, True) == f.P(g, True).D
+    #assert f.D.P(g, False) == f.P(g, False).D
     
 def test_H():
     
