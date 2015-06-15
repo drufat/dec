@@ -235,6 +235,8 @@ class Grid_2D(object):
     def P(self, deg, isprimal, func):
         return decform(deg, isprimal, self, self.dec.P[deg, isprimal](func))
 
+from dec.integrate import integrate_1form, integrate_2form
+
 def projection(cells):
     
     P = {(0, True ) : lambda f: f(*cells[0, True ]),
@@ -498,7 +500,6 @@ def cartesian_product_grids(gx, gy):
 
 
 def reshapeB(shape, B):
-
     def getB(b, s):
         if type(b) is tuple:
             # 1form
@@ -513,50 +514,35 @@ def reshapeB(shape, B):
         return Bi
     return { k : getB(B[k], shape[k]) for k in B}
 
-def reshapeP(shape, P):
-    def get_new_p(p, k):
-        def new_p(f):
-            f = p(f)
-            f, _ = unshape(f)
-            return f
-        return new_p
-    newP = {k : get_new_p(P[k], k) for k in P}
-    return newP
-
 def reshapeT(shape, T):
-    def get_new(p, k):
+    def get_new(F, k):
         def new_f(f):
             f = reshape(f, shape[k])
-            f = p(f)
+            f = F(f)
+            #
             return f
         return new_f
     return {k:get_new(T[k], k) for k in T}
 
 def reshapeU(shape, U):
-    def get_new(p, k):
+    def get_new(F, k):
         def new_f(f):
-            f = p(f)
+            #
+            f = F(f)
             f, _ = unshape(f)
             return f
         return new_f
     return {k:get_new(U[k], k) for k in U}
 
-def reshapeO(shape, O, Otype):
-    def get_new_op(op, typ):
-        deg, isprimal = typ
-        def new_op(f):
-            f = reshape(f, shape[deg  , isprimal])
-            f = op(f)
+def reshapeO(shape, O):
+    def get_new(F, k):
+        def new_f(f):
+            f = reshape(f, shape[k])
+            f = F(f)
             f, _ = unshape(f)
             return f
-        return new_op
-    newO = {}
-    for k in O:
-        if Otype(*k) in shape:
-            newO[k] = get_new_op(O[k], k)
-        else: 
-            newO[k] = O[k]
-    return newO
+        return new_f
+    return {k:get_new(O[k], k) for k in O}
 
 def flatten_grid(g):
     
@@ -568,8 +554,8 @@ def flatten_grid(g):
 
     dec = bunch(P=projection(cells),
                 B=reshapeB(shape, g.dec.B),
-                D=reshapeO(shape, g.dec.D, (lambda d, p: (d+1, p))),
-                H=reshapeO(shape, g.dec.H, (lambda d, p: (2-d, not p))),
+                D=reshapeO(shape, g.dec.D),
+                H=reshapeO(shape, g.dec.H),
                 W=wedge(refine.T, refine.U),
                 C=contraction(refine.T, refine.U),)
     

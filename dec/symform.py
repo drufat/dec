@@ -161,10 +161,11 @@ def to_discrete(f, g, isprimal):
     
     d, ch, c = f.degree, f.grid, f.components
     assert g.dimension == ch.dimension
-    cells = g.cells[d, isprimal]
     
     #Symbolic Integration
     λ = sy.lambdify(ch.cell_coords(d), f.integrate, 'numpy')
+    
+    cells = g.cells[d, isprimal]
     #TODO: It may be necessary to compute limits when x0==x1, y0==y1
     if   d == 0 and ch.dimension == 1:
         x0 = cells

@@ -1,5 +1,6 @@
 from dec.spectral import *
 from dec.grid1 import *
+import dec.integrate as deci
 from numpy.testing import assert_array_almost_equal as eq
 random.seed(seed=1)
 
@@ -11,8 +12,8 @@ def test_integrals():
         pnts = concatenate([g.verts, [g.xmax]])
         for f in (sin,
                   cos):
-            reference = slow_integration(g.edges[0], g.edges[1], f)
-            eq( integrate_boole1(pnts, f), reference )
+            reference = deci.slow_integration(g.edges[0], g.edges[1], f)
+            eq( deci.integrate_boole1(pnts, f), reference )
             eq( integrate_spectral_coarse(pnts, f), reference )
             eq( integrate_spectral(pnts, f), reference )
 
@@ -20,17 +21,17 @@ def test_integrals():
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
-            reference = slow_integration(g.edges[0], g.edges[1], f)
-            eq( integrate_boole1(g.verts, f), reference )
+            reference = deci.slow_integration(g.edges[0], g.edges[1], f)
+            eq( deci.integrate_boole1(g.verts, f), reference )
             eq( integrate_chebyshev(g.verts, f), reference )
 
         g = Grid_1D.chebyshev(N, -1, +1)
         for f in ((lambda x: x),
                   (lambda x: x**3),
                   (lambda x: exp(x))):
-            reference = slow_integration(g.edges_dual[0], g.edges_dual[1], f)
+            reference = deci.slow_integration(g.edges_dual[0], g.edges_dual[1], f)
             x = concatenate(([-1], g.verts_dual, [+1]))
-            eq( integrate_boole1(x, f), reference )
+            eq( deci.integrate_boole1(x, f), reference )
             eq( integrate_chebyshev_dual(x, f), reference )
 
 def test_basis_functions():

@@ -3,11 +3,10 @@
 '''
 import numpy as np
 from sympy import (symbols, Function, diff, lambdify, simplify,
-                   sympify, Dummy, Symbol, Integral,
                    sin, cos, sqrt)
 from dec.helper import bunch
 from dec.symform import form
-from dec.data import memoize
+from dec.integrate import enumerate_coords, integration_1d, integration_2d
 
 # Coordinates
 x, y, z = symbols('x y z')
@@ -41,13 +40,6 @@ p  = [
     0
 ]
 
-@memoize('memoize/sympy.json', lambda expr: repr(expr), lambda expr: sympify(expr))
-def process(expr):
-    rslt = simplify(expr.doit())
-    if rslt.has(Integral):
-        raise ValueError('Unable to evaluate {}.'.format(rslt))    
-    return rslt
-
 class Chart(object):
     '''
     >>> c = Chart(x)
@@ -62,7 +54,7 @@ class Chart(object):
         if len(coords) == 1:
             x, = coords
             dec = bunch(D=derivative_1d(x),
-                        P=projections_1d(x),
+                        P=integration_1d(x),
                         H=hodge_star_1d(),
                         W=wedge_1d(),
                         C=contraction_1d(),
@@ -70,7 +62,7 @@ class Chart(object):
         elif len(coords) == 2:
             x, y = coords
             dec = bunch(D=derivative_2d(x, y),
-                        P=projections_2d(x, y),
+                        P=integration_2d(x, y),
                         H=hodge_star_2d(),
                         W=wedge_2d(),
                         C=contraction_2d(),
@@ -99,19 +91,6 @@ def Chart_2d(x=x, y=y):
     Chart(x, y)
     '''
     return Chart(x, y)
-
-def enumerate_coords(coord, deg):
-    '''
-    >>> enumerate_coords((x,), 0)
-    (x0,)
-    >>> enumerate_coords((x,), 1)
-    (x0, x1)
-    >>> enumerate_coords((x,), 2)
-    (x0, x1, x2)
-    >>> enumerate_coords((x, y), 2)
-    (x0, y0, x1, y1, x2, y2)
-    '''
-    return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
 def simplex_measure(σ):
 
@@ -147,185 +126,6 @@ def simplex_measure(σ):
         if k == 4:
             ((x0,y0,z0), (x1,y1,z1), (x2,y2,z2), (x3,y3,z3)) = σ
             raise NotImplementedError
-
-def averages_1d(x):
-    '''
-    >>> A0, A1 = averages_1d(x)
-    >>> assert A0(1)     == 1
-    >>> assert A0(x)     == x0
-    >>> assert A1(1)     == 1
-    >>> assert A1(x)     == (x1 + x0)/2
-    >>> assert A1(x**2)  == (x0**2 + x0*x1 + x1**2)/3
-    >>> assert A1(x**3)  == (x0**3 + x0**2*x1 + x0*x1**2 + x1**3)/4
-    '''
-    x0, x1 = enumerate_coords((x,), 1)
-    s, t = Symbol('s'), Symbol('t')
-    assert t != x != s
-
-    def A0(f):
-        f = sympify(f)
-        return f.subs(x, x0)
-
-    def A1(f):
-        f = sympify(f)
-        integrand = f.subs(x, x0*(1-s) + x1*s)
-        iexpr = Integral(integrand, (s, 0, 1))
-        return process(iexpr)
-
-    return A0, A1
-
-def averages_2d(x, y):
-    '''
-    >>> A0, A1, A2 = averages_2d(x, y)
-    >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    >>> assert A0(1) == 1
-    >>> assert A0(x) == x0
-    >>> assert A1(1) == 1
-    >>> assert A1(x) == (x0 + x1)/2
-    >>> assert A1(y) == (y0 + y1)/2
-    >>> assert A2(1) == 1
-    >>> assert A2(x) == (x0 + x1 + x2)/3
-    >>> assert A2(y) == (y0 + y1 + y2)/3
-    '''
-    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    s, t = Symbol('s'), Symbol('t')
-    assert t != x != s
-    assert t != y != s
-
-    def A0(f):
-        f = sympify(f)
-        return f.subs({x:x0, y:y0})
-     
-    def A1(f):
-        f = sympify(f)
-        subst = ((x, x0*(1-s) + x1*s),
-                 (y, y0*(1-s) + y1*s))
-        integrand = f.subs(subst)
-        iexpr = Integral(integrand, (s, 0, 1))
-        return process(iexpr)
-     
-    def A2(f):
-        f = sympify(f)
-        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
-                 (y, y0*(1-s-t) + y1*s + y2*t))
-        integrand = 2*f.subs(subst)
-        iexpr = Integral(integrand, (t, 0, 1-s), (s, 0, 1))
-        return process(iexpr)
-    
-    return A0, A1, A2
-
-def projections_1d(x):
-    '''
-    >>> P0, P1 = projections_1d(x)
-    >>> x0, x1 = enumerate_coords((x,), 1)
-    >>> assert P0((x,)) == x0
-    >>> assert P1((x,)) == x1**2/2 - x0**2/2
-    >>> assert P1((1,)) == x1 - x0
-    '''
-    x0, x1 = enumerate_coords((x,), 1)
-
-    def P0(f):
-        f, = sympify(f)
-        return f.subs(x, x0)
-
-    def P1(f):
-        f, = sympify(f)
-        iexpr = Integral(f, (x, x0, x1))
-        return process(iexpr)
-    
-    return P0, P1
-
-def projections_2d(x, y):
-    '''
-    >>> P0, P1, P2 = projections_2d(x, y)
-    >>> assert P0((x*y,)) == x0*y0
-    >>> assert P1((x, 0)) == -x0**2/2 + x1**2/2
-    >>> assert P1((1, 0)) == -x0 + x1
-    >>> assert P1((1, 1)) == -x0 + x1 - y0 + y1
-    >>> assert P2((0,)) == 0
-    
-    The expression below corresponds to the area of a triangle
-    >>> from sympy import expand
-    >>> assert P2((1,)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
-    '''
-    
-    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-
-    def P0(f):
-        f, = sympify(f)
-        return f.subs({x:x0, y:y0})
-     
-    def P1(f):
-        ux, uy = sympify(f)
-        s = Symbol('s')
-        lx, ly = x1 - x0, y1 - y0
-        subst = ((x, x0*(1-s) + x1*s),
-                 (y, y0*(1-s) + y1*s))
-        integrand = (ux.subs(subst)*lx +
-                     uy.subs(subst)*ly)
-        iexpr = Integral(integrand, (s, 0, 1))
-        return process(iexpr)
-     
-    def P2(f):
-        omega, = sympify(f)
-        s, t = Symbol('s'), Symbol('t')
-        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
-        subst = ((x, x0*(1-s-t) + x1*s + x2*t),
-                 (y, y0*(1-s-t) + y1*s + y2*t))
-        integrand = (omega.subs(subst)*A)
-        iexpr = Integral(integrand, (t, 0, 1-s), (s, 0, 1))
-        return process(iexpr)
-    
-    return P0, P1, P2
-
-def projections_2d_regular(x, y):
-    '''
-    
-    (x3, y3)--------(x2, y2)
-       |                |
-       |                |
-    (x0, y0)--------(x1, y1)
-
-    (x0, y1)--------(x1, y1)
-       |                |
-       |                |
-    (x0, y0)--------(x1, y0)
-
-    >>> P0, P1, P2 = projections_2d_regular(x, y)
-    >>> assert P0((1,)) == 1
-    >>> assert P0((x*y,)) == x0*y0
-    >>> assert P1((1, 0)) == ((x1-x0), 0)
-    >>> assert P1((0, 1)) == (0, (y1-y0))
-    >>> assert P1((y, x)) == (y*(x1-x0), x*(y1-y0))
-    >>> assert P2((0,)) == 0
-    >>> assert P2((1,)) == (x0-x1)*(y0-y1)
-    '''
-    
-    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-
-    def P0(f):
-        f, = sympify(f)
-        return f.subs({x:x0, y:y0})
-
-    def I(x, a, b):
-        def I_(f):
-            iexpr = Integral(f, (x, a, b))
-            return process(iexpr)
-        return I_
-    
-    Ix = I(x, x0, x1) 
-    Iy = I(y, y0, y1) 
-    
-    def P1(f):
-        fx, fy = f
-        return (Ix(fx), 
-                Iy(fy))
-     
-    def P2(f):
-        f, = sympify(f)
-        return Ix(Iy(f))
-    
-    return P0, P1, P2
 
 def derivative_1d(x):    
     '''
@@ -590,7 +390,7 @@ def Dot(a, b):
     '''
     Inner Product
     
-    The inner product berween forms can be expressed as 
+    The inner product between forms can be expressed as 
 
     .. math:: \langle \alpha, \beta \rangle = \star ( \alpha \wedge \star \beta )
     

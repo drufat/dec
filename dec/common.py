@@ -1,6 +1,7 @@
 import dec.symbolic 
 import itertools
-from dec.helper import bunch, slow_integration
+from dec.helper import bunch
+from dec.integrate import slow_integration
 
 Π = lambda *x: tuple(itertools.product(*x))
 
