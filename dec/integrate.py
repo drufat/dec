@@ -153,6 +153,17 @@ def integration_2d(x, y):
         return process(iexpr)
      
     def P2(f):
+        '''
+        (x2,y2)
+           |\
+           | \
+           |  \ 
+           |   \
+           |    \
+           |     \
+           |      \
+        (x0,y0)----(x1,y1)
+        '''
         omega, = sy.sympify(f)
         s, t = sy.Symbol('s'), sy.Symbol('t')
         A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
@@ -166,17 +177,6 @@ def integration_2d(x, y):
 
 def integration_2d_regular(x, y):
     '''
-    
-    (x3, y3)--------(x2, y2)
-       |                |
-       |                |
-    (x0, y0)--------(x1, y1)
-
-    (x0, y1)--------(x1, y1)
-       |                |
-       |                |
-    (x0, y0)--------(x1, y0)
-
     >>> x, y = sy.symbols('x, y')
     >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
     >>> P0, P1, P2 = integration_2d_regular(x, y)
@@ -210,6 +210,12 @@ def integration_2d_regular(x, y):
                 Iy(fy))
      
     def P2(f):
+        '''
+        (x0,y1)--------(x1,y1)
+           |              |
+           |              |
+        (x0,y0)--------(x1,y0)
+        '''
         f, = sy.sympify(f)
         return Ix(Iy(f))
     
@@ -271,6 +277,9 @@ def integrate_boole2(x1, x5, f):
         (7*f(*x1) + 32*f(*x2) + 12*f(*x3) + 32*f(*x4) + 7*f(*x5))
     return I
 
+def slow_integration(a, b, f):
+    return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
+
 def integrate_1form(edge, f):
     '''
     Integrate a continuous one-form **f** along an **edge** 
@@ -328,7 +337,4 @@ def integrate_2form(face, f):
         error += e
 
     return integral, error
-
-def slow_integration(a, b, f):
-    return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
 
