@@ -355,14 +355,26 @@ def to_refine(tx, ty):
     Tx = apply_operators(tx, axis=1)
     Ty = apply_operators(ty, axis=0)
     
-    T = {(0, True ): lambda f: Ty[0, True ](Tx[0, True ](f)),
-         (1, True ): lambda f:(Ty[0, True ](Tx[1, True ](f[0])),
-                               Ty[1, True ](Tx[0, True ](f[1]))),
-         (2, True ): lambda f: Ty[1, True ](Tx[1, True ](f)),
-         (0, False): lambda f: Ty[0, False](Tx[0, False](f)),
-         (1, False): lambda f:(Ty[0, False](Tx[1, False](f[0])),
-                               Ty[1, False](Tx[0, False](f[1]))),
-         (2, False): lambda f: Ty[1, False](Tx[1, False](f)),}
+    T = {(0, True ): lambda f:(
+                               Ty[0, True ](Tx[0, True ](f)),
+                               ),
+         (1, True ): lambda f:(
+                               Ty[0, True ](Tx[1, True ](f[0])),
+                               Ty[1, True ](Tx[0, True ](f[1])),
+                               ),
+         (2, True ): lambda f:(
+                               Ty[1, True ](Tx[1, True ](f)),
+                               ),
+         (0, False): lambda f:(
+                               Ty[0, False](Tx[0, False](f)),
+                               ),
+         (1, False): lambda f:(
+                               Ty[0, False](Tx[1, False](f[0])),
+                               Ty[1, False](Tx[0, False](f[1])),
+                               ),
+         (2, False): lambda f:(
+                               Ty[1, False](Tx[1, False](f)),
+                               ),}
     
     return T
 
@@ -371,14 +383,14 @@ def from_refine(ux, uy):
     Ux = apply_operators(ux, axis=1)
     Uy = apply_operators(uy, axis=0)
     
-    U = {(0, True ): lambda f: Uy[0, True ](Ux[0, True ](f)),
+    U = {(0, True ): lambda f: Uy[0, True ](Ux[0, True ](f[0])),
          (1, True ): lambda f:(Uy[0, True ](Ux[1, True ](f[0])),
                                Uy[1, True ](Ux[0, True ](f[1]))),
-         (2, True ): lambda f: Uy[1, True ](Ux[1, True ](f)),
-         (0, False): lambda f: Uy[0, False](Ux[0, False](f)),
+         (2, True ): lambda f: Uy[1, True ](Ux[1, True ](f[0])),
+         (0, False): lambda f: Uy[0, False](Ux[0, False](f[0])),
          (1, False): lambda f:(Uy[0, False](Ux[1, False](f[0])),
                                Uy[1, False](Ux[0, False](f[1]))),
-         (2, False): lambda f: Uy[1, False](Ux[1, False](f)),}
+         (2, False): lambda f: Uy[1, False](Ux[1, False](f[0])),}
     
     return U
 
@@ -586,10 +598,7 @@ def wedge(T, U):
         def w(a, b):
             a = T[d0, p0](a)
             b = T[d1, p1](b)
-            if d0 != 1: a = (a,)
-            if d1 != 1: b = (b,)
             c = Ws[d0, d1](a, b)
-            if (d0+d1) != 1: (c,) = c
             return U[d0+d1, p2](c)
         return w
 
@@ -614,9 +623,7 @@ def contraction(T, U):
         def c(a, b):
             a = T[1, p0](a)
             b = T[d1, p1](b)
-            if d1 != 1: b = (b,)
             c = Cs[d1](a, b)
-            if (d1-1) != 1: (c,) = c
             return U[d1-1, p2](c)
         return c
 

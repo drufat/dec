@@ -1,5 +1,6 @@
 from dec.symbolic import *
 from dec.grid2 import Grid_2D
+import sympy as sy
 
 c = Chart(x,y)
 
@@ -9,7 +10,8 @@ def compare_comps(g, f, isprimal):
     fd = f.P(g, isprimal)
     
     # lambda form
-    fλ = f.lambdify
+    #fλ = f.lambdify
+    fλ = sy.lambdify(f.grid.coords, f.components, 'numpy')
 
     # Test refinement
     assert np.allclose(fλ(*g.points),
