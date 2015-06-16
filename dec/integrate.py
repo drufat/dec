@@ -16,20 +16,6 @@ def process(expr):
 
 x, y, x0, y0, x1, y1, x2, y2 = sy.symbols('x, y, x0, y0, x1, y1, x2, y2')
 
-def enumerate_coords(coord, deg):
-    '''
-    >>> x, y = sy.symbols('x, y')
-    >>> enumerate_coords((x,), 0)
-    (x0,)
-    >>> enumerate_coords((x,), 1)
-    (x0, x1)
-    >>> enumerate_coords((x,), 2)
-    (x0, x1, x2)
-    >>> enumerate_coords((x, y), 2)
-    (x0, y0, x1, y1, x2, y2)
-    '''
-    return sy.symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
-
 def averages_1d(x, x0, x1):
     '''
     >>> A0, A1 = averages_1d(x, x0, x1)
@@ -293,6 +279,10 @@ def n_integration_2d_regular():
     V = lambda P: np.vectorize(P, excluded=[0])
     return P0, (V(P1x), V(P1y)) , V(P2)
 
+
+######################
+# Old Integration
+######################
 
 def integrate_simpson(a, b, f):
     '''

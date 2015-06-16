@@ -6,7 +6,6 @@ from sympy import (symbols, Function, diff, lambdify, simplify,
                    sin, cos, sqrt)
 from dec.helper import bunch
 from dec.symform import form
-from dec.integrate import enumerate_coords, integration_1d, integration_2d
 
 # Coordinates
 x, y, z = symbols('x y z')
@@ -89,6 +88,20 @@ def Chart_2d(x=x, y=y):
     Chart(x, y)
     '''
     return Chart(x, y)
+
+def enumerate_coords(coord, deg):
+    '''
+    >>> x, y = symbols('x, y')
+    >>> enumerate_coords((x,), 0)
+    (x0,)
+    >>> enumerate_coords((x,), 1)
+    (x0, x1)
+    >>> enumerate_coords((x,), 2)
+    (x0, x1, x2)
+    >>> enumerate_coords((x, y), 2)
+    (x0, y0, x1, y1, x2, y2)
+    '''
+    return symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
 def simplex_measure(σ):
 

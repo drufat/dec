@@ -9,7 +9,10 @@ from operator import mul
 from functools import reduce
 import itertools
 import operator
+import sympy as sy
 from scipy.interpolate.interpolate import interp2d
+from dec.integrate import integrate_1form, integrate_2form,\
+    integration_2d_regular, n_integration_2d_regular
 
 Π = lambda *x: tuple(itertools.product(*x))
 
@@ -176,7 +179,7 @@ class Grid_2D(object):
         return self.cells[2, False]
     
     def projection(self):
-        P = self.dec.P
+        P = self.dec.Pn
         P0  = P[0, True]
         P1  = P[1, True]
         P2  = P[2, True]
@@ -232,14 +235,19 @@ class Grid_2D(object):
         '''
         return decform(deg, isprimal, self, np.random.rand(self.N[deg, isprimal]))
 
-    def P(self, form, isprimal):        
+    def P(self, form, isprimal):
         return decform(form.degree, 
                        isprimal, 
                        self, 
                        self.dec.P[form.degree, isprimal](form.components))
-
-from dec.integrate import integrate_1form, integrate_2form,\
-    integration_2d_regular, n_integration_2d, n_integration_2d_regular
+        
+    def BC(self, form):
+        isprimal=False
+        degree = form.degree + 1
+        return decform(degree, 
+                       isprimal, 
+                       self, 
+                       self.dec.BC[degree, isprimal](form.components))
 
 def projection_2d(cells):
     '''
@@ -434,7 +442,6 @@ def assignfunctionto(dictionary):
     
     return assign
 
-import sympy as sy
 def symprojection(cells, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
 
     P = {}
@@ -456,10 +463,10 @@ def symprojection(cells, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
         def _(σ):
             ((X0, X1), Y), (X, (Y0, Y1)) = cells[1, t]
             ι = I[1](σ)
-            λ = sy.lambdify((x0, x1, y, x, y0, y1), ι, 'numpy')
-            ax, ay = λ(X0, X1, Y, X, Y0, Y1)
-            return (ax + zeros_like(X0),
-                    ay + zeros_like(Y0))
+            λ = (sy.lambdify((x0, x1, y), ι[0], 'numpy'),
+                 sy.lambdify((x, y0, y1), ι[1], 'numpy'))
+            return (λ[0](X0, X1, Y) + zeros_like(X0),
+                    λ[1](X, Y0, Y1) + zeros_like(Y0))
         
         @assign((2, t))
         def _(σ):
@@ -505,32 +512,9 @@ def numprojection(cells):
 
     return P
 
-def combinedprojection(cells, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
+def test_projection():
 
-    x, y, x0, y0, x1, y1 = symbols
-    Σ = symprojection(cells, symbols)
-    N = numprojection(cells)
-    λ = lambda f: sy.lambdify((x, y), f, 'numpy')
-
-    def get_proj(k):
-        def proj(f):
-            if callable(f):
-                return N[k](f)
-            else:
-                try:
-                    # Symbolic Integration
-                    return Σ[k](f)
-                except:
-                    # Numeric Integration
-                    return N[k](λ(f))
-        return proj
-    
-    return {k:get_proj(k) for k in N}    
-    
-        
-def test_symprojection():
-
-    x, y, x0, y0, x1, y1 = sy.sympify('x, y, x0, y0, x1, y1')
+    x, y = sy.sympify('x, y')
     gx = Grid_1D.chebyshev(3)
     cells = cartesian_product_grids(gx, gx).cells
     
@@ -573,6 +557,76 @@ def test_symprojection():
     Σ[2, t](σ)
     Σ[2, f](σ)
 
+def symboundary(cells, xmin, xmax, ymin, ymax, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
+    
+    BC = {}
+    assign = assignfunctionto(BC)
+    
+    x, y, x0, y0, x1, y1 = symbols
+    I = integration_2d_regular(x, y, x0, y0, x1, y1)
+
+    @assign((1, False))
+    def _(σ):
+        ι = I[0](σ)
+        λ = sy.lambdify((x0, y0), ι, 'numpy')
+        ((X0, X1), Y), (X, (Y0, Y1)) = cells[1, False]
+        
+        βx = zeros_like(X0)
+        m = (X0==xmin)
+        βx[m] -= λ(X0[m], Y[m])
+        m = (X1==xmax)
+        βx[m] += λ(X1[m], Y[m])
+
+        βy = zeros_like(Y0)
+        m = (Y0==ymin)
+        βy[m] -= λ(X[m], Y0[m])
+        m = (Y1==ymax)
+        βy[m] += λ(X[m], Y1[m])
+        
+        return βx, βy
+        
+    @assign((2, False))
+    def _(σ):
+        ι = I[1](σ)
+        λ = (sy.lambdify((x0, x1, y), ι[0], 'numpy'),
+             sy.lambdify((x, y0, y1), ι[1], 'numpy'))
+        ((X0, Y0), (X1, Y1)) = cells[2, False]
+        
+        β = zeros_like(X0)
+        m = (Y0==ymin)
+        β[m] += λ[0](X0[m], X1[m], Y0[m])
+        m = (X1==xmax)
+        β[m] += λ[1](X1[m], Y0[m], Y1[m])
+        m = (Y1==ymax)
+        β[m] += λ[0](X1[m], X0[m], Y1[m])
+        m = (X0==xmin)
+        β[m] += λ[1](X0[m], Y1[m], Y0[m])
+        
+        return β
+    
+    return BC
+
+def test_boundary():
+
+    x, y = sy.sympify('x, y')
+    gx = Grid_1D.chebyshev(5)
+    g = cartesian_product_grids(gx, gx)
+    cells = g.cells
+
+    xmin, xmax = g.gx.xmin, g.gx.xmax
+    ymin, ymax = g.gy.xmin, g.gy.xmax
+    
+    B = symboundary(cells, xmin, xmax, ymin, ymax)
+    
+    σ = (1, )
+    B[1, False](σ)
+    
+    σ = (1, 0)
+    B[2, False](σ)
+    
+    σ = (0, 1)
+    B[2, False](σ)
+    
 
 def flatten_cells(cells):
     '''
@@ -641,13 +695,21 @@ def cartesian_product_grids(gx, gy):
     
     cells = product_cells(gx.cells, gy.cells)    
 
-    P = combinedprojection(cells)
+    P = symprojection(cells)
+    Pn = numprojection(cells)
+    
+    BC = symboundary(cells, gx.xmin, gx.xmax, gy.xmin, gy.xmax,)
     
     B = basis_fn(gx.dec.B, gy.dec.B)
     D = derivative(gx.dec.D, gy.dec.D)
     H = hodge_star(gx.dec.H, gy.dec.H)
 
-    dec = bunch(P=P, B=B, D=D, H=H,)
+    dec = bunch(P=P, 
+                Pn=Pn,
+                BC=BC, 
+                B=B, 
+                D=D, 
+                H=H,)
     
     T = to_refine(  gx.refine.T, gy.refine.T)
     U = from_refine(gx.refine.U, gy.refine.U)
@@ -710,6 +772,8 @@ def flatten_grid(g):
                    U=reshapeU(shape, g.refine.U))
 
     dec = bunch(P=reshapeU(shape, g.dec.P),
+                Pn=reshapeU(shape, g.dec.Pn),
+                BC=reshapeU(shape, g.dec.BC),
                 B=reshapeB(shape, g.dec.B),
                 D=reshapeO(shape, g.dec.D),
                 H=reshapeO(shape, g.dec.H),

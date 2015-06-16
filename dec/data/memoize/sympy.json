@@ -66,6 +66,7 @@
   "Integral(-x0 + x1 - y0 + y1, (s, 0, 1))": "-x0 + x1 - y0 + y1",
   "Integral(-x0 + x1, (s, 0, 1))": "-x0 + x1",
   "Integral(-y**2, (y, y0, y1))": "y0**3/3 - y1**3/3",
+  "Integral(-y**3, (x, x0, x1))": "y**3*(x0 - x1)",
   "Integral(-y, (x, x0, x1))": "y*(x0 - x1)",
   "Integral(-y, (y, y0, y1))": "y0**2/2 - y1**2/2",
   "Integral(-y0 + y1, (x, x0, x1))": "(x0 - x1)*(y0 - y1)",
@@ -118,6 +119,7 @@
   "Integral(x**3 - y**2, (y, y0, y1))": "-x**3*y0 + x**3*y1 + y0**3/3 - y1**3/3",
   "Integral(x**3*y, (x, x0, x1))": "y*(-x0**4 + x1**4)/4",
   "Integral(x**3, (x, x0, x1))": "-x0**4/4 + x1**4/4",
+  "Integral(x**3, (y, y0, y1))": "x**3*(-y0 + y1)",
   "Integral(x**4*(-y0 + y1), (x, x0, x1))": "x0**5*(y0 - y1)/5 + x1**5*(-y0 + y1)/5",
   "Integral(x**4, (x, x0, x1))": "-x0**5/5 + x1**5/5",
   "Integral(x**4, (y, y0, y1))": "x**4*(-y0 + y1)",
@@ -129,6 +131,7 @@
   "Integral(y*(x + y), (y, y0, y1))": "-x*y0**2/2 + x*y1**2/2 - y0**3/3 + y1**3/3",
   "Integral(y*(x - y), (x, x0, x1))": "y*(-x0**2 + 2*x0*y + x1**2 - 2*x1*y)/2",
   "Integral(y**3*(x + y), (y, y0, y1))": "-x*y0**4/4 + x*y1**4/4 - y0**5/5 + y1**5/5",
+  "Integral(y**3, (y, y0, y1))": "-y0**4/4 + y1**4/4",
   "Integral(y, (x, x0, x1))": "y*(-x0 + x1)",
   "Integral(y, (y, y0, y1))": "-y0**2/2 + y1**2/2"
 }

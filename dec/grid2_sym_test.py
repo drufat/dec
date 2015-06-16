@@ -5,6 +5,54 @@ from dec.decform import decform
 
 c = Chart(x,y)
 
+def test_P():
+
+
+    def P(form, isprimal, g):
+        proj = projection_2d(g.cells)
+        a = proj[form.degree, isprimal](form.lambdify)
+        return decform(form.degree, isprimal, g, a)
+
+    def primaldual(t):
+        g = Grid_2D.periodic(5, 3)
+        
+        f = form(0, c, (sin(x)+sin(y),))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(1, c, (sin(x),sin(y),))
+        assert P(f, t, g)  == g.P(f, t) 
+        f = form(2, c, (sin(x)+sin(y),))
+        assert P(f, t, g)  == g.P(f, t)
+        
+        g = Grid_2D.chebyshev(3, 6)
+        
+        f = form(0, c, (x+y,))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(1, c, (x,y))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(2, c, (x+y,))
+        assert P(f, t, g)  == g.P(f, t)
+        
+    primaldual(True)
+    primaldual(False)
+
+def test_N():
+
+    def check_N(g):
+        f = form(0, c, (0,))
+        assert g.P(f, True).array.shape[0] == g.N[0, True]
+        assert g.P(f, False).array.shape[0] == g.N[0, False]
+        f = form(1, c, (0,0))
+        assert g.P(f, True).array.shape[0] == g.N[1, True]
+        assert g.P(f, False).array.shape[0] == g.N[1, False]
+        f = form(2, c, (0,))
+        assert g.P(f, True).array.shape[0] == g.N[2, True]
+        assert g.P(f, False).array.shape[0] == g.N[2, False]
+
+    check_N(Grid_2D.periodic(4, 3))
+    check_N(Grid_2D.periodic(3, 5))
+    check_N(Grid_2D.chebyshev(2, 3))
+    check_N(Grid_2D.chebyshev(5, 4))
+
 def compare_comps(g, f, isprimal):
     
     # discrete form
@@ -51,60 +99,11 @@ def test_refine():
     compare_comps(g, form(2, c, (sin(x),)), True)
     compare_comps(g, form(2, c, (sin(x),)), False)
 
-def test_P():
-
-
-    def P(form, isprimal, g):
-        proj = projection_2d(g.cells)
-        a = proj[form.degree, isprimal](form.lambdify)
-        return decform(form.degree, isprimal, g, a)
-
-    def primaldual(t):
-        g = Grid_2D.periodic(5, 3)
-        
-        f = form(0, c, (sin(x)+sin(y),))
-        assert P(f, t, g)  == g.P(f, t)
-        f = form(1, c, (sin(x),sin(y),))
-        assert P(f, t, g)  == g.P(f, t) 
-        f = form(2, c, (sin(x)+sin(y),))
-        assert P(f, t, g)  == g.P(f, t)
-        
-        g = Grid_2D.chebyshev(3, 6)
-        
-        f = form(0, c, (x+y,))
-        assert P(f, t, g)  == g.P(f, t)
-        f = form(1, c, (x,y))
-        assert P(f, t, g)  == g.P(f, t)
-        f = form(2, c, (x+y,))
-        assert P(f, t, g)  == g.P(f, t)
-        
-    primaldual(True)
-    primaldual(False)
-
-
-def test_N():
-
-    def check_N(g):
-        f = form(0, c, (0,))
-        assert g.P(f, True).array.shape[0] == g.N[0, True]
-        assert g.P(f, False).array.shape[0] == g.N[0, False]
-        f = form(1, c, (0,0))
-        assert g.P(f, True).array.shape[0] == g.N[1, True]
-        assert g.P(f, False).array.shape[0] == g.N[1, False]
-        f = form(2, c, (0,))
-        assert g.P(f, True).array.shape[0] == g.N[2, True]
-        assert g.P(f, False).array.shape[0] == g.N[2, False]
-
-    check_N(Grid_2D.periodic(4, 3))
-    check_N(Grid_2D.periodic(3, 5))
-    check_N(Grid_2D.chebyshev(2, 3))
-    check_N(Grid_2D.chebyshev(5, 4))
-
 
 def test_D():
     
     g = Grid_2D.periodic(3, 3)
-    
+        
     f = form(0, c, (cos(x)+cos(y),))
     assert f.D.P(g, True) == f.P(g, True).D
     assert f.D.P(g, False) == f.P(g, False).D
@@ -113,15 +112,25 @@ def test_D():
     assert f.D.P(g, True) == f.P(g, True).D
     assert f.D.P(g, False) == f.P(g, False).D
 
-#TODO: fix boundary conditions
     g = Grid_2D.chebyshev(3, 3)
+    
     f = form(0, c, (x+y,))
     assert f.D.P(g, True) == f.P(g, True).D
-    #assert f.D.P(g, False) == f.P(g, False).D
+    assert f.D.P(g, False) == f.P(g, False).D + g.BC(f)
 
     f = form(1, c, (-y,x))
     assert f.D.P(g, True) == f.P(g, True).D
-    #assert f.D.P(g, False) == f.P(g, False).D
+    assert f.D.P(g, False) == f.P(g, False).D + g.BC(f)
+
+    g = Grid_2D.chebyshev(4, 5)
+    
+    f = form(0, c, (x*y,))
+    assert f.D.P(g, True) == f.P(g, True).D
+    assert f.D.P(g, False) == f.P(g, False).D + g.BC(f)
+
+    f = form(1, c, (x,y))
+    assert f.D.P(g, True) == f.P(g, True).D
+    assert f.D.P(g, False) == f.P(g, False).D + g.BC(f)
     
 def test_H():
     

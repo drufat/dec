@@ -1,6 +1,6 @@
 import sympy as sy
 from dec.helper import nCr
-from dec.integrate import integration_1d, integration_2d, integration_2d_regular
+from dec.integrate import integration_1d, integration_2d
 
 def symform_factory(name):
     '''
@@ -158,14 +158,12 @@ def to_discrete(f, g, isprimal):
     assert g.dimension == ch.dimension
 
     cells = g.cells[d, isprimal]
-    #TODO: It may be necessary to compute limits when x0==x1, y0==y1
     sym = ch.coords + ch.cell_coords(ch.dimension)
     integration = [None, integration_1d, integration_2d]
     integrate = integration[ch.dimension](*sym)[d](c)
     λ = sy.lambdify(ch.cell_coords(d), integrate, 'numpy')
 
     if ch.dimension == 1:
-        #Symbolic Integration
         if   d == 0:
             x0 = cells
             a = λ(x0)
