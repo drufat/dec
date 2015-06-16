@@ -54,7 +54,6 @@ class Chart(object):
         if len(coords) == 1:
             x, = coords
             dec = bunch(D=derivative_1d(x),
-                        P=integration_1d(x),
                         H=hodge_star_1d(),
                         W=wedge_1d(),
                         C=contraction_1d(),
@@ -62,7 +61,6 @@ class Chart(object):
         elif len(coords) == 2:
             x, y = coords
             dec = bunch(D=derivative_2d(x, y),
-                        P=integration_2d(x, y),
                         H=hodge_star_2d(),
                         W=wedge_2d(),
                         C=contraction_2d(),

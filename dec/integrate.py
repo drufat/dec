@@ -14,6 +14,8 @@ def process(expr):
         raise ValueError('Unable to evaluate {}.'.format(rslt))    
     return rslt
 
+x, y, x0, y0, x1, y1, x2, y2 = sy.symbols('x, y, x0, y0, x1, y1, x2, y2')
+
 def enumerate_coords(coord, deg):
     '''
     >>> x, y = sy.symbols('x, y')
@@ -28,11 +30,9 @@ def enumerate_coords(coord, deg):
     '''
     return sy.symbols(tuple('{}{}'.format(c.name, i) for i in range(deg+1) for c in coord))
 
-def averages_1d(x):
+def averages_1d(x, x0, x1):
     '''
-    >>> x = sy.symbols('x')
-    >>> x0, x1 = enumerate_coords((x,), 1)
-    >>> A0, A1 = averages_1d(x)
+    >>> A0, A1 = averages_1d(x, x0, x1)
     >>> assert A0(1)     == 1
     >>> assert A0(x)     == x0
     >>> assert A1(1)     == 1
@@ -40,7 +40,6 @@ def averages_1d(x):
     >>> assert A1(x**2)  == (x0**2 + x0*x1 + x1**2)/3
     >>> assert A1(x**3)  == (x0**3 + x0**2*x1 + x0*x1**2 + x1**3)/4
     '''
-    x0, x1 = enumerate_coords((x,), 1)
     s, t = sy.symbols('s t')
     assert t != x != s
 
@@ -56,11 +55,9 @@ def averages_1d(x):
 
     return A0, A1
 
-def averages_2d(x, y):
+def averages_2d(x, y, x0, y0, x1, y1, x2, y2):
     '''
-    >>> x, y = sy.symbols('x, y')
-    >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    >>> A0, A1, A2 = averages_2d(x, y)
+    >>> A0, A1, A2 = averages_2d(x, y, x0, y0, x1, y1, x2, y2)
     >>> assert A0(1) == 1
     >>> assert A0(x) == x0
     >>> assert A1(1) == 1
@@ -70,7 +67,6 @@ def averages_2d(x, y):
     >>> assert A2(x) == (x0 + x1 + x2)/3
     >>> assert A2(y) == (y0 + y1 + y2)/3
     '''
-    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
     s, t = sy.symbols('s t')
     assert t != x != s
     assert t != y != s
@@ -97,17 +93,13 @@ def averages_2d(x, y):
     
     return A0, A1, A2
 
-def integration_1d(x):
+def integration_1d(x, x0, x1):
     '''
-    >>> x = sy.symbols('x')
-    >>> P0, P1 = integration_1d(x)
-    >>> x0, x1 = enumerate_coords((x,), 1)
+    >>> P0, P1 = integration_1d(x, x0, x1)
     >>> assert P0((x,)) == x0
     >>> assert P1((x,)) == x1**2/2 - x0**2/2
     >>> assert P1((1,)) == x1 - x0
     '''
-    x0, x1 = enumerate_coords((x,), 1)
-
     def P0(f):
         f, = sy.sympify(f)
         return f.subs(x, x0)
@@ -119,11 +111,9 @@ def integration_1d(x):
     
     return P0, P1
 
-def integration_2d(x, y):
+def integration_2d(x, y, x0, y0, x1, y1, x2, y2):
     '''
-    >>> x, y = sy.symbols('x, y')
-    >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    >>> P0, P1, P2 = integration_2d(x, y)
+    >>> P0, P1, P2 = integration_2d(x, y, x0, y0, x1, y1, x2, y2)
     >>> assert P0((x*y,)) == x0*y0
     >>> assert P1((x, 0)) == -x0**2/2 + x1**2/2
     >>> assert P1((1, 0)) == -x0 + x1
@@ -135,20 +125,18 @@ def integration_2d(x, y):
     >>> assert P2((1,)) == expand( ((x1-x0)*(y2-y0) - (x2-x0)*(y1-y0))/2 )
     '''
     
-    x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-
     def P0(f):
         f, = sy.sympify(f)
         return f.subs({x:x0, y:y0})
      
     def P1(f):
-        ux, uy = sy.sympify(f)
+        fx, fy = sy.sympify(f)
         s = sy.Symbol('s')
         lx, ly = x1 - x0, y1 - y0
         subst = ((x, x0*(1-s) + x1*s),
                  (y, y0*(1-s) + y1*s))
-        integrand = (ux.subs(subst)*lx +
-                     uy.subs(subst)*ly)
+        integrand = (fx.subs(subst)*lx +
+                     fy.subs(subst)*ly)
         iexpr = sy.Integral(integrand, (s, 0, 1))
         return process(iexpr)
      
@@ -175,11 +163,9 @@ def integration_2d(x, y):
     
     return P0, P1, P2
 
-def integration_2d_regular(x, y):
+def integration_2d_regular(x, y, x0, y0, x1, y1):
     '''
-    >>> x, y = sy.symbols('x, y')
-    >>> x0, y0, x1, y1, x2, y2 = enumerate_coords((x, y), 2)
-    >>> P0, P1, P2 = integration_2d_regular(x, y)
+    >>> P0, P1, P2 = integration_2d_regular(x, y, x0, y0, x1, y1)
     >>> assert P0((1,)) == 1
     >>> assert P0((x*y,)) == x0*y0
     >>> assert P1((1, 0)) == ((x1-x0), 0)
@@ -189,8 +175,6 @@ def integration_2d_regular(x, y):
     >>> assert P2((1,)) == (x0-x1)*(y0-y1)
     '''
     
-    x0, y0, x1, y1 = enumerate_coords((x, y), 1)
-
     def P0(f):
         f, = sy.sympify(f)
         return f.subs({x:x0, y:y0})
@@ -225,6 +209,90 @@ def integration_2d_regular(x, y):
 #######################
 # Numeric Intergration
 #######################
+
+def n_integration_1d():
+    '''
+    >>> P0, P1  = n_integration_1d()
+    >>> P1(lambda x: x, 0, 1)
+    array(0.5)
+    >>> P1(lambda x: 1, 0, 1)
+    array(1.0)
+    >>> P1(lambda x: 1, [0, 1], [1, 4])
+    array([ 1.,  3.])
+    '''
+    
+    def P0(f, x0):
+        return f(x0)
+    
+    def P1(f, x0, x1):
+        return quad(f, x0, x1)[0]
+    
+    V = lambda P: np.vectorize(P, excluded=[0])
+    return P0, V(P1)
+
+def n_integration_2d():
+    '''
+    >>> P0, P1, P2  = n_integration_2d()
+    >>> P1(lambda x, y: (1, 0), 0, 0, 1, 0)
+    array(1.0)
+    >>> P2(lambda x, y: 1, 0, 0, 1, 0, 1, 1)
+    array(0.5)
+    '''
+    
+    def P0(f, x0, y0):
+        return f(x0, y0)
+    
+    def P1(f, x0, y0, x1, y1):
+        lx, ly = x1 - x0, y1 - y0
+        def integrand(s):
+            ux, uy = f(x0*(1-s) + x1*s, 
+                       y0*(1-s) + y1*s)
+            return ux*lx + uy*ly
+        return quad(integrand, 0, 1)[0]
+    
+    def P2(f, x0, y0, x1, y1, x2, y2):
+        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
+        def integrand(s, t):
+            omega = f(x0*(1-s-t) + x1*s + x2*t,
+                      y0*(1-s-t) + y1*s + y2*t)
+            return omega*A
+        return dblquad(integrand, 0, 1, lambda s: 0, lambda s: 1-s)[0]
+    
+    V = lambda P: np.vectorize(P, excluded=[0])
+    return P0, V(P1), V(P2)
+
+def n_integration_2d_regular():
+
+    def P0(f, x0, y0):
+        return f(x0, y0)
+
+    def P1x(f, x0, x1, y):
+        '''
+        (x0,y)--------(x1,y)
+        '''
+        return quad(lambda _: f(_, y), x0, x1)[0]
+
+    def P1y(f, x, y0, y1):
+        '''
+        (x,y1)
+           |
+           |
+        (x,y0)
+        '''
+        return quad(lambda _: f(x, _), y0, y1)[0]
+     
+    def P2(f, x0, y0, x1, y1):
+        '''
+        (x0,y1)--------(x1,y1)
+           |              |
+           |              |
+        (x0,y0)--------(x1,y0)
+        '''
+        return dblquad(f, y0, y1, lambda x: x0, lambda x: x1)[0]
+    
+    V = lambda P: np.vectorize(P, excluded=[0])
+    return P0, (V(P1x), V(P1y)) , V(P2)
+
 
 def integrate_simpson(a, b, f):
     '''
@@ -279,57 +347,6 @@ def integrate_boole2(x1, x5, f):
 
 def slow_integration(a, b, f):
     return np.array([quad(f, _a, _b)[0] for _a, _b in zip(a, b)])
-
-def n_integration_1d():
-    '''
-    >>> P0, P1  = n_integration_1d()
-    >>> P1(lambda x: x, 0, 1)
-    array(0.5)
-    >>> P1(lambda x: 1, 0, 1)
-    array(1.0)
-    >>> P1(lambda x: 1, [0, 1], [1, 4])
-    array([ 1.,  3.])
-    '''
-    
-    def P0(f, x0):
-        return f(x0)
-    
-    def P1(f, x0, x1):
-        return quad(f, x0, x1)[0]
-    
-    V = lambda P: np.vectorize(P, excluded=[0])
-    return P0, V(P1)
-
-def n_integration_2d():
-    '''
-    >>> P0, P1, P2  = n_integration_2d()
-    >>> P1(lambda x, y: (1, 0), 0, 0, 1, 0)
-    array(1.0)
-    >>> P2(lambda x, y: 1, 0, 0, 1, 0, 1, 1)
-    array(0.5)
-    '''
-    
-    def P0(f, x0, y0):
-        return f(x0, y0)
-    
-    def P1(f, x0, y0, x1, y1):
-        lx, ly = x1 - x0, y1 - y0
-        def integrand(s):
-            ux, uy = f(x0*(1-s) + x1*s, 
-                       y0*(1-s) + y1*s)
-            return ux*lx + uy*ly
-        return quad(integrand, 0, 1)[0]
-    
-    def P2(f, x0, y0, x1, y1, x2, y2):
-        A = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0)
-        def integrand(s, t):
-            omega = f(x0*(1-s-t) + x1*s + x2*t,
-                      y0*(1-s-t) + y1*s + y2*t)
-            return omega*A
-        return dblquad(integrand, 0, 1, lambda s: 0, lambda s: 1-s)[0]
-    
-    V = lambda P: np.vectorize(P, excluded=[0])
-    return P0, V(P1), V(P2)
 
 def integrate_1form(edge, f):
     '''

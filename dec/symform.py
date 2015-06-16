@@ -1,5 +1,6 @@
 import sympy as sy
 from dec.helper import nCr
+from dec.integrate import integration_1d, integration_2d, integration_2d_regular
 
 def symform_factory(name):
     '''
@@ -150,19 +151,21 @@ def symform_factory(name):
 
 form = symform_factory('form')
 
+from dec.decform import decform
 def to_discrete(f, g, isprimal):
-    from dec.decform import decform
     
     d, ch, c = f.degree, f.grid, f.components
     assert g.dimension == ch.dimension
 
-    #Symbolic Integration
-    integrate = ch.dec.P[d](c)
-    λ = sy.lambdify(ch.cell_coords(d), integrate, 'numpy')
-
     cells = g.cells[d, isprimal]
     #TODO: It may be necessary to compute limits when x0==x1, y0==y1
+    sym = ch.coords + ch.cell_coords(ch.dimension)
+    integration = [None, integration_1d, integration_2d]
+    integrate = integration[ch.dimension](*sym)[d](c)
+    λ = sy.lambdify(ch.cell_coords(d), integrate, 'numpy')
+
     if ch.dimension == 1:
+        #Symbolic Integration
         if   d == 0:
             x0 = cells
             a = λ(x0)
@@ -170,16 +173,16 @@ def to_discrete(f, g, isprimal):
             x0, x1 = cells
             a = λ(x0, x1)
     elif ch.dimension == 2:
-        if   d == 0:
-            x0, y0 = cells
-            a = λ(x0, y0)
-        elif d == 1:
-            (x0, y0), (x1, y1) = cells
-            a = λ(x0, y0, x1, y1)
-        elif d == 2:
-            (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
-            a = (λ(x0, y0, x1, y1, x2, y2) + 
-                 λ(x0, y0, x2, y2, x3, y3))
+        return g.P(f, isprimal)
+#         if   d == 0:
+#             x0, y0 = cells
+#             a = λ(x0, y0)
+#         elif d == 1:
+#             (x0, y0), (x1, y1) = cells
+#             a = λ(x0, y0, x1, y1)
+#         elif d == 2:
+#             (x0, y0), (x1, y1), (x2, y2), (x3, y3) = cells
+#             a = (λ(x0, y0, x1, y1, x2, y2) + 
+#                  λ(x0, y0, x2, y2, x3, y3))
         
     return decform(d, isprimal, g, a)
-

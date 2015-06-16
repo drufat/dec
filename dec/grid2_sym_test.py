@@ -1,16 +1,16 @@
 from dec.symbolic import *
-from dec.grid2 import Grid_2D
+from dec.grid2 import Grid_2D, projection_2d
 import sympy as sy
+from dec.decform import decform
 
 c = Chart(x,y)
 
 def compare_comps(g, f, isprimal):
     
     # discrete form
-    fd = f.P(g, isprimal)
+    fd = g.P(f, isprimal)
     
     # lambda form
-    #fλ = f.lambdify
     fλ = sy.lambdify(f.grid.coords, f.components, 'numpy')
 
     # Test refinement
@@ -44,35 +44,61 @@ def test_refine():
     compare_comps(g, form(1, c, (sin(x),sin(y),)), False)
     compare_comps(g, form(1, c, (cos(x),cos(y),)), True)
     compare_comps(g, form(1, c, (cos(x),cos(y),)), False)
-    #TODO: fix integration
-#    compare_comps(g, form(1, c, (-sin(y),sin(x),)), True)
-#    compare_comps(g, form(1, c, (-sin(y),sin(x),)), False)
-#    compare_comps(g, form(1, c, (-cos(y),cos(x),)), True)
-#    compare_comps(g, form(1, c, (-cos(y),cos(x),)), False)
-#    compare_comps(g, form(2, c, (sin(x),)), True)
-#    compare_comps(g, form(2, c, (sin(x),)), False)
+    compare_comps(g, form(1, c, (-sin(y),sin(x),)), True)
+    compare_comps(g, form(1, c, (-sin(y),sin(x),)), False)
+    compare_comps(g, form(1, c, (-cos(y),cos(x),)), True)
+    compare_comps(g, form(1, c, (-cos(y),cos(x),)), False)
+    compare_comps(g, form(2, c, (sin(x),)), True)
+    compare_comps(g, form(2, c, (sin(x),)), False)
 
 def test_P():
 
-    g = Grid_2D.periodic(3, 3)
 
-    f = form(0, c, (sin(x)+sin(y),))
-    assert f.P(g, True) == g.P(f.degree, True, f.lambdify)
-    assert f.P(g, False) == g.P(f.degree, False, f.lambdify)
+    def P(form, isprimal, g):
+        proj = projection_2d(g.cells)
+        a = proj[form.degree, isprimal](form.lambdify)
+        return decform(form.degree, isprimal, g, a)
 
-    g = Grid_2D.chebyshev(3, 3)
+    def primaldual(t):
+        g = Grid_2D.periodic(5, 3)
+        
+        f = form(0, c, (sin(x)+sin(y),))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(1, c, (sin(x),sin(y),))
+        assert P(f, t, g)  == g.P(f, t) 
+        f = form(2, c, (sin(x)+sin(y),))
+        assert P(f, t, g)  == g.P(f, t)
+        
+        g = Grid_2D.chebyshev(3, 6)
+        
+        f = form(0, c, (x+y,))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(1, c, (x,y))
+        assert P(f, t, g)  == g.P(f, t)
+        f = form(2, c, (x+y,))
+        assert P(f, t, g)  == g.P(f, t)
+        
+    primaldual(True)
+    primaldual(False)
 
-    f = form(0, c, (x+y,))
-    assert f.P(g, True) == g.P(f.degree, True, f.lambdify)
-    assert f.P(g, False) == g.P(f.degree, False, f.lambdify)
 
-    f = form(1, c, (x,y))
-    assert f.P(g, True) == g.P(f.degree, True, f.lambdify)
-    assert f.P(g, False) == g.P(f.degree, False, f.lambdify)
+def test_N():
 
-    f = form(2, c, (x+y,))
-    assert f.P(g, True) == g.P(f.degree, True, f.lambdify)
-    assert f.P(g, False) == g.P(f.degree, False, f.lambdify)
+    def check_N(g):
+        f = form(0, c, (0,))
+        assert g.P(f, True).array.shape[0] == g.N[0, True]
+        assert g.P(f, False).array.shape[0] == g.N[0, False]
+        f = form(1, c, (0,0))
+        assert g.P(f, True).array.shape[0] == g.N[1, True]
+        assert g.P(f, False).array.shape[0] == g.N[1, False]
+        f = form(2, c, (0,))
+        assert g.P(f, True).array.shape[0] == g.N[2, True]
+        assert g.P(f, False).array.shape[0] == g.N[2, False]
+
+    check_N(Grid_2D.periodic(4, 3))
+    check_N(Grid_2D.periodic(3, 5))
+    check_N(Grid_2D.chebyshev(2, 3))
+    check_N(Grid_2D.chebyshev(5, 4))
 
 
 def test_D():
@@ -99,14 +125,15 @@ def test_D():
     
 def test_H():
     
-#TODO: Requires fixing integration first.
-#     g = Grid_2D.periodic(5, 5)
-#     f = form(0, c, (cos(x),))    
-#     assert f.H.P(g, False) == f.P(g, True).H
-#     assert f.H.P(g, True) == f.P(g, False).H
-#     f = form(1, c, (sin(x),cos(y)))    
-#     assert f.H.P(g, False) == f.P(g, True).H
-#     assert f.H.P(g, True) == f.P(g, False).H
+    g = Grid_2D.periodic(5, 5)
+
+    f = form(0, c, (cos(x),))    
+    assert f.H.P(g, False) == f.P(g, True).H
+    assert f.H.P(g, True) == f.P(g, False).H
+    
+    f = form(1, c, (sin(x),cos(y)))    
+    assert f.H.P(g, False) == f.P(g, True).H
+    assert f.H.P(g, True) == f.P(g, False).H
 
     g = Grid_2D.chebyshev(10, 10)
     
@@ -126,16 +153,21 @@ def test_W_C():
     
     g = Grid_2D.chebyshev(4, 4)
       
-    f0 = form(0, c, (x*y,))
+    f0 = form(0, c, (x,))
     f1 = form(1, c, (x**2,-y))
     f2 = form(2, c, (x+y,))
     f = [f0, f1, f2]
+
+    h0 = form(0, c, (y,))
+    h1 = form(1, c, (-y,x))
+    h2 = form(2, c, (x-y,))
+    h = [h0, h1, h2]
     
     for ((d1, p1), (d2, p2), p3) in g.dec.W.keys():
-        assert (f[d1]^f[d2]).P(g, p3) == f[d1].P(g, p1).W(f[d2].P(g, p2), toprimal=p3)
+        assert (f[d1]^h[d2]).P(g, p3) == f[d1].P(g, p1).W(h[d2].P(g, p2), toprimal=p3)
 
     for (p1, (d2, p2), p3) in g.dec.C.keys():
-        assert f[1].C(f[d2]).P(g, p3) == f[1].P(g, p1).C(f[d2].P(g, p2), toprimal=p3)
+        assert f[1].C(h[d2]).P(g, p3) == f[1].P(g, p1).C(h[d2].P(g, p2), toprimal=p3)
     
 if __name__ == '__main__':
     test_refine()

@@ -93,7 +93,7 @@ def unshape(X):
     elif type(X) is ndarray:
         return X.reshape(-1), X.shape
     else:
-        raise TypeError
+        raise TypeError('Incorrect type {} for {}'.format(type(X), X))
 
 def reshape(x, shape):
     '''
@@ -232,12 +232,19 @@ class Grid_2D(object):
         '''
         return decform(deg, isprimal, self, np.random.rand(self.N[deg, isprimal]))
 
-    def P(self, deg, isprimal, func):
-        return decform(deg, isprimal, self, self.dec.P[deg, isprimal](func))
+    def P(self, form, isprimal):        
+        return decform(form.degree, 
+                       isprimal, 
+                       self, 
+                       self.dec.P[form.degree, isprimal](form.components))
 
-from dec.integrate import integrate_1form, integrate_2form
+from dec.integrate import integrate_1form, integrate_2form,\
+    integration_2d_regular, n_integration_2d, n_integration_2d_regular
 
-def projection(cells):
+def projection_2d(cells):
+    '''
+    works for flattened cells
+    '''
     
     P = {(0, True ) : lambda f: f(*cells[0, True ]),
          (0, False) : lambda f: f(*cells[0, False]),
@@ -418,6 +425,155 @@ def product_cells(sx, sy):
              (2, f) : faces(sx[1, f], sy[1, f])}
     return cells
 
+def assignfunctionto(dictionary):
+
+    def assign(k): 
+        def _(f): 
+            dictionary[k] = f
+        return _
+    
+    return assign
+
+import sympy as sy
+def symprojection(cells, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
+
+    P = {}
+    assign = assignfunctionto(P)
+
+    x, y, x0, y0, x1, y1 = symbols
+    I = integration_2d_regular(x, y, x0, y0, x1, y1)
+
+    def primaldual(t):
+
+        @assign((0, t))
+        def _(σ):
+            (X0, Y0) = cells[0, t]
+            ι = I[0](σ)
+            λ = sy.lambdify((x0, y0), ι, 'numpy')
+            return λ(X0, Y0) + zeros_like(X0)
+        
+        @assign((1, t))
+        def _(σ):
+            ((X0, X1), Y), (X, (Y0, Y1)) = cells[1, t]
+            ι = I[1](σ)
+            λ = sy.lambdify((x0, x1, y, x, y0, y1), ι, 'numpy')
+            ax, ay = λ(X0, X1, Y, X, Y0, Y1)
+            return (ax + zeros_like(X0),
+                    ay + zeros_like(Y0))
+        
+        @assign((2, t))
+        def _(σ):
+            ((X0, Y0), (X1, Y1)) = cells[2, t]
+            ι = I[2](σ)
+            λ = sy.lambdify((x0, y0, x1, y1), ι, 'numpy')
+            return λ(X0, Y0, X1, Y1) + zeros_like(X0)
+    
+    for t in (True, False):
+        primaldual(t)
+
+    return P
+
+def numprojection(cells):
+
+    P = {}
+    assign = assignfunctionto(P)
+    
+    N = n_integration_2d_regular()
+
+    def primaldual(t):
+
+        @assign((0, t))
+        def _(f):
+            (X0, Y0) = cells[0, t]
+            return N[0](f, X0, Y0)
+        
+        @assign((1, t))
+        def _(f):
+            ((X0, X1), Y), (X, (Y0, Y1)) = cells[1, t]
+            fx = lambda x, y: f(x,y)[0]
+            fy = lambda x, y: f(x,y)[1]
+            return (N[1][0](fx, X0, X1, Y), 
+                    N[1][1](fy, X, Y0, Y1))
+        
+        @assign((2, t))
+        def _(f):
+            ((X0, Y0), (X1, Y1)) = cells[2, t]
+            return N[2](f, X0, Y0, X1, Y1)
+    
+    for t in (True, False):
+        primaldual(t)
+
+    return P
+
+def combinedprojection(cells, symbols=sy.sympify('x, y, x0, y0, x1, y1')):
+
+    x, y, x0, y0, x1, y1 = symbols
+    Σ = symprojection(cells, symbols)
+    N = numprojection(cells)
+    λ = lambda f: sy.lambdify((x, y), f, 'numpy')
+
+    def get_proj(k):
+        def proj(f):
+            if callable(f):
+                return N[k](f)
+            else:
+                try:
+                    # Symbolic Integration
+                    return Σ[k](f)
+                except:
+                    # Numeric Integration
+                    return N[k](λ(f))
+        return proj
+    
+    return {k:get_proj(k) for k in N}    
+    
+        
+def test_symprojection():
+
+    x, y, x0, y0, x1, y1 = sy.sympify('x, y, x0, y0, x1, y1')
+    gx = Grid_1D.chebyshev(3)
+    cells = cartesian_product_grids(gx, gx).cells
+    
+    Σ = symprojection(cells)
+    N = numprojection(cells)
+    λ = lambda f: sy.lambdify((x, y), f, 'numpy')
+
+    t, f = True, False
+
+    σ = (x*y,)
+    Σ[0, t](σ)
+    Σ[0, f](σ)
+    N[0, t](λ(σ[0]))
+    
+    σ = (x*y,)
+    Σ[2, t](σ)
+    N[2, t](λ(σ[0]))
+
+    σ = (0,)
+    Σ[2, t](σ)
+    N[2, t](λ(σ[0]))
+    
+    σ = (x*y,)
+    Σ[2, f](σ)
+    N[2, f](λ(σ[0]))
+    
+    σ = (x,y)
+    Σ[1, t](σ)
+    N[1, t](λ(σ))
+
+    σ = (0,0)
+    Σ[1, t](σ)
+    N[1, t](λ(σ))
+    
+    σ = (sy.sin(x), sy.sin(y))
+    Σ[1, t](σ)
+    Σ[1, f](σ)
+    
+    σ = (sy.sin(x)*sy.sin(x),)
+    Σ[2, t](σ)
+    Σ[2, f](σ)
+
+
 def flatten_cells(cells):
     '''
     Representation of a cellular complex in 2D (flat array):
@@ -484,11 +640,13 @@ def cartesian_product_grids(gx, gy):
     assert gy.dimension is 1
     
     cells = product_cells(gx.cells, gy.cells)    
-    P = projection(cells)
 
+    P = combinedprojection(cells)
+    
     B = basis_fn(gx.dec.B, gy.dec.B)
     D = derivative(gx.dec.D, gy.dec.D)
     H = hodge_star(gx.dec.H, gy.dec.H)
+
     dec = bunch(P=P, B=B, D=D, H=H,)
     
     T = to_refine(  gx.refine.T, gy.refine.T)
@@ -497,7 +655,6 @@ def cartesian_product_grids(gx, gy):
     refine = bunch(T=T, U=U)
     
     return Grid_2D(gx, gy, None, cells, None, dec, refine)
-
 
 def reshapeB(shape, B):
     def getB(b, s):
@@ -552,7 +709,7 @@ def flatten_grid(g):
     refine = bunch(T=reshapeT(shape, g.refine.T),
                    U=reshapeU(shape, g.refine.U))
 
-    dec = bunch(P=projection(cells),
+    dec = bunch(P=reshapeU(shape, g.dec.P),
                 B=reshapeB(shape, g.dec.B),
                 D=reshapeO(shape, g.dec.D),
                 H=reshapeO(shape, g.dec.H),
