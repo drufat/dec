@@ -240,6 +240,12 @@ class Grid_2D(object):
                        isprimal, 
                        self, 
                        self.dec.P[form.degree, isprimal](form.components))
+
+    def Pn(self, form, isprimal):
+        return decform(form.degree, 
+                       isprimal, 
+                       self, 
+                       self.dec.Pn[form.degree, isprimal](form.components))
         
     def BC(self, form):
         isprimal=False
@@ -486,16 +492,23 @@ def numprojection(cells):
     assign = assignfunctionto(P)
     
     N = n_integration_2d_regular()
+    def λ(f):
+        if callable(f):
+            return f
+        else:
+            return sy.lambdify(sy.symbols('x, y'), f, 'numpy')
 
     def primaldual(t):
 
         @assign((0, t))
         def _(f):
+            f = λ(f)
             (X0, Y0) = cells[0, t]
             return N[0](f, X0, Y0)
         
         @assign((1, t))
         def _(f):
+            f = λ(f)
             ((X0, X1), Y), (X, (Y0, Y1)) = cells[1, t]
             fx = lambda x, y: f(x,y)[0]
             fy = lambda x, y: f(x,y)[1]
@@ -504,6 +517,7 @@ def numprojection(cells):
         
         @assign((2, t))
         def _(f):
+            f = λ(f)
             ((X0, Y0), (X1, Y1)) = cells[2, t]
             return N[2](f, X0, Y0, X1, Y1)
     
