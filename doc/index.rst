@@ -16,6 +16,12 @@ Contents
     bases
     hodge-star
     poisson
+    examples/schur
+    examples/contraction
+    examples/grid1d
+    examples/grids
+    examples/hodge
+    examples/whitney
 
 Installation
 =============

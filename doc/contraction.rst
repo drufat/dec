@@ -39,7 +39,7 @@ be
     & =\gamma_{ijk}\left(X^{i}e^{j}\wedge e^{k}-X^{j}e^{i}\wedge e^{k}+X^{k}e^{i}\wedge e^{j}\right)\end{aligned}
 
 Examples
-^^^^^^^^
+--------
 
 In **2D** the explicit formula for the contractions are
 

@@ -35,7 +35,7 @@ i.e. it is a homomorphism under a pull-back:
 .. math:: \varphi^{*}(\alpha\wedge\beta)=(\varphi^{*}\alpha)\wedge(\varphi^{*}\beta)
 
 Examples
-^^^^^^^^
+--------
 
 Consider the **2D** case
 
