@@ -38,13 +38,13 @@ from which it follows that the evolution in time is given by
     \mathbf{\dot{v}} = -\nabla p - \left(\mathbf{v}\cdot\nabla\right)\mathbf{v}
 
 Examples
----------
+--------
 
 Let us compute the vorticity :math:`\omega`, pressure :math:`p`, and the time derivative of the velocity
 :math:`\mathbf{\dot{v}}` for a prescribed initial velocity field :math:`\mathbf{v}(x,y)`.
 
 Example 1
-..........
+.........
 
 .. math::
 
@@ -61,7 +61,7 @@ Example 1
     plt.show()
 
 Example 2
-..........
+.........
 
 Is this the Rudman vortex?
 
@@ -80,7 +80,7 @@ Is this the Rudman vortex?
     plt.show()
 
 Example 3
-..........
+.........
 
 .. math::
 
@@ -97,7 +97,7 @@ Example 3
     plt.show()
 
 Example 4
-..........
+.........
 
 .. math::
 
@@ -114,7 +114,7 @@ Example 4
     plt.show()
 
 Example 5
-..........
+.........
 
 .. math::
     \mathbf{v}(x, y) & = & \{1,0\} \\

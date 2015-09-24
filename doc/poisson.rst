@@ -1,5 +1,5 @@
 Poisson Operator
-==================
+================
 
 1D
 ---
@@ -37,7 +37,7 @@ Dual:
 where `b` is Dirichlet b.c.
 
 Periodic grid 1D
------------------ 
+----------------
 
 .. math::
     \begin{eqnarray}
@@ -48,7 +48,7 @@ Periodic grid 1D
 .. plot:: plot/cheb/poisson1d_periodic.py
 
 Chebyshev grid 1D
-------------------
+-----------------
 
 .. math::
     \begin{eqnarray}
@@ -74,13 +74,13 @@ Neumann boundary condition:
 .. plot:: plot/cheb/poisson1d_cheb.py
 
 2D
-------
+---
 
 .. math::
     (\star \mathbf{d} \star \mathbf{d} + \mathbf{d} \star \mathbf{d} \star ) f=q
 
 Periodic grid 2D
------------------ 
+----------------
 
 .. math::
 	f = e^{\sin(x)} \mathbf{d}x + e^{\sin(y)} \mathbf{d}y
@@ -103,6 +103,6 @@ Convergence for operator.
 .. plot:: plot/cheb/poisson2d_cheb.py
 
 Vector field
---------------
+------------
 
 .. plot:: plot/cheb/poisson_2d_example.py

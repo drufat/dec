@@ -1,6 +1,6 @@
 
 The chain collocation method: A spectrally accurate calculus of forms
-=======================================================================
+=====================================================================
 
 The figures below were used in the paper published here_.
 
@@ -22,7 +22,7 @@ over each of these dual cells sums to zero or one.
 .. plot:: plot/cheb/plot_basis_fn.py
 
 Figure 5
----------
+--------
 
 Chebyshev primal basis functions for a grid with :math:`N=7`. We normalize the
 one-form basis functions by :math:`x_n\!-\!x_{n-1}` to have approximately the
@@ -32,14 +32,14 @@ same scale in our visualizations.
 .. plot:: plot/cheb/plot_basis_fn_chebyshev.py
 
 Figure 6
----------
+--------
 Chebyshev dual basis functions for a grid with :math:`N=7`.
 
 .. plot:: plot/cheb/plot_basis_fn_chebyshev_dual.py
 
 
 Figure 7
----------
+--------
 
 Convergence graphs for a 1D Poisson equation: (a) we solve
 :math:`\Delta f = e^{\sin x} (\cos^2 x - \sin x)` on a periodic domain for
@@ -56,7 +56,7 @@ reach the limit of accuracy of the representation of floating point numbers.
 .. plot:: plot/cheb/poisson1d_cheb.py
 
 Figure 8
----------
+--------
 
 Convergence graphs for a 2D Poisson equation; (a) we solve
 :math:`\Delta f = e^{\sin x} (\cos^2 x - \sin x)+e^{\sin y} (\cos^2 y - \sin y)`
@@ -76,7 +76,7 @@ accuracy for fine meshes.
 .. plot:: plot/cheb/poisson2d_cheb.py
 
 Figure 9
----------
+--------
 
 Plot for the solution of
 :math:`(\star\mathbf{d}\star\mathbf{d}+\mathbf{d}\star\mathbf{d}\star)f\!=\!0`

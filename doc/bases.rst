@@ -1,11 +1,11 @@
 Mapping
-----------
+-------
 
 .. autofunction:: dec.spectral.varphi
 .. autofunction:: dec.spectral.varphi_inv
 
 Helper Functions
-------------------
+----------------
 
 .. autofunction:: dec.spectral.alpha0
 .. autofunction:: dec.spectral.beta0
@@ -17,7 +17,7 @@ Helper Functions
 .. autofunction:: dec.spectral.delta
 
 Periodic Basis Functions
-----------------------------
+------------------------
 
 .. autofunction:: dec.spectral.phi0
 .. autofunction:: dec.spectral.phid0
@@ -34,7 +34,7 @@ Periodic Basis Functions
     plot_bases_1d(plt, g, g.xmin, g.xmax, "\phi")
 
 Regular Basis Functions
-----------------------------
+-----------------------
 
 Even(Symmetric) 0-forms
 
@@ -84,7 +84,7 @@ symmetric bases functions for 0-forms?
     plt.show()
     
 Chebyshev Basis Functions
-----------------------------
+-------------------------
 
 .. autofunction:: dec.spectral.psi0
 .. autofunction:: dec.spectral.psi1
@@ -117,7 +117,7 @@ combinations of the derivatives of :math:`\psi^0` and are therefore also polynom
 
 
 2D Periodic Basis Function
------------------------------
+--------------------------
 
 .. plot:: plot/cheb/basis_forms_2d.py
 
