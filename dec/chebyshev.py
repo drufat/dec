@@ -84,8 +84,10 @@ def to_refine():
     return T0, T1, T0d, T1d
 
 def from_refine():
-    def U0(f):  return f[0::2]
-    def U0d(f): return f[1::2]
+    def U0(f):  
+        return f[0::2]
+    def U0d(f):
+        return f[1::2]
     def U1(f):
         f = H0d_cheb(S_cheb(f))
         return f[0::2] + f[1::2]

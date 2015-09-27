@@ -5,7 +5,7 @@ FILE=$2
 
 (
 	pushd $(dirname $FILE)
-	ipython nbconvert --to $FORMAT $(basename $FILE)
+	jupyter nbconvert --to $FORMAT $(basename $FILE)
 	popd
 )
 

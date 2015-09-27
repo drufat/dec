@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 (
-    cd notebooks
-    for f in ./*.ipynb; do 
-        PYTHONPATH=.. runipy $f 
+    pushd examples
+    for f in *.ipynb; do 
+        PYTHONPATH=.. runipy -o $f 
     done
+	popd
 )

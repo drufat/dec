@@ -47,7 +47,9 @@ def make(cls, n, xmin=0, xmax=pi):
        (1, True)  : H1_regular,
        (0, False) : H0d_regular,
        (1, False) : H1d_regular,}
-    
+
+    refine=dec.common.wrap_refine(to_refine, from_refine)
+   
     return cls(n=n,
                xmin=xmin, 
                xmax=xmax,
@@ -60,7 +62,30 @@ def make(cls, n, xmin=0, xmax=pi):
                          H=H,
                          W=None,
                          C=None),
-             refine=None)  
+             refine=refine)
+
+def to_refine():
+    def T0(f):
+        raise NotImplementedError
+    def T0d(f):
+        raise NotImplementedError
+    def T1(f):
+        raise NotImplementedError
+    def T1d(f):
+        raise NotImplementedError
+    return T0, T1, T0d, T1d
+
+
+def from_refine():
+    def U0(f):
+        raise NotImplementedError
+    def U0d(f):
+        raise NotImplementedError
+    def U1(f):
+        raise NotImplementedError
+    def U1d(f):
+        raise NotImplementedError
+    return U0, U1, U0d, U1d
     
 def H1d_regular(f):
     r'''
